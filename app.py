@@ -48,7 +48,7 @@ if prompt := st.chat_input("Hukm dijiye, Maalik Rajaram..."):
         
         if HF_TOKEN:
             # "HALKA & POWERFUL" - Qwen 2.5 7B Instruct
-            API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct"
+            API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
             headers = {"Authorization": f"Bearer {HF_TOKEN}"}
             
             system_instructions = (
