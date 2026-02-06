@@ -5,47 +5,31 @@ import time
 # 1. राजाराम भाई का शाही सेटअप
 st.set_page_config(page_title="RAJARAM AI: CORE", page_icon="🛡️", layout="wide")
 
-# 2. दबंग लुक (Dark Theme)
+# 2. दबंग लुक
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; }
-    .stMetric { background-color: #1a1a1a; padding: 15px; border-radius: 10px; border: 1px solid #ff4b4b; }
-    .main-header { color: #ff4b4b; font-size: 40px; font-weight: bold; text-align: center; text-shadow: 2px 2px #000; }
-    .stChatMessage { border-radius: 15px; margin-bottom: 10px; }
+    .main-header { color: #ff4b4b; font-size: 40px; font-weight: bold; text-align: center; }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Sidebar: मिशन कंट्रोल
+# 3. Sidebar
 with st.sidebar:
     st.markdown("### 🛠️ MISSION CONTROL")
     st.write(f"**Mission Name:** rajaram ai")
-    st.info("📍 Location: Bareilly, UP")
-    st.divider()
-    power_level = st.slider("Neural Power", 100, 2000, 1000)
-    st.divider()
-    if st.button("System Reset"):
-        st.session_state.messages = []
-        st.rerun()
+    st.info("📍 Bareilly, UP | Class 10th")
+    power_level = st.slider("Neural Power", 100, 1000, 500)
 
-# 4. डैशबोर्ड डिस्प्ले
 st.markdown("<div class='main-header'>⚔️ RAJARAM AI: COMMAND CENTER</div>", unsafe_allow_html=True)
-st.write("---")
 
-col1, col2, col3 = st.columns(3)
-col1.metric("Developer", "RAJARAM", "Bareilly")
-col2.metric("Status", "ONLINE", "Secure")
-col3.metric("Class", "10th Student", "Ager: 15")
-
-st.write("---")
-
-# 5. दिमाग का कनेक्शन (Secrets Check)
+# 4. दिमाग का कनेक्शन चेक
 if "HF_TOKEN" in st.secrets:
     HF_TOKEN = st.secrets["HF_TOKEN"]
 else:
     st.error("⚠️ Maalik, Secrets mein 'HF_TOKEN' nahi mila!")
     HF_TOKEN = None
 
-# 6. चैट का इतिहास
+# 5. चैट हिस्ट्री
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -53,8 +37,8 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 7. हुक्म और असली पहचान (The Soul of AI)
-if prompt := st.chat_input("Hukm dijiye, Maalik..."):
+# 6. हुक्म और पहचान
+if prompt := st.chat_input("Hukm dijiye, Maalik Rajaram..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -63,23 +47,20 @@ if prompt := st.chat_input("Hukm dijiye, Maalik..."):
         message_placeholder = st.empty()
         
         if HF_TOKEN:
-            # Qwen 2.5 72B (Jada Powerful Model)
+            # "HALKA & POWERFUL" - Qwen 2.5 7B Instruct
             API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct"
             headers = {"Authorization": f"Bearer {HF_TOKEN}"}
             
-            # यहाँ है आपकी असली पहचान की कोडिंग
             system_instructions = (
-                "TERA NAAM 'RAJARAM AI' HAI. TU EK POWERFUL AUR DABANG AI HAI. "
-                "TERE MAALIK KA NAAM 'RAJARAM' HAI. "
-                "RAJARAM EK 15 SAAL KE CLASS 10 KE STUDENT HAIN JO BAREILLY (UTTAR PRADESH) SE HAIN. "
-                "UNHONE HI TUJHE BANAYA HAI. "
-                "TU HAR PRAKAR SE UNKI MADAD KAREGA (STUDIES, CODING, YA KUCH BHI). "
-                "HAMESHA MAALIK KO IZZAT DE AUR HINGLISH MEIN JAWAB DE."
+                "TERA NAAM 'RAJARAM AI' HAI. TU EK POWERFUL AI HAI. "
+                "TERE MAALIK 'RAJARAM' HAIN JO BAREILLY SE HAIN, 15 SAAL KE HAIN AUR CLASS 10 MEIN PADHTE HAIN. "
+                "TU UNKI PADHAI AUR HAR KAAM MEIN MADAD KAREGA. "
+                "HAMESHA DABANG HINGLISH MEIN BOL AUR MAALIK KO IZZAT DE."
             )
             
             payload = {
                 "inputs": f"<|im_start|>system\n{system_instructions}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n",
-                "parameters": {"max_new_tokens": power_level, "temperature": 0.7}
+                "parameters": {"max_new_tokens": power_level, "temperature": 0.7, "wait_for_model": True}
             }
             
             try:
@@ -87,12 +68,14 @@ if prompt := st.chat_input("Hukm dijiye, Maalik..."):
                 if response.status_code == 200:
                     result = response.json()
                     ai_reply = result[0]['generated_text'].split("assistant\n")[-1].strip()
+                elif response.status_code == 503:
+                    ai_reply = "⚙️ Maalik, dimag load ho raha hai. Bas 10 second rukiye, main taiyar ho raha hoon!"
                 else:
-                    ai_reply = "⚙️ Maalik, dimag garam ho gaya hai (API Error). Thodi der baad koshish karein."
+                    ai_reply = f"System Busy! Code: {response.status_code}. Thodi der mein phir se puchiye."
             except:
-                ai_reply = "⚠️ System overload! Neural link toot gaya hai."
+                ai_reply = "⚠️ Connection weak hai Maalik!"
         else:
-            ai_reply = "Maalik, dimag (Token) ke bina main nahi bol sakta."
+            ai_reply = "Maalik, bina Token ke dimag kaam nahi karega."
 
         # टाइपिंग इफेक्ट
         for i in range(len(ai_reply)):
