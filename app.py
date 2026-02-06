@@ -64,7 +64,7 @@ if prompt := st.chat_input("Hukm dijiye, Maalik..."):
         
         if HF_TOKEN:
             # Qwen 2.5 72B (Jada Powerful Model)
-            API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct"
+            API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct"
             headers = {"Authorization": f"Bearer {HF_TOKEN}"}
             
             # यहाँ है आपकी असली पहचान की कोडिंग
