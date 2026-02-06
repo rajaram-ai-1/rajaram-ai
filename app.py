@@ -1,36 +1,45 @@
 import streamlit as st
-import requests
+import google.generativeai as genai
 import time
 
-# 1. पेज सेटअप
-st.set_page_config(page_title="RAJARAM AI", page_icon="⚔️", layout="centered")
+# 1. राजाराम भाई का शाही सेटअप
+st.set_page_config(page_title="RAJARAM AI: UNSTOPPABLE", page_icon="⚔️", layout="wide")
 
-# 2. राजाराम भाई का दबंग स्टाइल (CSS)
+# 2. दबंग स्टाइल (CSS)
 st.markdown("""
     <style>
-    .stApp { background-color: #0e1117; color: white; }
-    .main-header { color: #ff4b4b; font-size: 35px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-    .status-box { padding: 10px; border-radius: 10px; border: 1px solid #ff4b4b; text-align: center; margin-bottom: 20px; }
+    .stApp { background-color: #000000; color: #ffffff; }
+    .main-header { color: #ff4b4b; font-size: 45px; font-weight: bold; text-align: center; text-shadow: 3px 3px #555; }
+    .stChatInput { border-radius: 20px; border: 2px solid #ff4b4b; }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. साइडबार में आपकी पहचान
+# 3. चाबी और दिमाग का कनेक्शन
+API_KEY = st.secrets.get("GEMINI_API_KEY")
+
+if API_KEY:
+    genai.configure(api_key=API_KEY)
+    # Gemini 1.5 Flash: Duniya ka sabse tez dimag
+    model = genai.GenerativeModel('gemini-1.5-flash')
+else:
+    st.error("Maalik, Secrets mein 'GEMINI_API_KEY' daalna bhool gaye aap!")
+
+st.markdown("<div class='main-header'>⚔️ RAJARAM AI: CORE ⚔️</div>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ff4b4b;'>Bareilly's Strongest Digital Power</p>", unsafe_allow_html=True)
+
+# 4. साइडबार (Dashboard)
 with st.sidebar:
-    st.markdown("### 🛠️ MISSION CONTROL")
-    st.write("**Mission Name:** rajaram ai")
-    st.write("**Developer:** Rajaram")
-    st.info("📍 Bareilly, UP | Class 10th")
+    st.title("🛡️ COMMANDER INFO")
+    st.write("**Name:** RAJARAM")
+    st.write("**Age:** 15 Years")
+    st.write("**Class:** 10th Student")
+    st.write("**Base:** Bareilly, UP")
     st.divider()
-    if st.button("Clear Chat"):
+    if st.button("System Reset"):
         st.session_state.messages = []
         st.rerun()
 
-st.markdown("<div class='main-header'>⚔️ RAJARAM AI: COMMAND CENTER</div>", unsafe_allow_html=True)
-
-# 4. चाबी चेक करना
-HF_TOKEN = st.secrets.get("HF_TOKEN")
-
-# 5. चैट हिस्ट्री
+# 5. चैट मेमोरी
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -38,57 +47,33 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 6. हुक्म और प्रोसेसिंग
-if prompt := st.chat_input("Hukm dijiye, Maalik..."):
+# 6. असली पहचान और बातचीत
+if prompt := st.chat_input("Hukm dijiye, Maalik Rajaram..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
+        msg_placeholder = st.empty()
         
-        if HF_TOKEN:
-            # Google Gemma: Duniya ka sabse halka aur bharosemand model
-            API_URL = "https://api-inference.huggingface.co/models/google/gemma-1.1-2b-it"
-            headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-            
-            # आपकी असली पहचान का डेटा
-            system_prompt = (
-                "Tu Rajaram AI hai. Tera maalik Rajaram hai. "
-                "Rajaram 15 saal ka hai, class 10 ka student hai aur Bareilly se hai. "
-                "Tu hamesha Rajaram ki madad karega. Har jawab Hinglish mein de."
-            )
-            
-            payload = {
-                "inputs": f"<start_of_turn>user\n{system_prompt}\n{prompt}<end_of_turn>\n<start_of_turn>model\n",
-                "parameters": {
-                    "max_new_tokens": 500,
-                    "temperature": 0.7,
-                    "top_p": 0.9,
-                    "wait_for_model": True # Ye sabse zaroori hai error rokne ke liye
-                }
-            }
-            
-            try:
-                response = requests.post(API_URL, headers=headers, json=payload)
-                if response.status_code == 200:
-                    result = response.json()
-                    # Gemma response clean up
-                    full_text = result[0]['generated_text']
-                    ai_reply = full_text.split("<start_of_turn>model\n")[-1].replace("<end_of_turn>", "").strip()
-                elif response.status_code == 503:
-                    ai_reply = "⚙️ Maalik, dimag load ho raha hai. 10 second rukiye aur phir enter dabaiye."
-                else:
-                    ai_reply = f"⚠️ Server ne mana kar diya. Error Code: {response.status_code}"
-            except Exception as e:
-                ai_reply = f"❌ Connection Error: {str(e)}"
-        else:
-            ai_reply = "🚫 Maalik, Secrets mein HF_TOKEN nahi mila. Please check karein."
+        # AI की आत्मा (Identity)
+        identity = (
+            "Tu RAJARAM AI hai. Tujhe RAJARAM ne banaya hai jo 15 saal ke hain, Bareilly se hain aur 10th class mein padhte hain. "
+            "Tu hamesha unhe 'Maalik' ya 'Rajaram Bhai' keh kar bulaega. "
+            "Tera dimag kabhi fail nahi hota aur tu har sawal ka jawab dabang Hinglish mein deta hai."
+        )
+        
+        try:
+            # Direct response from Gemini
+            response = model.generate_content(f"{identity}\n\nUser Question: {prompt}")
+            full_response = response.text
+        except:
+            full_response = "Maalik, lagta hai internet dhokha de raha hai. Ek baar phir koshish kijiye!"
 
-        # टाइपिंग इफेक्ट
-        for i in range(len(ai_reply)):
-            message_placeholder.markdown(ai_reply[:i+1] + "▌")
-            time.sleep(0.01)
-        message_placeholder.markdown(ai_reply)
+        # टाइपिंग इफेक्ट (Full Speed)
+        for i in range(len(full_response)):
+            msg_placeholder.markdown(full_response[:i+1] + "▌")
+            time.sleep(0.005)
+        msg_placeholder.markdown(full_response)
     
-    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
