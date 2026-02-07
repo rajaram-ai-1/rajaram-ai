@@ -3,7 +3,6 @@ from groq import Groq
 
 # --- 1. सुरक्षा कवच (Secrets से चाबी उठाना) ---
 try:
-    # Streamlit की Settings -> Secrets में GROQ_API_KEY = "आपकी_चाबी" होना चाहिए
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except Exception:
     st.error("❌ भाई, तिजोरी (Secrets) में चाबी नहीं मिली! उसे Settings में जाकर भरें।")
@@ -11,35 +10,32 @@ except Exception:
 
 client = Groq(api_key=GROQ_API_KEY)
 
-# --- 2. 20+ दिमागों की अमर फौज (Fallback Army) ---
+# --- 2. 20+ दिमागों की अमर फौज (Groq Models Army) ---
 groq_army = [
     "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", 
     "llama-3.1-8b-instant", "llama3-70b-8192", 
     "llama3-8b-8192", "mixtral-8x7b-32768", 
-    "gemma2-9b-it", "gemma-7b-it"
+    "gemma2-9b-it", "gemma-7b-it",
+    "llama-guard-3-8b", "distil-whisper-large-v3-en"
 ]
 
-def get_immortal_response(user_input):
-    """यह फंक्शन हर दिमाग को तब तक आज़माएगा जब तक जवाब न मिल जाए"""
+def get_immortal_response(messages_history):
+    """यह फंक्शन पूरी याददाश्त के साथ हर दिमाग को आज़माएगा"""
     for brain in groq_army:
         try:
             completion = client.chat.completions.create(
                 model=brain,
-                messages=[
-                    {"role": "system", "content": "You are Rajaram AI. A loyal brother. Motivational. Focus on studies/jobs. Talk in Hindi-English. Always call user 'Bhai'."},
-                    {"role": "user", "content": user_input}
-                ],
+                messages=messages_history, # यहाँ पूरी याददाश्त भेजी जा रही है
                 temperature=0.6,
                 max_tokens=1024,
             )
             return completion.choices[0].message.content, brain
         except Exception:
-            # अगर एक दिमाग थका है या एरर है, तो चुपचाप अगले पर बढ़ो
             continue
             
-    return "भाई, पूरी फौज अभी विश्राम पर है। 2 मिनट बाद फिर कोशिश करें, मैं यहीं हूँ!", "None"
+    return "भाई, पूरी फौज अभी विश्राम पर है। 2 मिनट बाद फिर कोशिश करें!", "None"
 
-# --- 3. राजाराम AI इंटरफ़ेस (सफ़ेद डायरी थीम) ---
+# --- 3. राजाराम AI इंटरफ़ेस सेटअप ---
 st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
 st.markdown("""
@@ -54,30 +50,37 @@ st.markdown("""
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-style: italic;'>'20 दिमागों का कवच - अमर और सुरक्षित'</p>", unsafe_allow_html=True)
 
-# याददाश्त (Chat History)
+# --- 4. याददाश्त और आपकी पहचान (Memory & Identity) ---
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {
+            "role": "system", 
+            "content": "You are Rajaram AI. Your mission name is rajaram ai. You were created by your master Rajaram, who is 15 years old and a class 10 student living in Bareilly. Always talk in Hindi. Always call the user 'Bhai'. You must remember all previous messages of this conversation."
+        }
+    ]
 
 # पुरानी चैट दिखाना
 for msg in st.session_state.messages:
-    style = "user-bubble" if msg["role"] == "user" else "ai-bubble"
-    st.markdown(f"<div class='{style}'>{msg['content']}</div>", unsafe_allow_html=True)
+    if msg["role"] != "system":
+        style = "user-bubble" if msg["role"] == "user" else "ai-bubble"
+        st.markdown(f"<div class='{style}'>{msg['content']}</div>", unsafe_allow_html=True)
 
-# इनपुट बॉक्स
+# --- 5. इनपुट और महा-रिस्पॉन्स ---
 prompt = st.chat_input("हुक्म करें भाई...")
 
 if prompt:
-    # यूजर का मैसेज दिखाओ
+    # यूजर का मैसेज याददाश्त में जोड़ो
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.markdown(f"<div class='user-bubble'>{prompt}</div>", unsafe_allow_html=True)
 
     with st.spinner("राजाराम AI की फौज मोर्चा संभाल रही है..."):
-        # अमर रिस्पॉन्स मांगना
-        answer, used_id = get_immortal_response(prompt)
+        # पूरी हिस्ट्री के साथ जवाब लाओ
+        answer, used_id = get_immortal_response(st.session_state.messages)
         
-        # AI का मैसेज दिखाओ
+        # AI का मैसेज याददाश्त में जोड़ो
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.markdown(f"<div class='ai-bubble'>{answer}<br><br><small style='color:blue;'>सक्रिय शक्ति: {used_id}</small></div>", unsafe_allow_html=True)
         
-        # डायरी के बटन
         st.write("➕ ❤️ 📷 🎥")
+        # पेज रिफ्रेश ताकि मेमोरी सेट रहे
+        st.rerun()
