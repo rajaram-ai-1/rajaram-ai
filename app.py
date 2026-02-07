@@ -1,83 +1,80 @@
 import streamlit as st
 from groq import Groq
+import google.generativeai as genai
+from PIL import Image
 
-# --- 1. सुरक्षा कवच ---
+# --- 1. चाबियाँ (Secrets से) ---
 try:
-    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-    client = Groq(api_key=GROQ_API_KEY)
+    client_groq = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 except:
-    st.error("Secrets में चाबी डालें भाई!")
+    st.error("भाई, Secrets में चाबियाँ चेक करो!")
     st.stop()
 
-# --- 2. Gemini 3 जैसा लुक (CSS) ---
-st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
+# --- 2. दिमाग का लॉजिक ---
+def get_ai_response(text, file):
+    if file:
+        # अगर फोटो है तो जेमिनी जागेगा
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        img = Image.open(file)
+        res = model.generate_content([text if text else "इसे समझाओ भाई", img])
+        return res.text, "Gemini Vision 📷"
+    else:
+        # सिर्फ टेक्स्ट है तो ग्रॉक की फौज
+        try:
+            res = client_groq.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "system", "content": "You are Rajaram AI. A loyal brother. Answer in Hindi. Call user 'Bhai'."},
+                          {"role": "user", "content": text}]
+            )
+            return res.choices[0].message.content, "Llama 3.3 ⚡"
+        except:
+            return "भाई, ग्रॉक अभी बिजी है, जेमिनी से पूछ रहा हूँ...", "Switching..."
 
+# --- 3. इंटरफ़ेस (जैसा आपने फोटो में मांगा) ---
+st.set_page_config(page_title="Rajaram AI", page_icon="👑")
+
+# सादा और डार्क लुक
 st.markdown("""
     <style>
-    /* पूरे ऐप का बैकग्राउंड डार्क */
-    .stApp { background-color: #131314; color: #e3e3e3; }
-    
-    /* चैट मैसेज का स्टाइल */
-    .chat-container { margin-bottom: 100px; }
-    .user-msg { background-color: #2b2d31; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px solid #3c3f43; }
-    .ai-msg { background-color: transparent; padding: 15px; margin: 10px 0; }
-
-    /* नीचे वाला जादुई चैटबॉक्स (जैसा आपने फोटो में दिखाया) */
-    .fixed-bottom {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80%;
-        background-color: #1e1f20;
-        border-radius: 30px;
-        padding: 10px 20px;
-        display: flex;
-        align-items: center;
-        border: 1px solid #3c3f43;
-        z-index: 1000;
-    }
-    
-    /* इनपुट बॉक्स को साफ़ करना */
-    .stChatInputContainer {
-        padding-bottom: 30px !important;
-        background-color: transparent !important;
-    }
-    .stChatInput div {
-        background-color: #1e1f20 !important;
-        border: 1px solid #3c3f43 !important;
-        border-radius: 25px !important;
-        color: white !important;
-    }
+    .stApp { background-color: #131314; color: white; }
+    .stButton>button { width: 100%; border-radius: 20px; background-color: #2b2d31; color: white; border: 1px solid #3c3f43; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. चैट इंटरफ़ेस ---
-st.markdown("<h2 style='text-align: center; color: #8e9196;'>Rajaram AI</h2>", unsafe_allow_html=True)
+st.title("👑 Rajaram AI")
 
+# चैट की याददाश्त
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# मैसेज दिखाना
-for msg in st.session_state.messages:
-    role_class = "user-msg" if msg["role"] == "user" else "ai-msg"
-    with st.container():
-        st.markdown(f"<div class='{role_class}'>{msg['content']}</div>", unsafe_allow_html=True)
+# बटन वाली पट्टी (Tools, Fast, Voice)
+col1, col2, col3 = st.columns(3)
+with col1:
+    up_file = st.file_uploader("➕ Tools (Photo)", type=['png', 'jpg', 'jpeg'], label_visibility="collapsed")
+with col2:
+    st.button("⚡ Fast (Active)")
+with col3:
+    st.button("🎤 Voice (Soon)")
 
-# --- 4. इनपुट बार (Tools + Input + Fast + Mic) ---
-# Streamlit का डिफ़ॉल्ट इनपुट बॉक्स आपकी फोटो जैसा ही काम करेगा
+# पुरानी चैट दिखाना
+for m in st.session_state.messages:
+    with st.chat_message(m["role"]):
+        st.write(m["content"])
+
+# इनपुट बॉक्स
 prompt = st.chat_input("Ask Rajaram AI...")
 
-if prompt:
-    # यूजर का मैसेज
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.rerun() # स्क्रीन रिफ्रेश करने के लिए
+if prompt or up_file:
+    user_txt = prompt if prompt else "फोटो देखो भाई"
+    st.session_state.messages.append({"role": "user", "content": user_txt})
+    with st.chat_message("user"):
+        st.write(user_txt)
+        if up_file: st.image(up_file, width=200)
 
-# फोटो वाले आइकॉन दिखाने के लिए संकेत
-st.markdown("""
-    <div style='display: flex; justify-content: space-around; color: #8e9196; font-size: 14px; margin-top: 10px;'>
-        <span>➕ Tools</span>
-        <span>Fast ⚡</span>
-        <span>🎤 Voice</span>
-    </div>
-    """, unsafe_allow_html=True)
+    with st.spinner("सोच रहा हूँ भाई..."):
+        ans, brain = get_ai_response(user_txt, up_file)
+        st.session_state.messages.append({"role": "assistant", "content": ans})
+        with st.chat_message("assistant"):
+            st.write(ans)
+            st.caption(f"शक्ति: {brain}")
