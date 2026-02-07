@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 # --- 1. अपनी गूगल मास्टर चाबी यहाँ डालें ---
 # aistudio.google.com से फ्री में प्राप्त करें
-GOOGLE_API_KEY = "AIzaSyAuB63uYhNzdhSDYECdU6EZ2ycb_fKVXvk"
+GOOGLE_API_KEY = "AIzaSyAEuyftO2G5B0PCuPIEnyRsqC865CAguRQ"
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # --- 2. गूगल के सभी 20 दिमागों (IDs) की महा-सूची ---
