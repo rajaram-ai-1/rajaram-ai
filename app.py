@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- 1. अपनी गूगल मास्टर चाबी यहाँ डालें ---
-GOOGLE_API_KEY = "AIzaSyCEaasqfKx3uMBIReMj4FuQyk-OWxpW99Y"
+GOOGLE_API_KEY = "AIzaSyAfs96f1KQq7Hnq9_k-EPh70SU8b70Tt0E"
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # --- 2. दिमागों की महा-सूची (सही नामों के साथ) ---
