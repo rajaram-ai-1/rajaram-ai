@@ -1,51 +1,50 @@
 import streamlit as st
 from groq import Groq
-import google.generativeai as genai
-from PIL import Image
+import base64
 
-# --- 1. चाबियाँ (Secrets) ---
+# --- 1. सुरक्षा कवच ---
 try:
+    # अब सिर्फ एक ही चाबी की जरूरत है
     GROQ_K = st.secrets["GROQ_API_KEY"]
-    GEMINI_K = st.secrets["GOOGLE_API_KEY"]
     client_groq = Groq(api_key=GROQ_K)
-    
-    # गूगल को स्टेबल वर्जन पर सेट करना
-    genai.configure(api_key=GEMINI_K)
-except Exception as e:
-    st.error(f"भाई, चाबियाँ चेक करो: {e}")
+except:
+    st.error("भाई, Secrets में GROQ_API_KEY चेक करो!")
     st.stop()
 
-# --- 2. देखने और सोचने की शक्ति ---
-def get_ai_response(text, file):
-    if file:
-        try:
-            # यहाँ 'gemini-1.5-flash-latest' का इस्तेमाल करें, ये कभी फेल नहीं होता
-            model = genai.GenerativeModel('gemini-1.5-flash-latest')
-            img = Image.open(file)
-            # स्टेबल जनरेशन
-            res = model.generate_content([text if text else "इसे समझाओ भाई", img])
-            return res.text, "Gemini Vision 📷"
-        except Exception as e:
-            # अगर फिर भी एरर आए, तो ग्रॉक को बैकअप में रखें
-            return f"गूगल भाई अभी भी नखरे कर रहे हैं, पर हम हार नहीं मानेंगे! एरर: {str(e)}", "Error"
-    else:
-        try:
-            res = client_groq.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "system", "content": "You are Rajaram AI. A loyal brother. Use Hindi."},
-                          {"role": "user", "content": text}]
-            )
-            return res.choices[0].message.content, "Llama 3.3 ⚡"
-        except: return "भाई, ग्रॉक अभी बिजी है।", "None"
+# --- 2. Groq का 'देखने' वाला दिमाग ---
+def get_groq_vision_response(text, file):
+    try:
+        # फोटो को बाइनरी में बदलना
+        image_data = base64.b64encode(file.read()).decode('utf-8')
+        
+        # Groq का विजन मॉडल इस्तेमाल करना
+        completion = client_groq.chat.completions.create(
+            model="llama-3.2-11b-vision-preview",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": text if text else "इस फोटो को समझाओ भाई"},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}
+                        },
+                    ],
+                }
+            ],
+            temperature=0.7,
+        )
+        return completion.choices[0].message.content, "Groq Vision 📷"
+    except Exception as e:
+        return f"भाई, ग्रॉक भी थक गया है: {str(e)}", "Error"
 
-# --- 3. इंटरफ़ेस (Tools बटन चैट बॉक्स के पास) ---
+# --- 3. इंटरफ़ेस (Gemini 3 Style) ---
 st.set_page_config(page_title="Rajaram AI", page_icon="👑")
 
 st.markdown("""
     <style>
     .stApp { background-color: #131314; color: white; }
     .chat-bubble { padding: 15px; border-radius: 15px; border: 1px solid #3c3f43; margin-bottom: 15px; }
-    .stChatInput { border-radius: 20px !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -54,32 +53,39 @@ st.title("👑 Rajaram AI")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# मैसेज दिखाना
+# चैट दिखाना
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.write(m["content"])
 
-# --- 4. टूल्स बार ---
+# --- 4. टूल्स और चैट बॉक्स ---
 col1, col2 = st.columns([1, 5])
 with col1:
-    # कैमरा आइकॉन वाला छोटा अपलोडर
-    up_file = st.file_uploader("📷", type=['png', 'jpg', 'jpeg'], key="camera", label_visibility="collapsed")
+    up_file = st.file_uploader("📷", type=['png', 'jpg', 'jpeg'], key="cam", label_visibility="collapsed")
 
 with col2:
-    prompt = st.chat_input("अब पूछो भाई, अब नहीं रुकेगा...")
+    prompt = st.chat_input("अब गूगल का डर नहीं, पूछो भाई...")
 
 if prompt or up_file:
     user_txt = prompt if prompt else "फोटो देखो भाई"
     
-    # डुप्लीकेट मैसेज रोकने के लिए
     if not st.session_state.messages or st.session_state.messages[-1]["content"] != user_txt:
         st.session_state.messages.append({"role": "user", "content": user_txt})
         with st.chat_message("user"):
             st.write(user_txt)
             if up_file: st.image(up_file, width=200)
 
-        with st.spinner("राजाराम AI की शक्ति काम कर रही है..."):
-            ans, brain = get_ai_response(user_txt, up_file)
+        with st.spinner("राजाराम AI की विजन शक्ति काम कर रही है..."):
+            if up_file:
+                ans, brain = get_groq_vision_response(user_txt, up_file)
+            else:
+                # नॉर्मल चैट के लिए 70B वाला बड़ा दिमाग
+                res = client_groq.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[{"role": "user", "content": user_txt}]
+                )
+                ans, brain = res.choices[0].message.content, "Llama 3.3 ⚡"
+            
             st.session_state.messages.append({"role": "assistant", "content": ans})
             with st.chat_message("assistant"):
                 st.write(ans)
