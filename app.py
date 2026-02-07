@@ -1,92 +1,83 @@
 import streamlit as st
 from groq import Groq
-import base64
 
-# --- 1. सुरक्षा कवच ---
+# --- 1. सुरक्षा कवच (Secrets से चाबी उठाना) ---
 try:
-    # अब सिर्फ एक ही चाबी की जरूरत है
-    GROQ_K = st.secrets["GROQ_API_KEY"]
-    client_groq = Groq(api_key=GROQ_K)
-except:
-    st.error("भाई, Secrets में GROQ_API_KEY चेक करो!")
+    # Streamlit की Settings -> Secrets में GROQ_API_KEY = "आपकी_चाबी" होना चाहिए
+    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+except Exception:
+    st.error("❌ भाई, तिजोरी (Secrets) में चाबी नहीं मिली! उसे Settings में जाकर भरें।")
     st.stop()
 
-# --- 2. Groq का 'देखने' वाला दिमाग ---
-def get_groq_vision_response(text, file):
-    try:
-        # फोटो को बाइनरी में बदलना
-        image_data = base64.b64encode(file.read()).decode('utf-8')
-        
-        # Groq का विजन मॉडल इस्तेमाल करना
-        completion = client_groq.chat.completions.create(
-            model="llama-3.2-11b-vision-preview",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": text if text else "इस फोटो को समझाओ भाई"},
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}
-                        },
-                    ],
-                }
-            ],
-            temperature=0.7,
-        )
-        return completion.choices[0].message.content, "Groq Vision 📷"
-    except Exception as e:
-        return f"भाई, ग्रॉक भी थक गया है: {str(e)}", "Error"
+client = Groq(api_key=GROQ_API_KEY)
 
-# --- 3. इंटरफ़ेस (Gemini 3 Style) ---
-st.set_page_config(page_title="Rajaram AI", page_icon="👑")
+# --- 2. 20+ दिमागों की अमर फौज (Fallback Army) ---
+groq_army = [
+    "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", 
+    "llama-3.1-8b-instant", "llama3-70b-8192", 
+    "llama3-8b-8192", "mixtral-8x7b-32768", 
+    "gemma2-9b-it", "gemma-7b-it"
+]
+
+def get_immortal_response(user_input):
+    """यह फंक्शन हर दिमाग को तब तक आज़माएगा जब तक जवाब न मिल जाए"""
+    for brain in groq_army:
+        try:
+            completion = client.chat.completions.create(
+                model=brain,
+                messages=[
+                    {"role": "system", "content": "You are Rajaram AI. A loyal brother. Motivational. Focus on studies/jobs. Talk in Hindi-English. Always call user 'Bhai'."},
+                    {"role": "user", "content": user_input}
+                ],
+                temperature=0.6,
+                max_tokens=1024,
+            )
+            return completion.choices[0].message.content, brain
+        except Exception:
+            # अगर एक दिमाग थका है या एरर है, तो चुपचाप अगले पर बढ़ो
+            continue
+            
+    return "भाई, पूरी फौज अभी विश्राम पर है। 2 मिनट बाद फिर कोशिश करें, मैं यहीं हूँ!", "None"
+
+# --- 3. राजाराम AI इंटरफ़ेस (सफ़ेद डायरी थीम) ---
+st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
 st.markdown("""
     <style>
-    .stApp { background-color: #131314; color: white; }
-    .chat-bubble { padding: 15px; border-radius: 15px; border: 1px solid #3c3f43; margin-bottom: 15px; }
+    .stApp { background-color: white; color: black; }
+    .user-bubble { background-color: #f1f3f4; padding: 15px; border-radius: 20px 20px 0px 20px; color: black; border: 1px solid #ddd; margin-bottom: 10px; width: fit-content; max-width: 80%; margin-left: auto; }
+    .ai-bubble { background-color: #ffffff; padding: 15px; border-radius: 20px 20px 20px 0px; color: black; border: 1px solid #eee; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); margin-bottom: 10px; width: fit-content; max-width: 80%; }
+    .stChatInput { border-radius: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("👑 Rajaram AI")
+st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-style: italic;'>'20 दिमागों का कवच - अमर और सुरक्षित'</p>", unsafe_allow_html=True)
 
+# याददाश्त (Chat History)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# चैट दिखाना
-for m in st.session_state.messages:
-    with st.chat_message(m["role"]):
-        st.write(m["content"])
+# पुरानी चैट दिखाना
+for msg in st.session_state.messages:
+    style = "user-bubble" if msg["role"] == "user" else "ai-bubble"
+    st.markdown(f"<div class='{style}'>{msg['content']}</div>", unsafe_allow_html=True)
 
-# --- 4. टूल्स और चैट बॉक्स ---
-col1, col2 = st.columns([1, 5])
-with col1:
-    up_file = st.file_uploader("📷", type=['png', 'jpg', 'jpeg'], key="cam", label_visibility="collapsed")
+# इनपुट बॉक्स
+prompt = st.chat_input("हुक्म करें भाई...")
 
-with col2:
-    prompt = st.chat_input("अब गूगल का डर नहीं, पूछो भाई...")
+if prompt:
+    # यूजर का मैसेज दिखाओ
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.markdown(f"<div class='user-bubble'>{prompt}</div>", unsafe_allow_html=True)
 
-if prompt or up_file:
-    user_txt = prompt if prompt else "फोटो देखो भाई"
-    
-    if not st.session_state.messages or st.session_state.messages[-1]["content"] != user_txt:
-        st.session_state.messages.append({"role": "user", "content": user_txt})
-        with st.chat_message("user"):
-            st.write(user_txt)
-            if up_file: st.image(up_file, width=200)
-
-        with st.spinner("राजाराम AI की विजन शक्ति काम कर रही है..."):
-            if up_file:
-                ans, brain = get_groq_vision_response(user_txt, up_file)
-            else:
-                # नॉर्मल चैट के लिए 70B वाला बड़ा दिमाग
-                res = client_groq.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": user_txt}]
-                )
-                ans, brain = res.choices[0].message.content, "Llama 3.3 ⚡"
-            
-            st.session_state.messages.append({"role": "assistant", "content": ans})
-            with st.chat_message("assistant"):
-                st.write(ans)
-                st.caption(f"Active Power: {brain}")
+    with st.spinner("राजाराम AI की फौज मोर्चा संभाल रही है..."):
+        # अमर रिस्पॉन्स मांगना
+        answer, used_id = get_immortal_response(prompt)
+        
+        # AI का मैसेज दिखाओ
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+        st.markdown(f"<div class='ai-bubble'>{answer}<br><br><small style='color:blue;'>सक्रिय शक्ति: {used_id}</small></div>", unsafe_allow_html=True)
+        
+        # डायरी के बटन
+        st.write("➕ ❤️ 📷 🎥")
