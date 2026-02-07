@@ -1,4 +1,20 @@
 import streamlit as st
+# और भी जो इम्पोरटेंट चीजें आपने इम्पोर्ट की हैं...
+
+# --- यहाँ से शुरू करें सुरक्षा कोड ---
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            .stAppDeployButton {display: none;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+# --- यहाँ सुरक्षा कोड खत्म ---
+
+# इसके नीचे आपका पुराना वाला कोड रहेगा (st.title, client = Groq... आदि)
+import streamlit as st
 from groq import Groq
 
 # --- 1. सुरक्षा कवच (Secrets) ---
