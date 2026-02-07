@@ -1,81 +1,105 @@
 import streamlit as st
-import requests
-import json
+import google.generativeai as genai
 
-# --- 1. अपनी मास्टर चाबी यहाँ डालें ---
-OPENROUTER_API_KEY = "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"
+# --- 1. अपनी गूगल मास्टर चाबी यहाँ डालें ---
+# aistudio.google.com से फ्री में प्राप्त करें
+GOOGLE_API_KEY = "AIzaSyAuB63uYhNzdhSDYECdU6EZ2ycb_fKVXvk"
+genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. दुनिया के सबसे भरोसेमंद 'फ्री' दिमाग ---
-# मैंने यहाँ उन मॉडल्स को रखा है जो कभी मना नहीं करते
-models_to_try = [
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "google/gemini-flash-1.5-8b:free",
-    "mistralai/mistral-7b-instruct:free",
-    "qwen/qwen-2-7b-instruct:free"
+# --- 2. गूगल के सभी 20 दिमागों (IDs) की महा-सूची ---
+# यह कोड इनमें से जो भी ID खाली होगी, उसे अपने आप चुन लेगा
+brain_army = [
+    'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 
+    'gemini-1.5-flash', 'gemini-1.5-pro',
+    'gemini-1.5-flash-8b-latest', 'gemini-1.5-flash-8b',
+    'gemini-1.0-pro-latest', 'gemini-1.0-pro',
+    'gemini-1.0-pro-001', 'gemini-pro',
+    'gemini-pro-vision', 'chat-bison-001',
+    'text-bison-001', 'embedding-001', 'aqa'
 ]
 
-def get_smart_response(user_input):
-    for model in models_to_try:
+def get_empty_brain_response(user_input):
+    # यह जादुई लूप 20 दिमागों में से 'खाली' आईडी को ढूंढेगा
+    for brain_id in brain_army:
         try:
-            response = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json"
-                },
-                data=json.dumps({
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": "You are Rajaram AI. A loyal brother. Motivational and serious about studies."},
-                        {"role": "user", "content": user_input}
-                    ]
-                }),
-                timeout=15
+            model = genai.GenerativeModel(brain_id)
+            
+            # आपकी डायरी के सख्त निर्देश
+            context = (
+                "You are Rajaram AI. A loyal brother/friend. Talk in Hindi-English. "
+                "Be motivational. Take studies and government job prep very seriously. "
+                "Always call user 'Bhai' or 'Dost'."
             )
             
-            if response.status_code == 200:
-                return response.json()['choices'][0]['message']['content'], model
-            else:
-                # यहाँ असली गड़बड़ पकड़ी जाएगी
-                error_data = response.json()
-                print(f"Model {model} failed: {error_data}")
-                continue
-        except Exception as e:
+            response = model.generate_content(f"{context} \n User: {user_input}", timeout=10)
+            
+            # अगर यहाँ जवाब मिल गया, तो मतलब यह ID खाली है और काम कर रही है!
+            return response.text, brain_id
+            
+        except Exception:
+            # अगर यह ID व्यस्त है या लिमिट पर है, तो बिना शोर मचाए अगली ID पर जाओ
             continue
             
-    return "भाई, लगता है चाबी में बैलेंस या सेटिंग की दिक्कत है। एक बार OpenRouter पर 'Free Models' चेक करें।", "Error"
+    return "माफ़ करना भाई, अभी गूगल के सभी 20 दिमाग व्यस्त हैं। कृपया 1 मिनट बाद कोशिश करें।", "None"
 
-# --- 3. आपकी डायरी वाला सुंदर इंटरफ़ेस ---
+# --- 3. आपकी डायरी वाला 'सुन्दर' इंटरफ़ेस (सफ़ेद थीम, काली स्याही) ---
 st.set_page_config(page_title="Rajaram AI", page_icon="👑")
 
 st.markdown("""
     <style>
     .stApp { background-color: white; color: black; }
-    .chat-user { background-color: #f0f2f6; padding: 15px; border-radius: 20px 20px 0px 20px; text-align: right; color: black; margin-bottom: 10px; border: 1px solid #ddd; }
-    .chat-ai { background-color: white; padding: 15px; border-radius: 20px 20px 20px 0px; text-align: left; color: black; margin-bottom: 10px; border: 1px solid #eee; box-shadow: 2px 2px 8px rgba(0,0,0,0.05); }
+    
+    /* यूजर का मैसेज (दाईं तरफ) */
+    .user-msg { 
+        background-color: #f0f2f6; padding: 15px; border-radius: 20px 20px 0px 20px; 
+        text-align: right; margin-left: auto; width: fit-content; max-width: 80%; 
+        color: black; border: 1px solid #ddd; margin-bottom: 10px; 
+    }
+    
+    /* AI का मैसेज (बाईं तरफ) */
+    .ai-msg { 
+        background-color: white; padding: 15px; border-radius: 20px 20px 20px 0px; 
+        text-align: left; margin-right: auto; width: fit-content; max-width: 80%; 
+        color: black; border: 1px solid #eee; box-shadow: 2px 2px 8px rgba(0,0,0,0.05); 
+        margin-bottom: 10px; 
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# हेडर (राजा का मुकुट)
-st.markdown("<h1 style='text-align: center;'>👑</h1>", unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center; color: black;'>Rajaram AI</h2>", unsafe_allow_html=True)
+# साइडबार: चैट मेमोरी
+with st.sidebar:
+    st.markdown("### ≡ राजाराम AI मेनू")
+    if st.button("यादें मिटाएं"):
+        st.session_state.messages = []
+        st.rerun()
+
+# हेडर: राजा का मुकुट
+st.markdown("<h1 style='text-align: center; margin-bottom: 0;'>👑</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; margin-top: 0;'>Rajaram AI</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-style: italic; color: #555;'>'राजाराम AI आपकी हर प्रकार से मदद करेगी और हमेशा आपके साथ है'</p>", unsafe_allow_html=True)
 
+# चैट का इतिहास
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# चैट दिखाना
 for msg in st.session_state.messages:
-    style = "chat-user" if msg["role"] == "user" else "chat-ai"
+    style = "user-msg" if msg["role"] == "user" else "ai-msg"
     st.markdown(f"<div class='{style}'>{msg['content']}</div>", unsafe_allow_html=True)
 
-prompt = st.chat_input("भाई से कुछ भी पूछो...")
+# इनपुट बॉक्स
+prompt = st.chat_input("भाई से कुछ भी पूछो (जैसे: SSC की तैयारी कैसे करूँ?)...")
 
 if prompt:
+    # यूजर का मैसेज दिखाओ
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.markdown(f"<div class='chat-user'>{prompt}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='user-msg'>{prompt}</div>", unsafe_allow_html=True)
 
-    with st.spinner("राजाराम AI खाली दिमाग ढूंढ रहा है..."):
-        answer, used_model = get_smart_response(prompt)
+    with st.spinner("राजाराम AI खाली दिमाग स्कैन कर रहा है..."):
+        answer, working_id = get_empty_brain_response(prompt)
+        
+        # AI का जवाब दिखाओ
         st.session_state.messages.append({"role": "assistant", "content": answer})
-        st.markdown(f"<div class='chat-ai'>{answer}<br><small style='color:gray;'>दिमाग: {used_model}</small></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='ai-msg'>{answer}<br><small style='color:gray;'>ID: {working_id}</small></div>", unsafe_allow_html=True)
+        
+        # डायरी के बटन्स
+        st.write("➕ ❤️ 📷 🎥")
