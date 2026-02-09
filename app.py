@@ -1,4 +1,15 @@
 import streamlit as st
+
+# --- बटन और फुटर हटाने का कवच ---
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- यहाँ से आपका अनमोल कोड शुरू होगा ---import streamlit as st
 # और भी जो इम्पोरटेंट चीजें आपने इम्पोर्ट की हैं...
 
 # --- यहाँ से शुरू करें सुरक्षा कोड ---
