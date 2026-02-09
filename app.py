@@ -1,20 +1,24 @@
 import streamlit as st
 
-# --- अमर सुरक्षा (Force Hide) ---
+# --- अमर सुरक्षा (Ultimate Force Hide) ---
 st.markdown("""
     <style>
-    /* 1. मेन्यू, फुटर और हेडर को पूरी तरह हटाना */
-    #MainMenu {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    header {visibility: hidden !important;}
+    /* पूरे हेडर और फुटर के ढांचे को ही ब्लॉक करना */
+    header, footer, .stAppDeployButton, #MainMenu, .stActionButton {
+        display: none !important;
+        visibility: hidden !important;
+    }
     
-    /* 2. स्क्रीन के ऊपर की खाली जगह और बटन्स को हटाना */
-    .stAppDeployButton {display:none !important;}
-    [data-testid="stHeader"] {display:none !important;}
-    [data-testid="stToolbar"] {display:none !important;}
-    
-    /* 3. नीचे का 'Made with Streamlit' हटाना */
-    #root > div:nth-child(1) > div.withScreencast > div > div > div > section > div.stAppViewFooter {display:none !important;}
+    /* मोबाइल पर दिखने वाले तीन डॉट (Toolbar) को हटाना */
+    [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stStatusWidget"] {
+        display: none !important;
+    }
+
+    /* स्क्रीन के ऊपर की फालतू जगह को खत्म करना */
+    .block-container {
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
