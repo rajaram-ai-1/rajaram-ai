@@ -1,4 +1,6 @@
 import streamlit as st
+st.write("Samrajya Surakshit Hai")
+import streamlit as st
 
 # 1. सुरक्षा कवच (सारे बटन्स और हेडर गायब करने के लिए)
 st.markdown("""
