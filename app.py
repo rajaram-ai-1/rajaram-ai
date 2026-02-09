@@ -1,28 +1,27 @@
 import streamlit as st
 
-# --- अमर सुरक्षा (Ultimate Force Hide) ---
+# --- अमर अदृश्य दीवार (Overlayer) ---
 st.markdown("""
     <style>
-    /* पूरे हेडर और फुटर के ढांचे को ही ब्लॉक करना */
-    header, footer, .stAppDeployButton, #MainMenu, .stActionButton {
+    /* पूरे हेडर एरिया को एक अदृश्य दीवार से ढंकना */
+    .invisible-wall {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px; /* हेडर की ऊँचाई */
+        background-color: transparent;
+        z-index: 999999; /* सबसे ऊपर */
+        pointer-events: all; /* यह क्लिक को रोक लेगा */
+    }
+    
+    header, footer, .stAppDeployButton {
         display: none !important;
         visibility: hidden !important;
     }
-    
-    /* मोबाइल पर दिखने वाले तीन डॉट (Toolbar) को हटाना */
-    [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stStatusWidget"] {
-        display: none !important;
-    }
-
-    /* स्क्रीन के ऊपर की फालतू जगह को खत्म करना */
-    .block-container {
-        padding-top: 0rem !important;
-        padding-bottom: 0rem !important;
-    }
     </style>
+    <div class="invisible-wall"></div>
     """, unsafe_allow_html=True)
-
-# --- इसके नीचे आपका अनमोल कोड ---
 import streamlit as st
 
 # --- बटन और फुटर हटाने का कवच ---
