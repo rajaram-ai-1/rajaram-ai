@@ -1,48 +1,39 @@
 import streamlit as st
+from groq import Groq
 
-# 1. सुरक्षा कवच (Header, Footer, Menu, Deploy Button सब गायब)
+# --- 1. सबसे पहले पेज सेटिंग (नियम: यह सबसे ऊपर होना चाहिए) ---
+st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
+
+# --- 2. अमर सुरक्षा कवच (Menu, Header, Footer और Deploy बटन गायब) ---
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
             header {visibility: hidden;}
             .stAppDeployButton {display: none;}
+            .stApp { background-color: white; color: black; }
+            .user-bubble { background-color: #f1f3f4; padding: 15px; border-radius: 20px 20px 0px 20px; color: black; border: 1px solid #ddd; margin-bottom: 10px; width: fit-content; max-width: 80%; margin-left: auto; }
+            .ai-bubble { background-color: #ffffff; padding: 15px; border-radius: 20px 20px 20px 0px; color: black; border: 1px solid #eee; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); margin-bottom: 10px; width: fit-content; max-width: 80%; }
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
-# 2. आपका असली टाइटल (साफ़ और अमर)
-st.title("👑 Rajaram AI")
-st.write("### 25 दिमागों का कवच - अमर और सुरक्षित")
-
-# 3. सफलता का संदेश
-st.success("बधाई हो राजाराम भाई! आपका साम्राज्य अब पूरी तरह सुरक्षित है।")
-
-# --- यहाँ से आपका Groq या AI वाला पुराना कोड शुरू होगा ---
-# (अगर आपके पास Groq का कोड है, तो उसे इसके नीचे पेस्ट करें)
-from groq import Groq
-
-# --- 1. सुरक्षा कवच (Secrets) ---
+# --- 3. तिजोरी से चाबी निकालना (Secrets) ---
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+    client = Groq(api_key=GROQ_API_KEY)
 except Exception:
     st.error("❌ भाई, तिजोरी (Secrets) में चाबी नहीं मिली!")
     st.stop()
 
-client = Groq(api_key=GROQ_API_KEY)
-
-# --- 2. 20-25 दिमागों की महा-फौज (Full Army List) ---
-# हमने Groq के सभी मुख्य और बैकअप मॉडल्स जोड़ दिए हैं
+# --- 4. 25 दिमागों की महा-फौज (Models List) ---
 groq_army = [
     "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", 
     "llama-3.2-90b-vision-preview", "llama-3.2-11b-vision-preview",
     "llama-3.2-3b-preview", "llama-3.2-1b-preview",
     "llama-3.1-8b-instant", "llama3-70b-8192", 
     "llama3-8b-8192", "mixtral-8x7b-32768", 
-    "gemma2-9b-it", "gemma-7b-it",
-    "llama-guard-3-8b", "distil-whisper-large-v3-en"
-    # नोट: Groq पर उपलब्ध मॉडल्स समय-समय पर अपडेट होते रहते हैं, 
-    # यह लिस्ट उन सभी को कवर करने की कोशिश करती है।
+    "gemma2-9b-it", "gemma-7b-it"
 ]
 
 def get_immortal_response(messages_history):
@@ -57,32 +48,19 @@ def get_immortal_response(messages_history):
             )
             return completion.choices[0].message.content, brain
         except Exception:
-            # अगर ये दिमाग काम नहीं कर रहा, तो चुपचाप अगले पर जाओ
             continue
-            
-    return "भाई, पूरी की पूरी 25 दिमागों की फौज अभी विश्राम पर है। 2 मिनट बाद फिर हुक्म करें!", "None"
+    return "भाई, पूरी की पूरी 25 दिमागों की फौज अभी विश्राम पर है। थोड़ी देर बाद फिर हुक्म करें!", "None"
 
-# --- 3. इंटरफ़ेस सेटअप ---
-st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
-
-st.markdown("""
-    <style>
-    .stApp { background-color: white; color: black; }
-    .user-bubble { background-color: #f1f3f4; padding: 15px; border-radius: 20px 20px 0px 20px; color: black; border: 1px solid #ddd; margin-bottom: 10px; width: fit-content; max-width: 80%; margin-left: auto; }
-    .ai-bubble { background-color: #ffffff; padding: 15px; border-radius: 20px 20px 20px 0px; color: black; border: 1px solid #eee; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); margin-bottom: 10px; width: fit-content; max-width: 80%; }
-    </style>
-    """, unsafe_allow_html=True)
-
+# --- 5. मुख्य इंटरफ़ेस (UI) ---
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'><b>25 दिमागों का कवच - अमर और सुरक्षित</b></p>", unsafe_allow_html=True)
 
-# --- 4. याददाश्त और पहचान ---
+# --- 6. याददाश्त और पहचान ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "system", 
-            "content": "तुम 'राजाराम AI' हो, जिसे बरेली के मास्टर राजाराम ने बनाया है। हमेशा सिर्फ और सिर्फ हिंदी में बात करो। 'भाई' शब्द को हमेशा सही तरीके से लिखो। जवाब न बहुत लंबे हों और न बहुत छोटे, बिल्कुल संतुलित होने चाहिए। हर सवाल का सीधा और दोस्ताना जवाब दो। कभी भी 'बेटा' शब्द का इस्तेमाल मत करना और हमेशा सम्मान के साथ 'भाई' कहना।"
-            
+            "content": "तुम 'राजाराम AI' हो, जिसे बरेली के मास्टर राजाराम ने बनाया है। हमेशा सिर्फ और सिर्फ हिंदी में बात करो। 'भाई' शब्द का सम्मान के साथ उपयोग करो। जवाब संतुलित हों और कभी भी 'बेटा' शब्द का उपयोग न करें।"
         }
     ]
 
@@ -92,22 +70,16 @@ for msg in st.session_state.messages:
         style = "user-bubble" if msg["role"] == "user" else "ai-bubble"
         st.markdown(f"<div class='{style}'>{msg['content']}</div>", unsafe_allow_html=True)
 
-# --- 5. इनपुट और महा-रिस्पॉन्स ---
+# --- 7. इनपुट और महा-रिस्पॉन्स ---
 prompt = st.chat_input("हुक्म करें राजाराम भाई...")
 
 if prompt:
-    # यूजर का मैसेज याददाश्त में जोड़ो
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.markdown(f"<div class='user-bubble'>{prompt}</div>", unsafe_allow_html=True)
 
     with st.spinner("25 दिमागों की फौज मोर्चा संभाल रही है..."):
-        # पूरी हिस्ट्री के साथ जवाब लाओ
         answer, used_id = get_immortal_response(st.session_state.messages)
-        
-        # AI का मैसेज याददाश्त में जोड़ो
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.markdown(f"<div class='ai-bubble'>{answer}<br><br><small style='color:blue;'>सक्रिय शक्ति: {used_id}</small></div>", unsafe_allow_html=True)
-        
         st.write("➕ ❤️ 📷 🎥")
-        # पेज रिफ्रेश ताकि मेमोरी सेट रहे
         st.rerun()
