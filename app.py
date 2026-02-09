@@ -1,4 +1,16 @@
+import streamlit as st
 
+# --- अमर सुरक्षा CSS (जो हमने पहले लगाया था) ---
+st.markdown("""
+    <style>
+    header {visibility: hidden !important;}
+    .stAppDeployButton {display:none !important;}
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- यहाँ से आपका असली काम शुरू ---
+st.write("👑 **Rajaram AI**")
+st.write("25 दिमागों का कवच - अमर और सुरक्षित")
 import streamlit as st
 
 # --- बटन और फुटर हटाने का कवच ---
