@@ -1,18 +1,4 @@
-import streamlit as st
 
-# यह कोड आपके ऐप को फुल स्क्रीन कर देगा और ऊपर के बटन्स को 'धक्का' देकर स्क्रीन से बाहर निकाल देगा
-st.markdown("""
-    <style>
-    /* पूरे ऐप को ऊपर खिसका देना ताकि हेडर कट जाए */
-    .stApp {
-        margin-top: -60px;
-    }
-    /* किसी भी तरह के क्लिक को ऊपर वाले हिस्से में रोकना */
-    [data-testid="stHeader"] {
-        display: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 import streamlit as st
 
 # --- बटन और फुटर हटाने का कवच ---
