@@ -83,3 +83,4 @@ if prompt:
         st.markdown(f"<div class='ai-bubble'>{answer}<br><br><small style='color:blue;'>सक्रिय शक्ति: {used_id}</small></div>", unsafe_allow_html=True)
         st.write("➕ ❤️ 📷 🎥")
         st.rerun()
+                
