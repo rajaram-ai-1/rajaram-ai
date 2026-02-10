@@ -1,6 +1,28 @@
 import streamlit as st
 from groq import Groq
-
+# इसे अपने app.py में सबसे ऊपर (set_page_config के बाद) डालें
+st.markdown("""
+    <style>
+    /* 1. Manage App बटन को पूरी तरह गायब करना */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* 2. Streamlit का छोटा मेनू और 'Manage App' का घेरा हटाना */
+    .stAppDeployButton {display:none !important;}
+    div[data-testid="stStatusWidget"] {display:none !important;}
+    
+    /* 3. मोबाइल पर दिखने वाले 'Manage app' के लाल/काले बटन को हटाना */
+    button[title="Manage app"] {
+        display: none !important;
+    }
+    
+    /* 4. स्क्रीन के कोने में दिखने वाला गिटहब का निशान हटाना */
+    .viewerBadge_container__1QS13 {
+        display: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 # 1. पेज सेटिंग (यह सबसे ऊपर ही होनी चाहिए)
 st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
