@@ -12,7 +12,7 @@ def select_best_brain(messages_history):
     elif any(word in user_input for word in ["majak", "joke", "funny", "hi", "hello", "kaise ho"]):
         return "llama-3.1-8b-instant", "😂 चुलबुला दिमाग (Llama 8B)"
     else:
-        return "mixtral-8x7b-32768", "🧠 ज्ञानी दिमाग (Mixtral)"
+        return "llama-3.1-70b-versatile", "🧠 ज्ञानी दिमाग (Mixtral)"
 
 # 2. सुरक्षा कवच (स्टाइलिंग)
 st.markdown("""
