@@ -1,53 +1,29 @@
 import streamlit as st
-# --- राजाराम भाई का 'दिमाग' कंट्रोलर ---
-import streamlit as st
-
-def get_smart_model(user_input):
-    ui = user_input.lower()
-    if any(word in ui for word in ["padhai", "maths", "science", "exam", "book"]):
-        return "llama-3.3-70b-versatile"
-    elif any(word in ui for word in ["majak", "joke", "funny", "hi", "hello"]):
-        return "llama-3.1-8b-instant"
-    else:
-        return "mixtral-8x7b-32768"
-
-# यहाँ हम पुराने 'model' नाम के शब्द को ही बदल देंगे
-model = "mixtral-8x7b-32768" 
-# -------------------------------------
 from groq import Groq
-# इसे अपने app.py में सबसे ऊपर (set_page_config के बाद) डालें
+
+# 1. पेज सेटिंग (सबसे ऊपर)
+st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
+
+# --- राजाराम भाई का 'दिमाग' चुनने वाला इंजन (नया जोड़ा गया) ---
+def select_best_brain(messages_history):
+    user_input = messages_history[-1]["content"].lower()
+    if any(word in user_input for word in ["padhai", "maths", "science", "exam", "book", "class", "study"]):
+        return "llama-3.3-70b-versatile", "📖 पढ़ाई वाला दिमाग (Llama 70B)"
+    elif any(word in user_input for word in ["majak", "joke", "funny", "hi", "hello", "kaise ho"]):
+        return "llama-3.1-8b-instant", "😂 चुलबुला दिमाग (Llama 8B)"
+    else:
+        return "mixtral-8x7b-32768", "🧠 ज्ञानी दिमाग (Mixtral)"
+
+# 2. सुरक्षा कवच (स्टाइलिंग)
 st.markdown("""
     <style>
-    /* 1. Manage App बटन को पूरी तरह गायब करना */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    
-    /* 2. Streamlit का छोटा मेनू और 'Manage App' का घेरा हटाना */
     .stAppDeployButton {display:none !important;}
     div[data-testid="stStatusWidget"] {display:none !important;}
-    
-    /* 3. मोबाइल पर दिखने वाले 'Manage app' के लाल/काले बटन को हटाना */
-    button[title="Manage app"] {
-        display: none !important;
-    }
-    
-    /* 4. स्क्रीन के कोने में दिखने वाला गिटहब का निशान हटाना */
-    .viewerBadge_container__1QS13 {
-        display: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-# 1. पेज सेटिंग (यह सबसे ऊपर ही होनी चाहिए)
-st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
-
-# 2. सुरक्षा कवच (बटन्स और हेडर गायब करने के लिए)
-st.markdown("""
-    <style>
-    header {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    .stAppDeployButton {display:none !important;}
-    #MainMenu {visibility: hidden !important;}
+    button[title="Manage app"] {display: none !important;}
+    .viewerBadge_container__1QS13 {display: none !important;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -62,7 +38,7 @@ except Exception as e:
     st.error(f"❌ कनेक्शन एरर: {e}")
     st.stop()
 
-# 4. 25+ शक्तिशाली दिमागों की महा-फौज
+# 4. 25+ शक्तिशाली दिमागों की महा-फौज (आपकी लिस्ट सुरक्षित है)
 groq_army = [
     "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", 
     "llama-3.2-90b-vision-preview", "llama-3.2-11b-vision-preview",
@@ -73,33 +49,30 @@ groq_army = [
     "llama-guard-3-8b", "distil-whisper-large-v3-en"
 ]
 
+# 5. रिस्पॉन्स फंक्शन (इसे मैंने आपके पुराने कोड में फिट कर दिया है)
 def get_response(messages_history):
-    # पहले सही दिमाग चुनें
-    best_brain = select_best_brain(messages_history)
+    # स्मार्ट तरीके से दिमाग चुनना
+    best_brain, brain_display_name = select_best_brain(messages_history)
     
     try:
         completion = client.chat.completions.create(
-            model=best_brain,  # अब यह 'army' की जगह सीधा 'best_brain' यूज़ करेगा
+            model=best_brain,
             messages=messages_history,
             temperature=0.7,
             max_tokens=2048,
         )
-        return completion.choices[0].message.content
+        return completion.choices[0].message.content, brain_display_name
     except Exception as e:
-        return f"माफ़ करना भाई, गड़बड़ हो गई: {e}"
-            return completion.choices[0].message.content, brain
-        except:
-            continue
-    return "भाई, फौज अभी विश्राम पर है।", "None"
+        return f"माफ़ करना भाई, गड़बड़ हो गई: {e}", "Error"
 
-# 5. दरबार की सजावट
+# 6. दरबार की सजावट
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच  -  अमर और सुरक्षित</b></p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
 
-# 6. याददाश्त
+# 7. याददाश्त
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": "तुम 'राजाराम AI' हो। और यह आपके लिए बरेली के राजाराम भाई ने बनाया है जो 15 साल के क्लास 10 के स्टूडेंट हैं, वे बहुत इंटेलिजेंट हैं। यूज़र को हमेशा बैलेंस्ड जवाब दें, न बहुत लंबा और न बहुत छोटा।हमेशा हिंदी में बात करो और 'भाई' कहकर सम्मान दो।"}
+        {"role": "system", "content": "तुम 'राजाराम AI' हो। और यह आपके लिए बरेली के राजाराम भाई ने बनाया है जो 15 साल के क्लास 10 के स्टूडेंट हैं, वे बहुत इंटेलिजेंट हैं। हमेशा हिंदी में बात करो और 'भाई' कहकर सम्मान दो।"}
     ]
 
 # पुरानी चैट दिखाना
@@ -108,7 +81,7 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-# 7. हुक्म और जवाब
+# 8. हुक्म और जवाब
 prompt = st.chat_input("हुक्म करें राजाराम भाई...")
 
 if prompt:
@@ -117,9 +90,11 @@ if prompt:
         st.write(prompt)
 
     with st.spinner("फौज मोर्चा संभाल रही है..."):
+        # यहाँ आपका 'answer' और 'used_id' सही से सेट हो गया है
         answer, used_id = get_response(st.session_state.messages)
         st.session_state.messages.append({"role": "assistant", "content": answer})
         with st.chat_message("assistant"):
             st.write(answer)
             st.caption(f"सक्रिय शक्ति: {used_id}")
+        
         st.rerun()
