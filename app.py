@@ -67,22 +67,7 @@ def get_response(messages_history):
     except Exception as e:
         return f"माफ़ करना भाई, गड़बड़ हो गई: {e}", "Error"
 def get_meta_vision_response(user_prompt, image_file):
-    # फोटो को ऐसी भाषा में बदलो जिसे Llama समझ सके
-    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
     
-    response = client.chat.completions.create(
-        model="llama-3.2-11b-vision-preview",
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": user_prompt},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                ]
-            }
-        ]
-    )
-    return response.choices[0].message.content
 # 6. दरबार की सजावट
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - अमर ,सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
@@ -98,18 +83,38 @@ for msg in st.session_state.messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
-# यहाँ फोटो डालने का बटन आएगा
-uploaded_file = st.file_uploader("📷 फोटो चुनें", type=["jpg", "png", "jpeg"])
+# --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
 
+# 1. फोटो और टेक्स्ट इनपुट टूल्स
+uploaded_file = st.file_uploader("📷 फोटो चुनें (राजाराम AI विजन)", type=["jpg", "png", "jpeg"])
+prompt = st.chat_input("हुक्म करें राजाराम भाई...")
+
+# 2. जब यूजर कुछ पूछे या फोटो भेजे
 if prompt:
+    # यूज़र का मैसेज सेव और डिस्प्ले करें
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    # चेक करें: क्या फोटो अपलोड की गई है?
     if uploaded_file:
-        # अगर फोटो है, तो विजन वाला दिमाग चलेगा
         with st.spinner("राजाराम AI फोटो देख रहा है..."):
+            # फोटो वाला Meta Llama विजन फंक्शन चलाएं
             answer = get_meta_vision_response(prompt, uploaded_file)
+            used_id = "Llama-3.2-Vision (Meta)"
     else:
-        # अगर सिर्फ टेक्स्ट है, तो पुराना वाला दिमाग चलेगा
-        answer, used_id = get_response(st.session_state.messages)
-# 8. हुक्म और जवाब
+        with st.spinner("राजाराम AI जवाब तैयार कर रहा है..."):
+            # पुराना टेक्स्ट वाला फंक्शन चलाएं
+            answer, used_id = get_response(st.session_state.messages)
+
+    # एआई का जवाब सेव और डिस्प्ले करें
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    with st.chat_message("assistant"):
+        st.write(answer)
+        st.caption(f"सक्रिय शक्ति: {used_id}")
+    
+    # स्क्रीन रिफ्रेश करें
+    st.rerun()
 prompt = st.chat_input("हुक्म करें राजाराम भाई...")
 
 if prompt:
