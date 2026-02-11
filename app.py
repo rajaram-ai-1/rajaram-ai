@@ -69,7 +69,7 @@ def get_response(messages_history):
 def get_meta_vision_response(user_prompt, image_file):
             }
         }
-    }
+    (
 }
 # 6. दरबार की सजावट
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
