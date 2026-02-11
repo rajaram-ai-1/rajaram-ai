@@ -92,6 +92,7 @@ if prompt:
     with st.spinner("फौज मोर्चा संभाल रही है..."):
         # यहाँ आपका 'answer' और 'used_id' सही से सेट हो गया है
         answer, used_id = get_response(st.session_state.messages)
+        st.toast(f"अभी {used_id} एक्टिव है!", icon='🔥')
         st.session_state.messages.append({"role": "assistant", "content": answer})
         with st.chat_message("assistant"):
             st.write(answer)
