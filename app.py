@@ -87,7 +87,7 @@ def get_response(messages_history):
         return completion.choices[0].message.content
     except Exception as e:
         return f"माफ़ करना भाई, गड़बड़ हो गई: {e}"
-        )
+)
             return completion.choices[0].message.content, brain
         except:
             continue
