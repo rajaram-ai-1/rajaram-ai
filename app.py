@@ -1,4 +1,6 @@
 import streamlit as st
+import base64  # यह फोटो को कोड में बदलने के लिए है
+from PIL import Image
 from groq import Groq
 
 # 1. पेज सेटिंग (सबसे ऊपर)
@@ -64,7 +66,23 @@ def get_response(messages_history):
         return completion.choices[0].message.content, brain_display_name
     except Exception as e:
         return f"माफ़ करना भाई, गड़बड़ हो गई: {e}", "Error"
-
+def get_meta_vision_response(user_prompt, image_file):
+    # फोटो को ऐसी भाषा में बदलो जिसे Llama समझ सके
+    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+    
+    response = client.chat.completions.create(
+        model="llama-3.2-11b-vision-preview",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_prompt},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                ]
+            }
+        ]
+    )
+    return response.choices[0].message.content
 # 6. दरबार की सजावट
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - अमर ,सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
@@ -80,7 +98,17 @@ for msg in st.session_state.messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
+# यहाँ फोटो डालने का बटन आएगा
+uploaded_file = st.file_uploader("📷 फोटो चुनें", type=["jpg", "png", "jpeg"])
 
+if prompt:
+    if uploaded_file:
+        # अगर फोटो है, तो विजन वाला दिमाग चलेगा
+        with st.spinner("राजाराम AI फोटो देख रहा है..."):
+            answer = get_meta_vision_response(prompt, uploaded_file)
+    else:
+        # अगर सिर्फ टेक्स्ट है, तो पुराना वाला दिमाग चलेगा
+        answer, used_id = get_response(st.session_state.messages)
 # 8. हुक्म और जवाब
 prompt = st.chat_input("हुक्म करें राजाराम भाई...")
 
