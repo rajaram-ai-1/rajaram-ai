@@ -1,4 +1,19 @@
 import streamlit as st
+# --- राजाराम भाई का 'दिमाग' कंट्रोलर ---
+import streamlit as st
+
+def get_smart_model(user_input):
+    ui = user_input.lower()
+    if any(word in ui for word in ["padhai", "maths", "science", "exam", "book"]):
+        return "llama-3.3-70b-versatile"
+    elif any(word in ui for word in ["majak", "joke", "funny", "hi", "hello"]):
+        return "llama-3.1-8b-instant"
+    else:
+        return "mixtral-8x7b-32768"
+
+# यहाँ हम पुराने 'model' नाम के शब्द को ही बदल देंगे
+model = "mixtral-8x7b-32768" 
+# -------------------------------------
 from groq import Groq
 # इसे अपने app.py में सबसे ऊपर (set_page_config के बाद) डालें
 st.markdown("""
@@ -59,13 +74,19 @@ groq_army = [
 ]
 
 def get_response(messages_history):
-    for brain in groq_army:
-        try:
-            completion = client.chat.completions.create(
-                model=brain,
-                messages=messages_history,
-                temperature=0.7,
-                max_tokens=2048,
+    # पहले सही दिमाग चुनें
+    best_brain = select_best_brain(messages_history)
+    
+    try:
+        completion = client.chat.completions.create(
+            model=best_brain,  # अब यह 'army' की जगह सीधा 'best_brain' यूज़ करेगा
+            messages=messages_history,
+            temperature=0.7,
+            max_tokens=2048,
+        )
+        return completion.choices[0].message.content
+    except Exception as e:
+        return f"माफ़ करना भाई, गड़बड़ हो गई: {e}"
             )
             return completion.choices[0].message.content, brain
         except:
