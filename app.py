@@ -66,11 +66,8 @@ def get_response(messages_history):
         return completion.choices[0].message.content, brain_display_name
     except Exception as e:
         return f"माफ़ करना भाई, गड़बड़ हो गई: {e}", "Error"
-def get_meta_vision_response(user_prompt, image_file):
-            }
-        }
+def get_meta_vision_response(user_prompt, image_file): 
     (
-}
 # 6. दरबार की सजावट
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - अमर ,सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
