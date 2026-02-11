@@ -67,7 +67,7 @@ def get_response(messages_history):
 
 # 6. दरबार की सजावट
 st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - अमर ,सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
 
 # 7. याददाश्त
 if "messages" not in st.session_state:
