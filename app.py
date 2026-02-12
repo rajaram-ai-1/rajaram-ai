@@ -3,8 +3,6 @@ import base64  # यह फोटो को कोड में बदलने 
 from PIL import Image
 from groq import Groq
 import streamlit as st
-# 1. पेज सेटिंग (सबसे ऊपर)
-st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 # यह लाइन सबसे जरूरी है, इसे मिस मत करना भाई
 from streamlit_mic_recorder import mic_recorder 
 
@@ -24,16 +22,18 @@ with c2:
 
 # 2. आवाज़ को समझने वाला दिमाग
 def translate_voice(audio_bytes):
+    import speech_recognition as rgn
+    import io
+    
     recognizer = rgn.Recognizer()
-    audio_file = io.BytesIO(audio_bytes)
-    with rgn.AudioFile(audio_file) as source:
-        audio = recognizer.record(source)
+    # यहाँ हम AudioData का इस्तेमाल करेंगे जो सीधा bytes समझता है
     try:
-        # Google की मदद से आवाज़ को टेक्स्ट में बदलना
-        return recognizer.recognize_google(audio, language='hi-IN')
+        # हम मान के चल रहे हैं कि रिकॉर्डिंग 16000Hz पर है (Standard)
+        audio_data = rgn.AudioData(audio_bytes, 16000, 2) 
+        return recognizer.recognize_google(audio_data, language='hi-IN')
     except Exception as e:
+        # अगर कुछ समझ न आए तो खाली टेक्स्ट भेजें
         return ""
-
 # 3. लॉजिक जो टाइपिंग और आवाज़ दोनों को संभालेगा
 if audio_data:
     voice_result = translate_voice(audio_data['bytes'])
@@ -55,6 +55,9 @@ if prompt:
         st.write(answer)
     
     st.rerun()
+    
+# 1. पेज सेटिंग (सबसे ऊपर)
+st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
 # --- राजाराम भाई का 'दिमाग' चुनने वाला इंजन (नया जोड़ा गया) ---
 def select_best_brain(messages_history):
