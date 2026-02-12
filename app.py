@@ -85,7 +85,39 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
+# --- 1. वॉइस इनपुट (अभी हम इसे सिर्फ बटन के रूप में रख रहे हैं) ---
+from streamlit_mic_recorder import mic_recorder
 
+st.write("🎤 राजाराम भाई, बोलकर हुक्म दें:")
+audio = mic_recorder(
+    start_prompt="रिकॉर्डिंग शुरू करें 🎙️",
+    stop_prompt="रोकें और भेजें ⏹️",
+    key='voice_input'
+)
+
+# --- 2. सीधा और सरल चैट बॉक्स ---
+# यहाँ 'prompt' को हम साफ़ तौर पर लिख रहे हैं ताकि NameError न आए
+prompt = st.chat_input("यहाँ टाइप करें... (राजाराम AI)")
+
+# --- 3. काम करने का लॉजिक ---
+if prompt:
+    # यूजर का मैसेज दिखाएं
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    # AI का जवाब तैयार करना
+    with st.spinner("राजाराम AI सोच रहा है..."):
+        # यहाँ आपका मुख्य AI फंक्शन (get_response) कॉल होगा
+        answer, _ = get_response(st.session_state.messages)
+
+    # AI का जवाब दिखाएं
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    with st.chat_message("assistant"):
+        st.write(answer)
+    
+    # स्क्रीन रिफ्रेश ताकि चैट अपडेट हो जाए
+    st.rerun()
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
