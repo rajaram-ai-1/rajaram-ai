@@ -85,47 +85,7 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# 1. लुक को साफ़ करने के लिए CSS (इसे रहने दें)
-st.markdown("""
-    <style>
-    div[data-testid="stFileUploader"] { width: 50px; }
-    div[data-testid="stFileUploader"] section { padding: 0; min-height: 45px; border: none; }
-    div[data-testid="stFileUploader"] label { display: none; }
-    </style>
-    """, unsafe_allow_html=True)
 
-# 2. राजाराम भाई का असली चैट बॉक्स
-col1, col2 = st.columns([1, 9])
-
-with col1:
-    up_img = st.file_uploader("+", type=["jpg", "png", "jpeg"], key="rajaram_plus")
-
-with col2:
-    # यहाँ 'prompt' नाम वापस रख दिया है ताकि नीचे एरर न आए
-    prompt = st.text_input("", placeholder="Gemini से पूछें... (राजाराम AI)", label_visibility="collapsed", key="rajaram_chat")
-
-# 3. असली काम - एरर यहाँ से खत्म होगा
-if prompt:  # अब इसे 'prompt' मिल जाएगा!
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    if up_img is not None:
-        with st.spinner("राजाराम AI फोटो देख रहा है..."):
-            try:
-                # विजन फंक्शन को कॉल करना
-                answer = get_meta_vision_response(prompt, up_img)
-            except Exception as e:
-                answer = "क्षमा करें राजाराम भाई, विजन फंक्शन में कुछ कमी है।"
-    else:
-        with st.spinner("राजाराम AI सोच रहा है..."):
-            answer, _ = get_response(st.session_state.messages)
-
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-    with st.chat_message("assistant"):
-        st.write(answer)
-    
-    st.rerun()
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
