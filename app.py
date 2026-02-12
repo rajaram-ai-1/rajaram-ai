@@ -85,57 +85,76 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# --- नया और सुंदर चैटबॉक्स (यहाँ से पेस्ट करें) ---
-
-# 1. CSS का जादू (इसे डालने से बटन और बॉक्स एकदम पास आ जाएंगे)
+# 1. CSS का महा-जादू (यह चैटबॉक्स को असली Gemini जैसा बनाएगा)
 st.markdown("""
-    <style>
-    div[data-testid="stFileUploader"] {
-        width: fit-content;
+<style>
+    /* पूरे बॉक्स को घेरने वाला कंटेनर */
+    .main-input-container {
+        position: fixed;
+        bottom: 30px;
+        width: 70%;
+        background: #202123;
+        border: 1px solid #4d4d4d;
+        border-radius: 25px;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        z-index: 9999;
     }
-    div[data-testid="stFileUploader"] section {
-        padding: 0;
-        min-height: 0;
-        border: none;
+    /* फ़ाइल अपलोडर को छिपाना और सिर्फ आइकन दिखाना */
+    .stFileUploader {
+        width: 40px;
+        overflow: hidden;
     }
-    .stChatInputContainer {
-        padding-bottom: 20px;
+    .stFileUploader section {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
     }
-    </style>
-    """, unsafe_allow_html=True)
+    div[data-testid="stFileUploader"] label, div[data-testid="stFileUploader"] small {
+        display: none !important;
+    }
+    /* प्लस बटन को प्लस जैसा दिखाना */
+    .stFileUploader span::before {
+        content: '➕';
+        font-size: 20px;
+        cursor: pointer;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# 2. लेआउट बनाना (बटन और बॉक्स को एक लाइन में लाना)
-col1, col2 = st.columns([1, 9]) # 1 भाग बटन के लिए, 9 भाग चैट के लिए
+# 2. असली लेआउट
+col1, col2 = st.columns([1, 10])
 
 with col1:
-    # यह आपका छोटा '+' बटन बनेगा
-    uploaded_file = st.file_uploader("+", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+    # यह आपका जादुई प्लस बटन है
+    uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], key="final_plus")
 
 with col2:
-    # यह आपका टाइपिंग बॉक्स
+    # यह आपका टाइपिंग एरिया
     prompt = st.chat_input("हुक्म करें राजाराम भाई...")
 
-# 3. असली काम (Logic)
+# 3. जवाब न आने वाली समस्या का समाधान (Logic)
 if prompt:
     # यूजर का मैसेज दिखाएं
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
 
-    # अगर फोटो है तो विजन, नहीं तो टेक्स्ट
-    if uploaded_file:
-        with st.spinner("राजाराम AI फोटो देख रहा है..."):
+    # असली चेक: फोटो और टेक्स्ट दोनों साथ भेज रहे हैं या नहीं
+    if uploaded_file is not None:
+        with st.spinner("राजाराम AI आपकी फोटो देख रहा है..."):
+            # यहाँ आपका विजन फंक्शन कॉल होगा
             answer = get_meta_vision_response(prompt, uploaded_file)
-            used_id = "Llama-Vision"
     else:
-        with st.spinner("राजाराम AI सोच रहा है..."):
+        with st.spinner("राजाराम AI गहराई से सोच रहा है..."):
+            # सिर्फ टेक्स्ट वाला जवाब
             answer, used_id = get_response(st.session_state.messages)
 
-    # AI का जवाब दिखाएं
+    # AI का जवाब स्क्रीन पर लाना
     st.session_state.messages.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant"):
-        st.write(answer)
-        st.caption(f"पावर: {used_id}")
+        st.markdown(answer)
     
     st.rerun()
 if prompt:
