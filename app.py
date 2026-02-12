@@ -2,7 +2,57 @@ import streamlit as st
 import base64  # यह फोटो को कोड में बदलने के लिए है
 from PIL import Image
 from groq import Groq
+import streamlit as st
+# यह लाइन सबसे जरूरी है, इसे मिस मत करना भाई
+from streamlit_mic_recorder import mic_recorder 
 
+# --- बाकी का सेटअप ---
+import speech_recognition as rgn
+import io
+
+# 1. माइक और इनपुट का सेटअप
+c1, c2 = st.columns([1, 8])
+
+with c1:
+    # यहाँ अब NameError नहीं आएगा क्योंकि हमने ऊपर mic_recorder इम्पोर्ट कर लिया है
+    audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='voice_input_v3')
+
+with c2:
+    prompt = st.chat_input("rajaram ai se puche...")
+
+# 2. आवाज़ को समझने वाला दिमाग
+def translate_voice(audio_bytes):
+    recognizer = rgn.Recognizer()
+    audio_file = io.BytesIO(audio_bytes)
+    with rgn.AudioFile(audio_file) as source:
+        audio = recognizer.record(source)
+    try:
+        # Google की मदद से आवाज़ को टेक्स्ट में बदलना
+        return recognizer.recognize_google(audio, language='hi-IN')
+    except Exception as e:
+        return ""
+
+# 3. लॉजिक जो टाइपिंग और आवाज़ दोनों को संभालेगा
+if audio_data:
+    voice_result = translate_voice(audio_data['bytes'])
+    if voice_result:
+        prompt = voice_result
+        st.info(f"🎤 मैंने सुना: {voice_result}")
+
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    with st.spinner("rajaram ai  सोच रहा है..."):
+        # यहाँ आपका Groq/Llama वाला फंक्शन कॉल होगा
+        answer, _ = get_response(st.session_state.messages)
+
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    with st.chat_message("assistant"):
+        st.write(answer)
+    
+    st.rerun()
 # 1. पेज सेटिंग (सबसे ऊपर)
 st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
@@ -85,53 +135,7 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# --- 1. माइक और इनपुट का सेटअप ---
-c1, c2 = st.columns([1, 8])
 
-with c1:
-    # माइक बटन
-    audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='voice_input_v3')
-
-with c2:
-    # हमने इसका नाम वापस 'prompt' रख दिया है ताकि Error न आए
-    prompt = st.chat_input("Meta Llama से कुछ भी पूछें...")
-
-# --- 2. दिमाग वाला फंक्शन (Speech to Text) ---
-def translate_voice(audio_bytes):
-    import speech_recognition as rgn
-    import io
-    recognizer = rgn.Recognizer()
-    audio_file = io.BytesIO(audio_bytes)
-    with rgn.AudioFile(audio_file) as source:
-        audio = recognizer.record(source)
-    try:
-        return recognizer.recognize_google(audio, language='hi-IN')
-    except:
-        return ""
-
-# --- 3. असली लॉजिक ---
-# अगर बोला गया है, तो उसे 'prompt' में डाल दो
-if audio_data:
-    voice_result = translate_voice(audio_data['bytes'])
-    if voice_result:
-        prompt = voice_result
-        st.info(f"🎤 आपने कहा: {voice_result}")
-
-# अब यहाँ 'prompt' हमेशा मौजूद रहेगा, इसलिए NameError नहीं आएगा
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    with st.spinner("Meta Llama सोच रहा है..."):
-        # आपका पुराना फंक्शन
-        answer, _ = get_response(st.session_state.messages)
-
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-    with st.chat_message("assistant"):
-        st.write(answer)
-    
-    st.rerun()
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
