@@ -1,59 +1,100 @@
 import streamlit as st
-import base64  # यह फोटो को कोड में बदलने के लिए है
-from PIL import Image
+from streamlit_mic_recorder import mic_recorder
 from groq import Groq
-import streamlit as st
-# यह लाइन सबसे जरूरी है, इसे मिस मत करना भाई
-from streamlit_mic_recorder import mic_recorder 
-
-# --- बाकी का सेटअप ---
 import speech_recognition as rgn
 import io
+import base64
+from PIL import Image
 
-# 1. माइक और इनपुट का सेटअप
-c1, c2 = st.columns([1, 8])
+# --- 1. पेज सेटअप और टाइटल ---
+st.set_page_config(page_title="Rajaram AI", page_icon="👑")
+st.title("👑 Rajaram AI")
+st.markdown("##### 25+ महा-शक्तियों का कवच - अमर, सुरक्षित और तेज़")
 
-with c1:
-    # यहाँ अब NameError नहीं आएगा क्योंकि हमने ऊपर mic_recorder इम्पोर्ट कर लिया है
-    audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='voice_input_v3')
+# --- 2. CSS: चैटबॉक्स को नीचे (Bottom) चिपकाने के लिए ---
+st.markdown("""
+    <style>
+    .main { margin-bottom: 100px; }
+    div[data-testid="stVerticalBlock"] > div:last-child {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #0E1117;
+        padding: 10px 5% 20px 5%;
+        z-index: 100;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-with c2:
-    prompt = st.chat_input("rajaram ai se puche...")
-
-# 2. आवाज़ को समझने वाला दिमाग
-def translate_voice(audio_bytes):
-    import speech_recognition as rgn
-    import io
-    
-    recognizer = rgn.Recognizer()
-    # यहाँ हम AudioData का इस्तेमाल करेंगे जो सीधा bytes समझता है
+# --- 3. दिमाग (Meta Llama / Groq) का फंक्शन ---
+def get_response(messages):
     try:
-        # हम मान के चल रहे हैं कि रिकॉर्डिंग 16000Hz पर है (Standard)
-        audio_data = rgn.AudioData(audio_bytes, 16000, 2) 
-        return recognizer.recognize_google(audio_data, language='hi-IN')
+        # पक्का करें कि आपने Streamlit Secrets में अपनी Key डाली है
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=messages,
+        )
+        return response.choices[0].message.content
     except Exception as e:
-        # अगर कुछ समझ न आए तो खाली टेक्स्ट भेजें
-        return ""
-# 3. लॉजिक जो टाइपिंग और आवाज़ दोनों को संभालेगा
-if audio_data:
-    voice_result = translate_voice(audio_data['bytes'])
-    if voice_result:
-        prompt = voice_result
-        st.info(f"🎤 मैंने सुना: {voice_result}")
+        return f"माफ़ करना भाई, एरर आया है: {str(e)}"
 
+# --- 4. आवाज़ को टेक्स्ट में बदलने वाला फंक्शन ---
+def translate_voice(audio_bytes):
+    recognizer = rgn.Recognizer()
+    audio_file = io.BytesIO(audio_bytes)
+    try:
+        with rgn.AudioFile(audio_file) as source:
+            audio = recognizer.record(source)
+        return recognizer.recognize_google(audio, language='hi-IN')
+    except:
+        return None
+
+# --- 5. चैट हिस्ट्री (याददाश्त) ---
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# पुराने मैसेज दिखाना
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# --- 6. इनपुट एरिया (माइक + बॉक्स) ---
+# यह हिस्सा स्क्रीन के नीचे रहेगा
+container = st.container()
+with container:
+    cols = st.columns([1, 6])
+    with cols[0]:
+        # माइक बटन
+        audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='rajaram_mic')
+    with cols[1]:
+        # टाइपिंग बॉक्स
+        prompt = st.chat_input("rajaram ai se puche...")
+
+# --- 7. असली काम (Logic) ---
+
+# अगर आवाज़ रिकॉर्ड हुई है
+if audio_data:
+    voice_text = translate_voice(audio_data['bytes'])
+    if voice_text:
+        prompt = voice_text
+        st.info(f"🎤 आपने कहा: {voice_text}")
+
+# अगर कोई मैसेज (टाइप किया हुआ या बोला हुआ) मिला है
 if prompt:
+    # यूजर का मैसेज दिखाओ और सेव करो
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
 
-    with st.spinner("rajaram ai  सोच रहा है..."):
-        # यहाँ आपका Groq/Llama वाला फंक्शन कॉल होगा
-        answer, _ = get_response(st.session_state.messages)
-
-    st.session_state.messages.append({"role": "assistant", "content": answer})
+    # AI का जवाब लाओ
     with st.chat_message("assistant"):
-        st.write(answer)
+        with st.spinner("राजाराम AI सोच रहा है..."):
+            full_response = get_response(st.session_state.messages)
+            st.markdown(full_response)
     
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
     st.rerun()
     
 # 1. पेज सेटिंग (सबसे ऊपर)
