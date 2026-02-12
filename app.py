@@ -85,7 +85,7 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# 1. लुक को साफ़ करने के लिए CSS
+# 1. लुक को साफ़ करने के लिए CSS (इसे रहने दें)
 st.markdown("""
     <style>
     div[data-testid="stFileUploader"] { width: 50px; }
@@ -94,39 +94,33 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. राजाराम भाई का 'V-I-P' चैट बॉक्स (Gemini Style)
-# यहाँ हमने [1, 9] का अनुपात लिया है ताकि बटन और बॉक्स एक लाइन में रहें
+# 2. राजाराम भाई का असली चैट बॉक्स
 col1, col2 = st.columns([1, 9])
 
 with col1:
-    # यह आपका असली '+' बटन है (Key बदलना ज़रूरी है ताकि None न आए)
     up_img = st.file_uploader("+", type=["jpg", "png", "jpeg"], key="rajaram_plus")
 
 with col2:
-    # 'chat_input' की जगह 'text_input' यूज़ करें, यह ज़्यादा भरोसेमंद है
-    user_txt = st.text_input("", placeholder="Gemini से पूछें... (राजाराम AI)", label_visibility="collapsed", key="rajaram_chat")
+    # यहाँ 'prompt' नाम वापस रख दिया है ताकि नीचे एरर न आए
+    prompt = st.text_input("", placeholder="Gemini से पूछें... (राजाराम AI)", label_visibility="collapsed", key="rajaram_chat")
 
-# 3. असली काम - जो 'None' को खत्म करेगा
-if user_txt:
-    # यूजर की बात दिखाओ
-    st.session_state.messages.append({"role": "user", "content": user_txt})
+# 3. असली काम - एरर यहाँ से खत्म होगा
+if prompt:  # अब इसे 'prompt' मिल जाएगा!
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(user_txt)
+        st.write(prompt)
 
-    # अगर फोटो है तो 'Vision' मोड
     if up_img is not None:
-        with st.spinner("राजाराम AI आपकी फोटो पढ़ रहा है..."):
+        with st.spinner("राजाराम AI फोटो देख रहा है..."):
             try:
-                # ध्यान दें: यहाँ फंक्शन का नाम और इनपुट सही होना चाहिए
-                answer = get_meta_vision_response(user_txt, up_img)
-            except:
-                answer = "माफ़ करना राजाराम भाई, फोटो पढ़ने में कुछ दिक्कत हुई।"
+                # विजन फंक्शन को कॉल करना
+                answer = get_meta_vision_response(prompt, up_img)
+            except Exception as e:
+                answer = "क्षमा करें राजाराम भाई, विजन फंक्शन में कुछ कमी है।"
     else:
-        # अगर सिर्फ टेक्स्ट है
-        with st.spinner("सोच रहा हूँ..."):
+        with st.spinner("राजाराम AI सोच रहा है..."):
             answer, _ = get_response(st.session_state.messages)
 
-    # जवाब दिखाओ
     st.session_state.messages.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant"):
         st.write(answer)
