@@ -30,7 +30,7 @@ st.markdown("""
         box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     }
 
-    /* इनपुट एरिया: टास्कबार से ऊपर (50px) */
+    /* इनपुट एरिया: टास्कबार से ऊपर (90px) */
     div[data-testid="stVerticalBlock"] > div:last-child {
         position: fixed;
         bottom: 85px; left: 0; width: 100%;
