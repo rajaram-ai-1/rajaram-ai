@@ -85,35 +85,48 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# 1. बटन और चैट बॉक्स को अगल-बगल लाना
-# हमने स्क्रीन को 1:10 के अनुपात में बाँटा है
-c1, c2 = st.columns([1, 10])
+# 1. लुक को साफ़ करने के लिए CSS
+st.markdown("""
+    <style>
+    div[data-testid="stFileUploader"] { width: 50px; }
+    div[data-testid="stFileUploader"] section { padding: 0; min-height: 45px; border: none; }
+    div[data-testid="stFileUploader"] label { display: none; }
+    </style>
+    """, unsafe_allow_html=True)
 
-with c1:
-    # यह आपका '+' बटन बनेगा
-    # हमने key बदल दी है ताकि कोई पुराना एरर न आए
-    uploaded_file = st.file_uploader("+", type=["jpg", "png", "jpeg"], label_visibility="collapsed", key="final_v1")
+# 2. राजाराम भाई का 'V-I-P' चैट बॉक्स (Gemini Style)
+# यहाँ हमने [1, 9] का अनुपात लिया है ताकि बटन और बॉक्स एक लाइन में रहें
+col1, col2 = st.columns([1, 9])
 
-with c2:
-    # यह आपका असली चैट बॉक्स
-    prompt = st.chat_input("हुक्म करें राजाराम भाई...")
+with col1:
+    # यह आपका असली '+' बटन है (Key बदलना ज़रूरी है ताकि None न आए)
+    up_img = st.file_uploader("+", type=["jpg", "png", "jpeg"], key="rajaram_plus")
 
-# 2. वर्किंग लॉजिक (यही जवाब लाएगा)
-if prompt:
-    # यूजर का मैसेज दिखाएं
-    st.session_state.messages.append({"role": "user", "content": prompt})
+with col2:
+    # 'chat_input' की जगह 'text_input' यूज़ करें, यह ज़्यादा भरोसेमंद है
+    user_txt = st.text_input("", placeholder="Gemini से पूछें... (राजाराम AI)", label_visibility="collapsed", key="rajaram_chat")
+
+# 3. असली काम - जो 'None' को खत्म करेगा
+if user_txt:
+    # यूजर की बात दिखाओ
+    st.session_state.messages.append({"role": "user", "content": user_txt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(user_txt)
 
-    # अगर फोटो है तो 'Vision', नहीं तो 'Normal'
-    if uploaded_file is not None:
-        with st.spinner("राजाराम AI फोटो देख रहा है..."):
-            answer = get_meta_vision_response(prompt, uploaded_file)
+    # अगर फोटो है तो 'Vision' मोड
+    if up_img is not None:
+        with st.spinner("राजाराम AI आपकी फोटो पढ़ रहा है..."):
+            try:
+                # ध्यान दें: यहाँ फंक्शन का नाम और इनपुट सही होना चाहिए
+                answer = get_meta_vision_response(user_txt, up_img)
+            except:
+                answer = "माफ़ करना राजाराम भाई, फोटो पढ़ने में कुछ दिक्कत हुई।"
     else:
-        with st.spinner("राजाराम AI सोच रहा है..."):
+        # अगर सिर्फ टेक्स्ट है
+        with st.spinner("सोच रहा हूँ..."):
             answer, _ = get_response(st.session_state.messages)
 
-    # AI का जवाब दिखाएं
+    # जवाब दिखाओ
     st.session_state.messages.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant"):
         st.write(answer)
