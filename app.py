@@ -85,65 +85,37 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# 1. एकदम साफ़-सुथरा CSS (कोई खिचड़ी नहीं)
-st.markdown("""
-    <style>
-    /* नीचे का हिस्सा जहाँ टाइपिंग होगी */
-    .footer-container {
-        position: fixed;
-        bottom: 20px;
-        width: 100%;
-        background: transparent;
-        z-index: 100;
-    }
-    .input-box {
-        display: flex;
-        align-items: center;
-        background: #262730;
-        border-radius: 30px;
-        padding: 5px 15px;
-        border: 1px solid #444;
-    }
-    /* फोटो बटन को छोटा गोल बनाना */
-    .stFileUploader section {
-        padding: 0 !important;
-        min-height: 40px !important;
-        width: 40px !important;
-        border-radius: 50% !important;
-    }
-    div[data-testid="stFileUploader"] label, div[data-testid="stFileUploader"] small {
-        display: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# 1. साइडबार में 'प्लस' और फोटो कंट्रोल (Gemini जैसा साफ़ लुक)
+with st.sidebar:
+    st.title("📁 Media")
+    # यहाँ आपका '+' वाला काम होगा
+    uploaded_file = st.file_uploader("फोटो चुनें (+)", type=["jpg", "png", "jpeg"])
+    if uploaded_file:
+        st.image(uploaded_file, caption="Selected Photo", use_container_width=True)
+        if st.button("Clear Photo 🗑️"):
+            st.rerun()
 
-# 2. आपका नया "Gemini" लेआउट
-col1, col2 = st.columns([1, 7])
+# 2. मुख्य चैट बॉक्स (जो स्क्रीन पर सबसे नीचे रहेगा)
+prompt = st.chat_input("Gemini से पूछें... (राजाराम AI)")
 
-with col1:
-    # यह आपका असली '+' बटन
-    uploaded_file = st.file_uploader("+", type=["jpg", "png", "jpeg"], key="fixed_plus")
-
-with col2:
-    # यहाँ हम 'chat_input' की जगह 'text_input' यूज़ करेंगे ताकि सब एक लाइन में रहे
-    prompt = st.text_input("", placeholder="Gemini से पूछें... (राजाराम AI)", label_visibility="collapsed", key="fixed_chat")
-
-# 3. काम करने वाला Logic
+# 3. जवाब देने का असली लॉजिक
 if prompt:
-    # मैसेज दिखाओ
+    # यूजर का सवाल दिखाएं
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-    # फोटो चेक करो
-    if uploaded_file:
-        with st.spinner("राजाराम AI विजन मोड में है..."):
+    # अगर फोटो सिलेक्टेड है तो विजन मॉडल चलेगा
+    if uploaded_file is not None:
+        with st.spinner("राजाराम AI गहराई से देख रहा है..."):
+            # यहाँ आपका Vision Function आएगा
             answer = get_meta_vision_response(prompt, uploaded_file)
     else:
+        # सिर्फ टेक्स्ट के लिए
         with st.spinner("सोच रहा हूँ..."):
             answer, _ = get_response(st.session_state.messages)
 
-    # जवाब दिखाओ
+    # AI का जवाब दिखाएं
     st.session_state.messages.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant"):
         st.write(answer)
