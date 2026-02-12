@@ -85,60 +85,46 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-import streamlit as st
-from streamlit_mic_recorder import mic_recorder
-import speech_recognition as rgn
-import io
+# --- 1. माइक और इनपुट का सेटअप ---
+c1, c2 = st.columns([1, 8])
 
-# --- 1. स्टाइलिंग (प्रोफेशनल लुक) ---
-st.markdown("""
-    <style>
-    div[data-testid="column"] { align-items: center; }
-    .stChatInput { margin-left: 10px; }
-    </style>
-    """, unsafe_allow_html=True)
+with c1:
+    # माइक बटन
+    audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='voice_input_v3')
 
-# --- 2. सुनने की शक्ति (Meta के साथ तालमेल) ---
-def suno_rajaram_bhai(audio_bytes):
+with c2:
+    # हमने इसका नाम वापस 'prompt' रख दिया है ताकि Error न आए
+    prompt = st.chat_input("Meta Llama से कुछ भी पूछें...")
+
+# --- 2. दिमाग वाला फंक्शन (Speech to Text) ---
+def translate_voice(audio_bytes):
+    import speech_recognition as rgn
+    import io
     recognizer = rgn.Recognizer()
     audio_file = io.BytesIO(audio_bytes)
     with rgn.AudioFile(audio_file) as source:
         audio = recognizer.record(source)
     try:
-        # यह आपकी आवाज़ को टेक्स्ट बना देगा
         return recognizer.recognize_google(audio, language='hi-IN')
     except:
         return ""
 
-# --- 3. यूआई (UI) का सेटअप ---
-c1, c2 = st.columns([1, 7])
-
-with c1:
-    # माइक का बटन
-    audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='voice')
-
-with c2:
-    # टाइपिंग बॉक्स
-    input_text = st.chat_input("Meta Llama से कुछ भी पूछें...")
-
-# --- 4. असली खेल (Logic) ---
-# अगर बोला गया है, तो उसे ही 'input_text' मान लो
+# --- 3. असली लॉजिक ---
+# अगर बोला गया है, तो उसे 'prompt' में डाल दो
 if audio_data:
-    bola_hua_text = suno_rajaram_bhai(audio_data['bytes'])
-    if bola_hua_text:
-        input_text = bola_hua_text
-        st.info(f"🎤 आपने कहा: {bola_hua_text}")
+    voice_result = translate_voice(audio_data['bytes'])
+    if voice_result:
+        prompt = voice_result
+        st.info(f"🎤 आपने कहा: {voice_result}")
 
-# जब सवाल (Text या Voice) मिल जाए
-if input_text:
-    st.session_state.messages.append({"role": "user", "content": input_text})
+# अब यहाँ 'prompt' हमेशा मौजूद रहेगा, इसलिए NameError नहीं आएगा
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(input_text)
+        st.write(prompt)
 
-    # Meta Llama (Groq) का दिमाग इस्तेमाल करना
     with st.spinner("Meta Llama सोच रहा है..."):
-        # यहाँ आपका पुराना get_response फंक्शन ही काम करेगा 
-        # क्योंकि उसमें पहले से 'Meta' का मॉडल सेट है
+        # आपका पुराना फंक्शन
         answer, _ = get_response(st.session_state.messages)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
