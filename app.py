@@ -85,38 +85,66 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 # --- यहाँ से नया कोड शुरू (इसे 'for' लूप के ठीक नीचे पेस्ट करें) ---
-# --- 1. वॉइस इनपुट (अभी हम इसे सिर्फ बटन के रूप में रख रहे हैं) ---
+import streamlit as st
 from streamlit_mic_recorder import mic_recorder
+import speech_recognition as rgn
+import io
 
-st.write("🎤 राजाराम भाई, बोलकर हुक्म दें:")
-audio = mic_recorder(
-    start_prompt="रिकॉर्डिंग शुरू करें 🎙️",
-    stop_prompt="रोकें और भेजें ⏹️",
-    key='voice_input'
-)
+# --- 1. स्टाइलिंग (प्रोफेशनल लुक) ---
+st.markdown("""
+    <style>
+    div[data-testid="column"] { align-items: center; }
+    .stChatInput { margin-left: 10px; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# --- 2. सीधा और सरल चैट बॉक्स ---
-# यहाँ 'prompt' को हम साफ़ तौर पर लिख रहे हैं ताकि NameError न आए
-prompt = st.chat_input("यहाँ टाइप करें... (राजाराम AI)")
+# --- 2. सुनने की शक्ति (Meta के साथ तालमेल) ---
+def suno_rajaram_bhai(audio_bytes):
+    recognizer = rgn.Recognizer()
+    audio_file = io.BytesIO(audio_bytes)
+    with rgn.AudioFile(audio_file) as source:
+        audio = recognizer.record(source)
+    try:
+        # यह आपकी आवाज़ को टेक्स्ट बना देगा
+        return recognizer.recognize_google(audio, language='hi-IN')
+    except:
+        return ""
 
-# --- 3. काम करने का लॉजिक ---
-if prompt:
-    # यूजर का मैसेज दिखाएं
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# --- 3. यूआई (UI) का सेटअप ---
+c1, c2 = st.columns([1, 7])
+
+with c1:
+    # माइक का बटन
+    audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='voice')
+
+with c2:
+    # टाइपिंग बॉक्स
+    input_text = st.chat_input("Meta Llama से कुछ भी पूछें...")
+
+# --- 4. असली खेल (Logic) ---
+# अगर बोला गया है, तो उसे ही 'input_text' मान लो
+if audio_data:
+    bola_hua_text = suno_rajaram_bhai(audio_data['bytes'])
+    if bola_hua_text:
+        input_text = bola_hua_text
+        st.info(f"🎤 आपने कहा: {bola_hua_text}")
+
+# जब सवाल (Text या Voice) मिल जाए
+if input_text:
+    st.session_state.messages.append({"role": "user", "content": input_text})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(input_text)
 
-    # AI का जवाब तैयार करना
-    with st.spinner("राजाराम AI सोच रहा है..."):
-        # यहाँ आपका मुख्य AI फंक्शन (get_response) कॉल होगा
+    # Meta Llama (Groq) का दिमाग इस्तेमाल करना
+    with st.spinner("Meta Llama सोच रहा है..."):
+        # यहाँ आपका पुराना get_response फंक्शन ही काम करेगा 
+        # क्योंकि उसमें पहले से 'Meta' का मॉडल सेट है
         answer, _ = get_response(st.session_state.messages)
 
-    # AI का जवाब दिखाएं
     st.session_state.messages.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant"):
         st.write(answer)
     
-    # स्क्रीन रिफ्रेश ताकि चैट अपडेट हो जाए
     st.rerun()
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
