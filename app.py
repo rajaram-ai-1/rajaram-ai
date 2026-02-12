@@ -3,6 +3,8 @@ import base64  # यह फोटो को कोड में बदलने 
 from PIL import Image
 from groq import Groq
 import streamlit as st
+# 1. पेज सेटिंग (सबसे ऊपर)
+st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 # यह लाइन सबसे जरूरी है, इसे मिस मत करना भाई
 from streamlit_mic_recorder import mic_recorder 
 
@@ -53,8 +55,6 @@ if prompt:
         st.write(answer)
     
     st.rerun()
-# 1. पेज सेटिंग (सबसे ऊपर)
-st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
 # --- राजाराम भाई का 'दिमाग' चुनने वाला इंजन (नया जोड़ा गया) ---
 def select_best_brain(messages_history):
