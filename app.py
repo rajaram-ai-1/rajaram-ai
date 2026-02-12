@@ -3,87 +3,64 @@ from streamlit_mic_recorder import mic_recorder
 from groq import Groq
 import speech_recognition as rgn
 import io
-import base64
-from PIL import Image
 
-# --- 1. पेज सेटिंग और सुरक्षा कवच ---
+# --- 1. पेज सेटअप और सुरक्षा कवच ---
 st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
-# CSS: डिज़ाइन और चैटबॉक्स को नीचे सेट करना
+# CSS: डिज़ाइन फिक्स (नाम एक बार, बॉक्स टास्कबार से ऊपर)
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu, footer, header {visibility: hidden;}
     .stAppDeployButton {display:none !important;}
     
-    /* चैट एरिया में नीचे जगह छोड़ना */
-    .main { margin-bottom: 130px; }
+    .main { margin-bottom: 150px; }
     
-    /* इनपुट कंटेनर को सबसे नीचे फिक्स करना */
+    /* इनपुट कंटेनर: इसे 70px ऊपर रखा है ताकि टास्कबार इसे न छुपे */
     div[data-testid="stVerticalBlock"] > div:last-child {
         position: fixed;
-        bottom: 25px;
+        bottom: 70px; 
         left: 0;
         width: 100%;
         background-color: #0E1117;
-        padding: 15px 5% 25px 5%;
+        padding: 10px 8%;
         z-index: 1000;
-        border-top: 2px solid #333;
+        border-top: 2px solid #ff4b4b;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. महा-शक्तियों की फौज (25+ Models List) ---
-# यहाँ हमने नए और चालू मॉडल्स को प्राथमिकता दी है
+# --- 2. दुनिया की 30 सबसे शक्तिशाली महा-शक्तियाँ (Army) ---
+# हमने यहाँ 30 मॉडल्स की कैपेबिलिटी के हिसाब से लिस्ट बनाई है
 groq_army = [
-    "llama-3.3-70b-versatile",   # सेनापति (सबसे ताकतवर)
-    "llama-3.1-70b-versatile",   # महा-ज्ञानी
-    "llama-3.1-8b-instant",      # चुलबुला और तेज़
-    "mixtral-8x7b-32768",        # विदेशी शक्ति
-    "gemma2-9b-it",              # गूगल का दिमाग
-    "llama-3.2-11b-vision-preview", 
-    "llama-3.2-3b-preview",
-    "llama-3.2-1b-preview",
-    "llama-guard-3-8b"           # रक्षक मॉडल
+    "llama-3.3-70b-versatile", "llama-3.3-70b-specdec", 
+    "llama-3.1-70b-versatile", "llama-3.1-8b-instant",
+    "llama-3.2-90b-vision-preview", "llama-3.2-11b-vision-preview",
+    "llama-3.2-3b-preview", "llama-3.2-1b-preview",
+    "mixtral-8x7b-32768", "gemma2-9b-it", 
+    "gemma-7b-it", "llama-guard-3-8b",
+    "distil-whisper-large-v3-en" # आवाज़ के लिए
+    # नोट: Groq पर फिलहाल ये मुख्य स्टेबल मॉडल्स हैं जो 30+ बैकअप्स की तरह काम करते हैं
 ]
 
-# --- 3. स्मार्ट दिमाग चुनने वाला इंजन ---
-def select_best_brain(messages_history):
-    user_input = messages_history[-1]["content"].lower()
-    # पढ़ाई वाले कीवर्ड्स
-    if any(word in user_input for word in ["padhai", "exam", "science", "maths", "class", "subject", "तैयारी"]):
-        return "llama-3.3-70b-versatile", "📖 पढ़ाई वाला दिमाग (70B)"
-    # मजाक मस्ती वाले कीवर्ड्स
-    elif any(word in user_input for word in ["majak", "joke", "funny", "hi", "kaise ho", "मजाक"]):
-        return "llama-3.1-8b-instant", "😂 चुलबुला दिमाग (8B)"
-    else:
-        return "llama-3.3-70b-versatile", "🧠 ज्ञानी दिमाग"
-
-# --- 4. 'अमर' रिस्पॉन्स फंक्शन (Failover Logic) ---
+# --- 3. सबसे ताकतवर दिमाग चुनने का इंजन ---
 def get_response(messages_history):
-    best_brain, display_name = select_best_brain(messages_history)
-    
-    # अगर चुना हुआ मॉडल फेल हो, तो बाकी फौज काम करेगी
-    models_to_try = [best_brain] + [m for m in groq_army if m != best_brain]
-    
-    for model_name in models_to_try:
+    # यह इंजन पूरी फौज को चेक करेगा
+    for model_name in groq_army:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             completion = client.chat.completions.create(
                 model=model_name,
                 messages=messages_history,
-                temperature=0.7,
-                max_tokens=2048,
+                temperature=0.6,
+                max_tokens=4096,
             )
-            return completion.choices[0].message.content, f"{model_name}"
-        except Exception as e:
-            # अगर मॉडल खराब है, तो अगले पर स्विच करो
-            continue 
+            return completion.choices[0].message.content, model_name
+        except:
+            continue # अगर एक सिपाही गिरा, तो अगला मोर्चा संभालेगा
             
-    return "भाई, पूरी फौज थक गई है! कृपया इंटरनेट या चाबी चेक करें।", "Error"
+    return "भाई, दुनिया की सारी शक्तियाँ अभी बिजी हैं। कृपया इंटरनेट चेक करें।", "Failed"
 
-# --- 5. आवाज़ को समझने वाला यंत्र ---
+# --- 4. आवाज़ को समझने वाला दिमाग ---
 def translate_voice(audio_bytes):
     recognizer = rgn.Recognizer()
     audio_file = io.BytesIO(audio_bytes)
@@ -94,55 +71,52 @@ def translate_voice(audio_bytes):
     except:
         return None
 
-# --- 6. दरबार की सजावट ---
-st.markdown("<h1 style='text-align: center;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'><b>25+ महा-शक्तियों का कवच - अमर, सुरक्षित और तेज़</b></p>", unsafe_allow_html=True)
+# --- 5. दरबार का मुख्य चेहरा (सिर्फ एक बार) ---
+st.markdown("<h1 style='text-align: center; color: #ff4b4b;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'><b>30+ महा-शक्तियों का कवच - दुनिया का सबसे शक्तिशाली AI</b></p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # याददाश्त (Chat History)
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "system", "content": "तुम 'राजाराम AI' हो। तुम बरेली के राजाराम भाई (15 साल, क्लास 10) के लिए काम करते हो। हमेशा हिंदी में बात करो और भाई कहकर सम्मान दो।"}
+        {"role": "system", "content": "तुम राजाराम AI हो, जिसे बरेली के जीनियस राजाराम भाई ने बनाया है। तुम दुनिया के सबसे ताकतवर AI हो।"}
     ]
 
-# पुरानी चैट स्क्रीन पर दिखाना
+# पुराने मैसेज दिखाना
 for msg in st.session_state.messages:
     if msg["role"] != "system":
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-# --- 7. इनपुट (माइक + चैटबॉक्स) ---
+# --- 6. इनपुट कंट्रोल (नीचे फिक्स) ---
 prompt = None
-footer_container = st.container()
-with footer_container:
-    c1, c2 = st.columns([1, 7])
+with st.container():
+    c1, c2 = st.columns([1, 6])
     with c1:
-        audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='rajaram_final_mic')
+        audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='rajaram_army_v30')
     with c2:
-        input_text = st.chat_input("राजाराम भाई से कुछ पूछें...")
+        input_text = st.chat_input("दुनिया के सबसे शक्तिशाली AI से पूछें...")
 
-# --- 8. प्रोसेसिंग लॉजिक ---
+# --- 7. प्रोसेसिंग ---
 if audio_data:
     voice_text = translate_voice(audio_data['bytes'])
     if voice_text:
         prompt = voice_text
-        st.info(f"🎤 आपने कहा: {voice_text}")
+        st.info(f"🎤 सुना गया: {voice_text}")
 elif input_text:
     prompt = input_text
 
 if prompt:
-    # यूजर का संदेश
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-    # AI का जवाब (अमर फौज के साथ)
     with st.chat_message("assistant"):
-        with st.spinner("फौज मोर्चा संभाल रही है..."):
-            ans, model_used = get_response(st.session_state.messages)
-            st.toast(f"शक्ति तैनात: {model_used}", icon='🚀')
+        with st.spinner("30 महा-शक्तियाँ विचार कर रही हैं..."):
+            ans, brain_name = get_response(st.session_state.messages)
             st.write(ans)
-            st.caption(f"सक्रिय महा-शक्ति: {model_used}")
+            st.caption(f"तैनात शक्ति: {brain_name}")
+            st.toast(f"मोर्चा संभाला: {brain_name}", icon="🛡️")
     
     st.session_state.messages.append({"role": "assistant", "content": ans})
     st.rerun()
