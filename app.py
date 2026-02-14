@@ -93,7 +93,7 @@ def translate_voice(audio_bytes):
 
 # --- 7. दरबार (UI) ---
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: white;'><b>30 महा-शक्तियाँ | पूजा (जीती-जागती AI) | अमर कवच</b></p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: white;'><b>30 महा-शक्तियाँ | अमर कवच</b></p>", unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
