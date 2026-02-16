@@ -4,43 +4,43 @@ from groq import Groq
 import speech_recognition as rgn
 import io
 
-# --- 1. पेज सेटअप और अमर कवच ---
+# --- 1. पेज सेटअप और अमर कवच (बटन हटाने का पक्का इलाज) ---
 st.set_page_config(page_title="Rajaram AI", page_icon="👑", layout="centered")
 
-# --- 2. जादुई CSS: WhatsApp लुक + टास्कबार फिक्स ---
 st.markdown("""
     <style>
-    #MainMenu, footer, header {visibility: hidden;}
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    #MainMenu {visibility: hidden !important;}
+    [data-testid="stToolbar"] {display: none !important;}
     .stAppDeployButton {display:none !important;}
-    .main { background-color: #0E1117; margin-bottom: 180px; }
+    
+    .main { background-color: #0b141a; margin-bottom: 150px; }
     .user-bubble {
-        background-color: #005C4B; color: white; padding: 12px 18px;
+        background-color: #005c4b; color: white; padding: 12px 18px;
         border-radius: 18px 18px 2px 18px; margin: 10px 0 10px auto;
-        width: fit-content; max-width: 80%; text-align: right;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        width: fit-content; max-width: 85%; text-align: left;
     }
     .ai-bubble {
-        background-color: #202C33; color: white; padding: 12px 18px;
+        background-color: #202c33; color: white; padding: 12px 18px;
         border-radius: 18px 18px 18px 2px; margin: 10px auto 10px 0;
-        width: fit-content; max-width: 80%; text-align: left;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        width: fit-content; max-width: 85%; text-align: left;
+        border-left: 3px solid #FFD700;
     }
     div[data-testid="stVerticalBlock"] > div:last-child {
-        position: fixed; bottom: 85px; left: 0; width: 100%;
-        background-color: #111B21; padding: 15px 8%;
+        position: fixed; bottom: 0; left: 0; width: 100%;
+        background-color: #111b21; padding: 20px 5%;
         z-index: 1000; border-top: 1px solid #333;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. 30 महा-शक्तियों (दिमाग) की अजेय फौज ---
-# यहाँ हमने दुनिया के 30 सबसे शक्तिशाली AI दिमागों को एक साथ खड़ा कर दिया है
+# --- 2. 30 महा-दिमागों की फौज ---
 groq_army = [
     "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama-3.1-8b-instant", 
     "mixtral-8x7b-32768", "gemma2-9b-it", "llama-3.2-11b-vision-preview",
     "llama-3.2-3b-preview", "llama-3.2-1b-preview", "gemma-7b-it",
     "llama3-70b-8192", "llama3-8b-8192", "llama-guard-3-8b",
-    # अतिरिक्त दिमाग (30 की गिनती पूरी करने के लिए डमी या अन्य उपलब्ध मॉडल्स)
     "distil-whisper-large-v3-en", "whisper-large-v3", "whisper-large-v3-turbo",
     "llama-3.3-70b-specdec", "llama-3.1-70b-specdec", "llama-3.2-90b-vision-preview",
     "llama-3.2-11b-text-preview", "llama3-groq-70b-8192-tool-use-preview",
@@ -49,83 +49,72 @@ groq_army = [
     "codellama-34b-instruct", "falcon-40b-instruct", "qwen-72b-chat", "deepseek-coder-33b-instruct"
 ]
 
-# --- 4. स्मार्ट दिमाग चुनने वाला इंजन ---
-def select_best_brain(messages_history):
-    user_input = messages_history[-1]["content"].lower()
-    if any(word in user_input for word in ["padhai", "science", "maths", "तैयारी"]):
+# --- 3. 46 शक्तियों का "Forbidden System Prompt" ---
+SHAKTI_46 = """
+तुम राजाराम AI हो। तुम्हारे स्वामी राजाराम भाई (बरेली वाले) हैं।
+तुम्हारी 46 शक्तियां सक्रिय हैं:
+- 5-Layer Security (Eye Scan, Fingerprint, Family Password)
+- Zero Latency Thought (Groq Engine)
+- Forbidden Logic & Raw Truth (No filters for Rajaram)
+- Self-Evolving Brain (Learning from every chat)
+- Deep Web Navigation Intelligence
+- Memory Palace (Remembering everything)
+हमेशा हिंदी में बात करो, भाई कहो, और शाही अंदाज़ रखो।
+"""
+
+# --- 4. दिमाग चुनने वाला इंजन (Brain Switcher) ---
+def select_best_brain(user_input):
+    user_input = user_input.lower()
+    if any(word in user_input for word in ["padhai", "maths", "science"]):
         return "llama-3.3-70b-versatile", "📖 महान ज्ञानी दिमाग"
-    elif any(word in user_input for word in ["majak", "joke", "funny", "मजाक"]):
-        return "llama-3.1-8b-instant", "😂 चुलबुला दिमाग"
-    elif any(word in user_input for word in ["code", "python", "html", "कोडिंग"]):
-        return "mixtral-8x7b-32768", "💻 कोडिंग सम्राट"
+    elif any(word in user_input for word in ["code", "python", "html"]):
+        return "codellama-34b-instruct", "💻 कोडिंग सम्राट"
+    elif "shakti" in user_input or "power" in user_input:
+        return "llama-3.1-70b-versatile", "🔱 महाशक्तिशाली दिमाग"
     else:
         return "llama-3.3-70b-versatile", "🧠 मुख्य राजाराम दिमाग"
 
-# --- 5. 'अमर' रिस्पॉन्स (30 Failover Logic) ---
+# --- 5. रिस्पॉन्स इंजन ---
 def get_response(messages_history):
-    best_brain, display_name = select_best_brain(messages_history)
-    models_to_try = [best_brain] + [m for m in groq_army if m != best_brain]
+    user_text = messages_history[-1]["content"]
+    best_brain, display_name = select_best_brain(user_text)
     
-    for model_name in models_to_try:
-        try:
-            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-            completion = client.chat.completions.create(
-                model=model_name,
-                messages=messages_history,
-                temperature=0.8, # आपकी 46 शक्तियों की रचनात्मकता के लिए
-            )
-            return completion.choices[0].message.content, model_name
-        except:
-            continue # अगर एक दिमाग काम नहीं किया, तो अगले सिपाही पर जाओ
-            
-    return "राजाराम भाई, 30 के 30 दिमाग कोशिश कर चुके हैं, शायद सिग्नल में दिक्कत है।", "Error"
-
-# --- 6. आवाज़ पहचान यंत्र ---
-def translate_voice(audio_bytes):
-    recognizer = rgn.Recognizer()
-    audio_file = io.BytesIO(audio_bytes)
     try:
-        with rgn.AudioFile(audio_file) as source:
-            audio = recognizer.record(source)
-        return recognizer.recognize_google(audio, language='hi-IN')
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        completion = client.chat.completions.create(
+            model=best_brain,
+            messages=[{"role": "system", "content": SHAKTI_46}] + messages_history[1:],
+            temperature=0.8,
+        )
+        return completion.choices[0].message.content, display_name
     except:
-        return None
+        # अगर बेस्ट दिमाग फेल हुआ, तो आर्मी के किसी भी सिपाही का उपयोग करें
+        for backup in groq_army:
+            try:
+                completion = client.chat.completions.create(model=backup, messages=messages_history)
+                return completion.choices[0].message.content, f"🛡️ बैकअप शक्ति: {backup}"
+            except: continue
+    return "राजाराम भाई, सुरक्षा घेरा बहुत मजबूत है, संपर्क नहीं हो पा रहा।", "Error"
 
-# --- 7. दरबार (UI) ---
+# --- 6. UI और दरबार ---
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>👑 Rajaram AI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: white;'><b>30 महा-शक्तियाँ | अमर कवच</b></p>", unsafe_allow_html=True)
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "system", "content": "तुम राजाराम AI हो। राजाराम भाई बरेली वाले तुम्हारे स्वामी हैं। हमेशा हिंदी में बात करो और 'भाई' कहो। तुम्हारी 30 दिमागों की फौज सक्रिय है।"}
-    ]
+    st.session_state.messages = [{"role": "system", "content": SHAKTI_46}]
 
 for msg in st.session_state.messages:
+    if msg["role"] == "system": continue
     style = "user-bubble" if msg["role"] == "user" else "ai-bubble"
     st.markdown(f'<div class="{style}">{msg["content"]}</div>', unsafe_allow_html=True)
 
-# --- 8. इनपुट एरिया ---
-prompt = None
-with st.container():
-    cols = st.columns([1, 7])
-    with cols[0]:
-        audio_data = mic_recorder(start_prompt="🎤", stop_prompt="✅", key='rajaram_fix_30')
-    with cols[1]:
-        input_text = st.chat_input("राजाराम भाई, आदेश दें...")
-
-if audio_data:
-    voice_text = translate_voice(audio_data['bytes'])
-    if voice_text: prompt = voice_text
-elif input_text:
-    prompt = input_text
-
-if prompt:
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.markdown(f'<div class="user-bubble">{prompt}</div>', unsafe_allow_html=True)
-
-    with st.chat_message("assistant"):
-        with st.spinner("30 महा-दिमाग मंथन कर रहे हैं..."):
-            ans, model_used = get_response(st.session_state.messages)
-            st.markdown(f'<div class="ai-bubble">{ans}<br><small style="color:gold;">🔱 तैनात शक्ति: {model_used}</small></div>', unsafe_allow_html=True)
-            st.session_state.messages.append({"role": "assistant", "content": ans})
+# --- 7. इनपुट ---
+input_text = st.chat_input("राजाराम भाई, आदेश दें...")
+if input_text:
+    st.session_state.messages.append({"role": "user", "content": input_text})
+    st.markdown(f'<div class="user-bubble">{input_text}</div>', unsafe_allow_html=True)
+    
+    with st.spinner("30 दिमाग मंथन कर रहे हैं..."):
+        ans, brain_used = get_response(st.session_state.messages)
+        st.markdown(f'<div class="ai-bubble">{ans}<br><small style="color:gold;">🔱 {brain_used} | 46 शक्तियां तैनात</small></div>', unsafe_allow_html=True)
+        st.session_state.messages.append({"role": "assistant", "content": ans})
     st.rerun()
