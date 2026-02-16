@@ -1,6 +1,9 @@
 import streamlit as st
 from groq import Groq
 import random
+from streamlit_mic_recorder import mic_recorder
+from gtts import gTTS
+import base64
 
 # --- 1. शाही कवच और डिज़ाइन (CSS) ---
 st.set_page_config(page_title="Rajaram AI 👑", layout="centered")
@@ -62,6 +65,17 @@ def get_ai_response(messages):
 
 # --- 5. दरबार (Interface) ---
 def main():
+   def main():
+    st.title("👑 राजाराम AI LIVE")
+    
+    # यहाँ माइक बटन आएगा
+    user_voice_input = shakti_listen()
+    
+    # अगर आपने कुछ बोला है, तो उसे चैट इनपुट मान लिया जाएगा
+    if user_voice_input:
+        prompt = user_voice_input
+        # इसके आगे का आपका पुराना कोड (Groq वाला) अपने आप चलेगा...
+       
     st.markdown("<h1 style='text-align: center; color: gold;'>👑 राजाराम AI</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: gray;'>30 दिमाग फेल-सेफ सिस्टम सक्रिय</p>", unsafe_allow_html=True)
 
