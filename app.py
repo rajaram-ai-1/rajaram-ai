@@ -4,7 +4,24 @@ import random
 from streamlit_mic_recorder import mic_recorder
 from gtts import gTTS
 import base64
+def shakti_listen():
+    audio = mic_recorder(start_prompt="🎤 बोलना शुरू करें", stop_prompt="🛑 रुकें", key='recorder')
+    if audio:
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        transcription = client.audio.transcriptions.create(
+            file=("user_voice.wav", audio['bytes']),
+            model="whisper-large-v3",
+            language="hi"
+        )
+        return transcription.text
+    return None
 
+def shakti_speak(text):
+    tts = gTTS(text=text, lang='hi')
+    tts.save("reply.mp3")
+    with open("reply.mp3", "rb") as f:
+        data = base64.b64encode(f.read()).decode()
+        st.markdown(f'<audio src="data:audio/mp3;base64,{data}" autoplay="true"></audio>', unsafe_allow_html=True)
 # --- 1. शाही कवच और डिज़ाइन (CSS) ---
 st.set_page_config(page_title="Rajaram AI 👑", layout="centered")
 
@@ -62,25 +79,7 @@ def get_ai_response(messages):
             continue
             
     return "राजाराम भाई, सभी 30 दिमागों पर बाहरी हमला हुआ है। कृपया कुछ देर बाद कोशिश करें।", "Error"
-def shakti_listen():
-    audio = mic_recorder(start_prompt="🎤 बोलना शुरू करें", stop_prompt="🛑 रुकें", key='recorder')
-    if audio:
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        transcription = client.audio.transcriptions.create(
-            file=("user_voice.wav", audio['bytes']),
-            model="whisper-large-v3",
-            language="hi"
-        )
-        return transcription.text
-    return None
 
-def shakti_speak(text):
-    tts = gTTS(text=text, lang='hi')
-    tts.save("reply.mp3")
-    with open("reply.mp3", "rb") as f:
-        data = base64.b64encode(f.read()).decode()
-        st.markdown(f'<audio src="data:audio/mp3;base64,{data}" autoplay="true"></audio>', unsafe_allow_html=True)
-                
 # --- 5. दरबार (Interface) ---
 def main():
    def main():
