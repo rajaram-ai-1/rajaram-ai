@@ -43,13 +43,12 @@ def shakti_listen():
             st.error("माइक की शक्ति में कुछ बाधा है भाई!")
     return None
 
-# --- 4. 30 दिमागों की फौज (Updated Models List) ---
-# यहाँ हमने सिर्फ वही मॉडल्स रखे हैं जो अभी चालू (Live) हैं
+# --- 4. 30 दिमागों की अपडेटेड फ़ौज (Active Models Only) ---
+# यहाँ हमने केवल वही मॉडल्स रखे हैं जो 2026 में एकदम एक्टिव हैं
 MODELS_ARMY = [
     "llama-3.3-70b-versatile", 
     "llama-3.1-70b-versatile", 
     "llama-3.1-8b-instant", 
-    "mixtral-8x7b-32768",
     "llama3-70b-8192",
     "llama3-8b-8192"
 ]
@@ -76,12 +75,12 @@ def main():
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             
-            # --- दिमाग बदलने की शक्ति ---
+            # --- दिमाग बदलने की शक्ति (Random Selection) ---
             selected_brain = random.choice(MODELS_ARMY)
             
             completion = client.chat.completions.create(
                 model=selected_brain,
-                messages=[{"role": "system", "content": "तुम राजाराम भाई की महा-शक्तिशाली AI हो। हमेशा हिंदी में भाई कहकर जवाब दो।"}] + 
+                messages=[{"role": "system", "content": "तुम राजाराम भाई की महा-शक्तिशाली AI हो। हिंदी में छोटा और शाही जवाब दो।"}] + 
                          [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
             )
             
@@ -98,7 +97,9 @@ def main():
             st.session_state.messages.append({"role": "assistant", "content": ans})
 
         except Exception as e:
-            st.error(f"क्षमा करें भाई, कुछ त्रुटि हुई है: {e}")
+            # अगर कोई मॉडल फिर भी एरर दे, तो यह मैसेज दिखेगा
+            st.error(f"क्षमा करें भाई, इस दिमाग में कुछ दिक्कत है। फिर से कोशिश करें।")
+            st.info(f"तकनीकी एरर: {e}")
 
 if __name__ == "__main__":
     main()
