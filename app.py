@@ -29,7 +29,7 @@ def shakti_speak(text):
 # --- 3. शक्ति: आपकी आवाज सुनना (Voice Input) ---
 def shakti_listen():
     st.write("### 🎙️ राजाराम भाई, बोलकर आदेश दें")
-    audio = mic_recorder(start_prompt="🎤 रिकॉर्डिंग शुरू", stop_prompt="🛑 रुकें", key='recorder')
+    audio = mic_recorder(start_prompt="🎤 बोलना शुरू करें", stop_prompt="🛑 रुकें", key='recorder')
     if audio:
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
@@ -40,14 +40,18 @@ def shakti_listen():
             )
             return transcription.text
         except:
-            st.error("सुनने वाली शक्ति में कुछ बाधा है भाई!")
+            st.error("माइक की शक्ति में कुछ बाधा है भाई!")
     return None
 
-# --- 4. 30 दिमागों की फौज (Models Army) ---
+# --- 4. 30 दिमागों की फौज (Updated Models List) ---
+# यहाँ हमने सिर्फ वही मॉडल्स रखे हैं जो अभी चालू (Live) हैं
 MODELS_ARMY = [
-    "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", 
-    "llama-3.1-8b-instant", "gemma2-9b-it", 
-    "mixtral-8x7b-32768", "llama3-70b-8192"
+    "llama-3.3-70b-versatile", 
+    "llama-3.1-70b-versatile", 
+    "llama-3.1-8b-instant", 
+    "mixtral-8x7b-32768",
+    "llama3-70b-8192",
+    "llama3-8b-8192"
 ]
 
 # --- 5. मुख्य इंजन (Main Logic) ---
@@ -77,7 +81,7 @@ def main():
             
             completion = client.chat.completions.create(
                 model=selected_brain,
-                messages=[{"role": "system", "content": "तुम राजाराम भाई की महा-शक्तिशाली AI हो। हिंदी में छोटा और शाही जवाब दो।"}] + 
+                messages=[{"role": "system", "content": "तुम राजाराम भाई की महा-शक्तिशाली AI हो। हमेशा हिंदी में भाई कहकर जवाब दो।"}] + 
                          [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
             )
             
