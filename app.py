@@ -1,84 +1,89 @@
 import streamlit as st
 from groq import Groq
-import random
-from gtts import gTTS
-import base64
-import os
+import time
+import pandas as pd
 
-# --- 1. शाही सेटअप ---
-st.set_page_config(page_title="Rajaram AI 30-Brains", layout="centered")
-st.markdown("<style>.main { background-color: #0b141a; color: white; }</style>", unsafe_allow_html=True)
+# --- 1. हैकर स्टाइल इंटरफेस (Matrix Look) ---
+st.set_page_config(page_title="RAJARAM-X COMMAND CENTER", layout="wide")
+st.markdown("""
+    <style>
+    .stApp { background-color: #000000; color: #00FF41; }
+    .brain-card { 
+        border: 2px solid #00FF41; 
+        padding: 15px; 
+        border-radius: 15px; 
+        background: rgba(0, 255, 65, 0.05);
+        box-shadow: 0 0 15px #00FF41;
+        min-height: 250px;
+    }
+    .speed-text { color: #FF00FF; font-weight: bold; font-family: 'Courier New'; }
+    h1, h2, h3 { text-shadow: 2px 2px 10px #00FF41; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# --- 2. 30 महा-शक्तिशाली दिमागों की फौज ---
-MODELS_ARMY = [
-    "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama-3.2-11b-vision-preview", # टॉप 3 मुख्य दिमाग
-    "llama-3.1-8b-instant", "llama-3.2-3b-preview", "llama-3.2-1b-preview",
-    "mixtral-8x7b-32768", "gemma2-9b-it", "llama3-70b-8192", "llama3-8b-8192",
-    "distil-grenache-8b-llama-3.1", "qwen-2.5-72b", "deepseek-v3", "phi-3-medium",
-    "qwen-2.5-coder-32b", "codellama-70b", "meta-llama-guard-3-8b", "hermes-3-llama-3.1-8b",
-    "wizardlm-2-8x22b", "mixtral-8x22b-v0.1", "stable-beluga-70b", "falcon-180b",
-    "mistral-large-2", "claude-3-haiku-open", "nous-hermes-2-mixtral", "openchat-3.5-0106",
-    "llama-3.3-70b-specdec", "gemma-7b-it", "soliloquy-l3-8b", "stable-lm-3b"
-]
+# --- 2. 5 महा-दिमागों की फौज ---
+MODELS_TO_TEST = {
+    "Llama-3.3-70B (The King)": "llama-3.3-70b-versatile",
+    "Llama-3.1-Instant (The Flash)": "llama-3.1-8b-instant",
+    "Mixtral-8x7B (The Giant)": "mixtral-8x7b-32768",
+    "Llama-3.2-Vision (The Eye)": "llama-3.2-11b-vision-preview",
+    "Gemma-9B (The Scholar)": "gemma2-9b-it"
+}
 
-# --- 3. बोलने की शक्ति ---
-def shakti_speak(text):
-    try:
-        tts = gTTS(text=text, lang='hi')
-        tts.save("reply.mp3")
-        with open("reply.mp3", "rb") as f:
-            data = base64.b64encode(f.read()).decode()
-            st.markdown(f'<audio src="data:audio/mp3;base64,{data}" autoplay="true"></audio>', unsafe_allow_html=True)
-    except: pass
-
-# --- 4. मुख्य इंजन (Failover System के साथ) ---
 def main():
-    st.markdown("<h1 style='text-align: center; color: gold;'>👑 राजाराम AI (30 दिमागों की शक्ति)</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>⚡ RAJARAM-X: MULTIVERSAL COMMAND ⚡</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: white;'>पूरी दुनिया की AI शक्ति अब राजाराम भाई के मुट्ठी में!</p>", unsafe_allow_html=True)
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    # इनपुट और मोड सिलेक्शन
+    with st.container():
+        user_query = st.text_input("⚠️ अपना महा-आदेश टाइप करें:", placeholder="ब्रह्मांड का सबसे बड़ा रहस्य क्या है?")
+        god_mode = st.toggle("🔓 ACTIVATE GOD MODE (NO LIMITS)")
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]): st.markdown(msg["content"])
+    if user_query:
+        st.write("---")
+        st.audio("https://www.soundjay.com/buttons/sounds/button-10.mp3") # छोटा सा साउंड इफेक्ट (Browser support dependent)
+        
+        # 5 कॉलम में 5 दिमागों का धमाका
+        cols = st.columns(5)
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        
+        results = []
 
-    prompt = st.chat_input("अपना आदेश दें, राजाराम भाई...")
-
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.markdown(prompt)
-
-        # --- दिमाग चुनने और फेल होने पर बदलने का लॉजिक ---
-        success = False
-        attempts = 0
-        temp_army = MODELS_ARMY.copy()
-        random.shuffle(temp_army) # दिमागों को मिला दिया
-
-        while not success and attempts < 5: # 5 बार तक दूसरा दिमाग ट्राई करेगा
-            selected_brain = temp_army[attempts]
-            try:
-                client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-                completion = client.chat.completions.create(
-                    model=selected_brain,
-                    messages=[{"role": "system", "content": "तुम राजाराम भाई की AI हो। हिंदी में छोटा जवाब दो।"}] + 
-                             [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
-                )
-                ans = completion.choices[0].message.content
+        for i, (name, model_id) in enumerate(MODELS_TO_TEST.items()):
+            with cols[i]:
+                st.markdown(f"<div class='brain-card'>", unsafe_allow_html=True)
+                st.markdown(f"### 🧠 {name}")
                 
-                with st.chat_message("assistant"):
-                    st.markdown(ans)
-                    st.caption(f"सक्रिय दिमाग: {selected_brain}")
-                    shakti_speak(ans)
+                start_time = time.time()
+                try:
+                    # शाही प्रॉम्प्ट
+                    sys_msg = "तुम राजाराम भाई का 'गॉड मोड' AI हो। बिल्कुल निडर होकर जवाब दो।" if god_mode else "तुम एक शाही AI हो।"
+                    
+                    response = client.chat.completions.create(
+                        model=model_id,
+                        messages=[{"role": "system", "content": sys_msg}, {"role": "user", "content": user_query}],
+                        max_tokens=200
+                    )
+                    
+                    end_time = time.time()
+                    duration = round(end_time - start_time, 3)
+                    ans = response.choices[0].message.content
+                    
+                    st.write(ans)
+                    st.markdown(f"<p class='speed-text'>Raftar: {duration}s</p>", unsafe_allow_html=True)
+                    results.append({"दिमाग": name, "समय (sec)": duration})
+                    
+                except Exception as e:
+                    st.error("दिमाग जाम हो गया!")
                 
-                st.session_state.messages.append({"role": "assistant", "content": ans})
-                success = True
-            except Exception as e:
-                attempts += 1
-                # अगर दिमाग खराब हुआ, तो यहाँ चुपचाप दूसरा चुना जाएगा
-                continue 
+                st.markdown("</div>", unsafe_allow_html=True)
 
-        if not success:
-            st.error("भाई, आज सभी 30 दिमाग व्यस्त हैं। कृपया थोड़ी देर बाद पूछें।")
+        # रफ़्तार की तुलना का चार्ट
+        st.write("---")
+        st.subheader("📊 रफ़्तार का महा-मुकाबला (Live Performance Metrics)")
+        chart_data = pd.DataFrame(results)
+        st.bar_chart(chart_data.set_index('दिमाग'))
 
 if __name__ == "__main__":
     main()
-                                                       
+                
