@@ -3,9 +3,10 @@ from groq import Groq
 import random
 from gtts import gTTS
 import base64
+from streamlit_mic_recorder import mic_recorder
 
-# --- 1. शाही लुक और डिज़ाइन ---
-st.set_page_config(page_title="Rajaram AI 👑", layout="centered")
+# --- 1. शाही सेटअप और डिजाइन ---
+st.set_page_config(page_title="Rajaram AI Mahashakti 👑", layout="centered")
 st.markdown("""
     <style>
     header, footer, .stAppDeployButton {visibility: hidden !important;}
@@ -14,54 +15,86 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. बोलने की शक्ति (Voice Power) ---
+# --- 2. शक्ति: जवाब को बोलकर सुनाना (Voice Output) ---
 def shakti_speak(text):
     try:
-        # हिंदी आवाज़ बनाना
         tts = gTTS(text=text, lang='hi')
         tts.save("reply.mp3")
         with open("reply.mp3", "rb") as f:
             data = base64.b64encode(f.read()).decode()
-            # ऑटो-प्ले ऑडियो कोड
             st.markdown(f'<audio src="data:audio/mp3;base64,{data}" autoplay="true"></audio>', unsafe_allow_html=True)
-    except Exception as e:
-        st.error("बोलने में दिक्कत आई भाई!")
+    except:
+        pass
 
-# --- 3. 30 दिमागों की फौज (30 Brains List) ---
-# यहाँ अलग-अलग शक्तिशाली मॉडल्स के नाम हैं जो रोटेशन में चलेंगे
+# --- 3. शक्ति: आपकी आवाज सुनना (Voice Input) ---
+def shakti_listen():
+    st.write("### 🎙️ राजाराम भाई, बोलकर आदेश दें")
+    audio = mic_recorder(start_prompt="🎤 रिकॉर्डिंग शुरू", stop_prompt="🛑 रुकें", key='recorder')
+    if audio:
+        try:
+            client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+            transcription = client.audio.transcriptions.create(
+                file=("user_voice.wav", audio['bytes']),
+                model="whisper-large-v3",
+                language="hi"
+            )
+            return transcription.text
+        except:
+            st.error("सुनने वाली शक्ति में कुछ बाधा है भाई!")
+    return None
+
+# --- 4. 30 दिमागों की फौज (Models Army) ---
 MODELS_ARMY = [
-    "llama-3.3-70b-versatile", 
-    "llama-3.1-70b-versatile", 
-    "gemma2-9b-it", 
-    "llama-3.1-8b-instant",
-    "mixtral-8x7b-32768"
+    "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", 
+    "llama-3.1-8b-instant", "gemma2-9b-it", 
+    "mixtral-8x7b-32768", "llama3-70b-8192"
 ]
 
-# --- 4. मुख्य इंजन ---
+# --- 5. मुख्य इंजन (Main Logic) ---
 def main():
-    st.markdown("<h1 style='text-align: center; color: gold;'>👑 राजाराम AI LIVE</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>30 दिमागों की शक्ति के साथ...</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: gold;'>👑 राजाराम AI महा-शक्ति</h1>", unsafe_allow_html=True)
 
-    # चैट हिस्ट्री को याद रखना
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # पुरानी चैट दिखाना
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # माइक से इनपुट लेना
+    voice_input = shakti_listen()
+    
+    # लिखने वाला इनपुट
+    text_input = st.chat_input("या यहाँ अपना आदेश लिखें, राजाराम भाई...")
 
-    # आदेश इनपुट (लिखने वाला)
-    prompt = st.chat_input("अपना आदेश लिखें, राजाराम भाई...")
+    # दोनों में से जो भी इनपुट मिले
+    prompt = voice_input if voice_input else text_input
 
     if prompt:
-        # 1. यूजर का मैसेज दिखाओ
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # 2. AI का दिमाग चुनना और जवाब लाना
+        
         try:
             client = Groq(api_key=st.secrets["GROQ_API_KEY"])
             
-            # 30 दिमागों
+            # --- दिमाग बदलने की शक्ति ---
+            selected_brain = random.choice(MODELS_ARMY)
+            
+            completion = client.chat.completions.create(
+                model=selected_brain,
+                messages=[{"role": "system", "content": "तुम राजाराम भाई की महा-शक्तिशाली AI हो। हिंदी में छोटा और शाही जवाब दो।"}] + 
+                         [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+            )
+            
+            ans = completion.choices[0].message.content
+            
+            # जवाब स्क्रीन पर दिखाना
+            with st.chat_message("assistant"):
+                st.markdown(ans)
+                st.caption(f"इस्तेमाल किया गया दिमाग: {selected_brain}")
+            
+            # जवाब बोलकर सुनाना
+            shakti_speak(ans)
+            
+            st.session_state.messages.append({"role": "assistant", "content": ans})
+
+        except Exception as e:
+            st.error(f"क्षमा करें भाई, कुछ त्रुटि हुई है: {e}")
+
+if __name__ == "__main__":
+    main()
