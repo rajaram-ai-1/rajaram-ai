@@ -7,20 +7,6 @@ if 'auth_level' not in st.session_state:
     st.session_state.auth_level = 1
 
 def check_security():
- # URL से 'access' पैरामीटर चेक करना (प्रोफेशनल तरीका)
-query_params = st.query_params
-is_judge = query_params.get("access") == "judge"
-
-def check_security():
-    # अगर लिंक में ?access=judge है, तो सीधा अंदर भेजें
-    if is_judge:
-        st.sidebar.success("🔑 VIP ACCESS GRANTED")
-        return True 
-
-    # बाकी लोगों के लिए आपकी पुरानी 5 लेयर्स
-    if st.session_state.auth_level == 1:
-        st.subheader("🛡️ LAYER 1: SYSTEM ACCESS")
-        # ... (आपका पुराना पासवर्ड वाला कोड)
     if st.session_state.auth_level == 1:
         st.subheader("🛡️ LAYER 1: SYSTEM ACCESS")
         pwd1 = st.text_input("Master Key दर्ज करें:", type="password")
