@@ -63,6 +63,70 @@ def check_security():
 # सुरक्षा चेक चलायें
 if not check_security():
     st.stop() 
+import streamlit as st
+
+# --- 1. स्टाइलिंग (Gemini जैसा लुक देने के लिए) ---
+st.markdown("""
+    <style>
+    .main { background-color: #f8f9fa; }
+    .stButton>button {
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        background-color: white;
+        color: #3c4043;
+        font-weight: 500;
+        width: 100%;
+    }
+    .stButton>button:hover {
+        background-color: #f1f3f4;
+        border-color: #ccc;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- 2. स्वागत संदेश ---
+st.title("नमस्ते, User!")
+st.subheader("कहाँ से शुरुआत करें?")
+
+# --- 3. Gemini जैसे टूल बटन ---
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if st.button("🔮 त्रिकाल शक्ति"):
+        st.session_state.mode = "trikal"
+with col2:
+    if st.button("🛡️ सुरक्षा कवच"):
+        st.session_state.mode = "security"
+with col3:
+    if st.button("⚡ सुपर फास्ट"):
+        st.session_state.mode = "fast"
+
+st.markdown("---")
+
+# --- 4. असली शक्ति वाला चैटबॉक्स ---
+user_query = st.chat_input("Rajaram-X से कुछ भी पूछें...")
+
+if user_query:
+    # अगर यूजर ने कोई बटन नहीं दबाया, तो डिफ़ॉल्ट रूप से 'fast' मोड चलेगा
+    current_mode = st.session_state.get('mode', 'fast')
+    
+    with st.chat_message("user"):
+        st.write(user_query)
+
+    with st.chat_message("assistant"):
+        if current_mode == "trikal":
+            # यहाँ आपकी 'तीन कालों वाली शक्ति' चिल्लाएगी!
+            st.warning("⚡ RAJARAM-X: TRIPLE-CORE POWER ACTIVATED")
+            c1, c2, c3 = st.columns(3)
+            with c1: st.info(f"**भूतकाल:** {user_query} का इतिहास...")
+            with c2: st.success(f"**वर्तमान:** {user_query} का लाइव स्टेटस...")
+            with c3: st.error(f"**भविष्य:** {user_query} की भविष्यवाणी...")
+        else:
+            st.write(f"0.08s में जवाब: {user_query} के बारे में जानकारी...")
+
+# --- 5. फुटर (आपकी ब्रांडिंग) ---
+st.markdown("<p style='text-align: center; color: gray;'>Powered by Rajaram-X | World's Fastest AI</p>", unsafe_allow_html=True)
+    
 # --- 5 LAYER SECURITY CODE END ---
 # --- 1. हैकर और शाही लुक ---
 st.set_page_config(page_title="RAJARAM-X: THE ULTIMATE ORACLE", layout="wide")
