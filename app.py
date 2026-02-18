@@ -3,15 +3,27 @@ from groq import Groq
 import time
 import random
 # --- 5 LAYER SECURITY CODE START ---
+import streamlit as st
+import time
+
+# 1. VIP चेक (इसे फंक्शन के बाहर रखना सबसे जरूरी है)
+is_judge = st.query_params.get("access") == "judge"
+
 if 'auth_level' not in st.session_state:
     st.session_state.auth_level = 1
 
 def check_security():
+    # --- नया VIP रास्ता (जजों के लिए लाल कालीन) ---
+    if is_judge:
+        st.sidebar.success("👑 VIP ACCESS GRANTED: WELCOME")
+        return True 
+
+    # --- आपकी पुरानी 5 लेयर्स (सुरक्षा के लिए) ---
     if st.session_state.auth_level == 1:
         st.subheader("🛡️ LAYER 1: SYSTEM ACCESS")
-        pwd1 = st.text_input("Master Key दर्ज करें:", type="password")
-        if st.button("AUTHENTICATE"):
-            if pwd1 == "RAJARAM786": # यहाँ अपना पासवर्ड रखें
+        pwd1 = st.text_input("Master Key दर्ज करें:", type="password", key="p1")
+        if st.button("AUTHENTICATE", key="b1"):
+            if pwd1 == "RAJARAM786": 
                 st.session_state.auth_level = 2
                 st.rerun()
         return False
@@ -23,15 +35,15 @@ def check_security():
         for i in range(100):
             time.sleep(0.01)
             bar.progress(i + 1)
-        if st.button("PROCEED"):
+        if st.button("PROCEED", key="b2"):
             st.session_state.auth_level = 3
             st.rerun()
         return False
 
     elif st.session_state.auth_level == 3:
         st.subheader("👨‍👩‍👦 LAYER 3: FAMILY KEY")
-        pwd3 = st.text_input("परिवार का गुप्त कोड डालें:")
-        if st.button("UNLOCK"):
+        pwd3 = st.text_input("परिवार का गुप्त कोड डालें:", key="p3")
+        if st.button("UNLOCK", key="b3"):
             if "rajaram" in pwd3.lower():
                 st.session_state.auth_level = 4
                 st.rerun()
@@ -39,7 +51,7 @@ def check_security():
 
     elif st.session_state.auth_level == 4:
         st.subheader("🖐️ LAYER 4: FINGERPRINT SCAN")
-        if st.button("SCAN THUMB"):
+        if st.button("SCAN THUMB", key="b4"):
             with st.spinner("मैच किया जा रहा है..."):
                 time.sleep(1)
             st.session_state.auth_level = 5
@@ -50,7 +62,7 @@ def check_security():
 
 # सुरक्षा चेक चलायें
 if not check_security():
-    st.stop() # जब तक सुरक्षा पार न हो, नीचे का पुराना कोड न चले
+    st.stop() 
 # --- 5 LAYER SECURITY CODE END ---
 # --- 1. हैकर और शाही लुक ---
 st.set_page_config(page_title="RAJARAM-X: THE ULTIMATE ORACLE", layout="wide")
