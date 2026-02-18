@@ -2,7 +2,56 @@ import streamlit as st
 from groq import Groq
 import time
 import random
+# --- 5 LAYER SECURITY CODE START ---
+if 'auth_level' not in st.session_state:
+    st.session_state.auth_level = 1
 
+def check_security():
+    if st.session_state.auth_level == 1:
+        st.subheader("🛡️ LAYER 1: SYSTEM ACCESS")
+        pwd1 = st.text_input("Master Key दर्ज करें:", type="password")
+        if st.button("AUTHENTICATE"):
+            if pwd1 == "RAJARAM786": # यहाँ अपना पासवर्ड रखें
+                st.session_state.auth_level = 2
+                st.rerun()
+        return False
+
+    elif st.session_state.auth_level == 2:
+        st.subheader("👁️ LAYER 2: BIOMETRIC EYE SCAN")
+        st.info("आंखों को स्कैन किया जा रहा है... कैमरे की ओर देखें।")
+        bar = st.progress(0)
+        for i in range(100):
+            time.sleep(0.01)
+            bar.progress(i + 1)
+        if st.button("PROCEED"):
+            st.session_state.auth_level = 3
+            st.rerun()
+        return False
+
+    elif st.session_state.auth_level == 3:
+        st.subheader("👨‍👩‍👦 LAYER 3: FAMILY KEY")
+        pwd3 = st.text_input("परिवार का गुप्त कोड डालें:")
+        if st.button("UNLOCK"):
+            if "rajaram" in pwd3.lower():
+                st.session_state.auth_level = 4
+                st.rerun()
+        return False
+
+    elif st.session_state.auth_level == 4:
+        st.subheader("🖐️ LAYER 4: FINGERPRINT SCAN")
+        if st.button("SCAN THUMB"):
+            with st.spinner("मैच किया जा रहा है..."):
+                time.sleep(1)
+            st.session_state.auth_level = 5
+            st.rerun()
+        return False
+    
+    return True # जब 5वीं लेयर पर पहुँचें
+
+# सुरक्षा चेक चलायें
+if not check_security():
+    st.stop() # जब तक सुरक्षा पार न हो, नीचे का पुराना कोड न चले
+# --- 5 LAYER SECURITY CODE END ---
 # --- 1. हैकर और शाही लुक ---
 st.set_page_config(page_title="RAJARAM-X: THE ULTIMATE ORACLE", layout="wide")
 st.markdown("""
