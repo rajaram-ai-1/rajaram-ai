@@ -63,6 +63,70 @@ def check_security():
 # सुरक्षा चेक चलायें
 if not check_security():
     st.stop() 
+# --- 1. बटन की चमक और एनीमेशन के लिए CSS ---
+st.markdown("""
+    <style>
+    .stButton>button {
+        border-radius: 15px;
+        border: 2px solid #00ff00; 
+        background-color: #000;
+        color: #00ff00;
+        font-weight: bold;
+        box-shadow: 0px 0px 10px #00ff00;
+        transition: 0.3s;
+        height: 60px;
+    }
+    .stButton>button:hover {
+        background-color: #00ff00;
+        color: #000;
+        box-shadow: 0px 0px 30px #00ff00;
+    }
+    /* सैटेलाइट विजन के लिए ग्लोइंग टेक्स्ट */
+    .satellite-text {
+        color: #00ff00;
+        font-family: 'Courier New', monospace;
+        text-shadow: 0px 0px 10px #00ff00;
+        text-align: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- 2. 5 महाशक्तियों के बटन ---
+st.subheader("Rajaram-X की महाशक्तियाँ चुनें:")
+col1, col2, col3, col4, col5 = st.columns(5)
+
+with col1:
+    if st.button("🔮 त्रिकाल"): st.session_state.tool = "trikal"
+with col2:
+    if st.button("🛡️ सुरक्षा"): st.session_state.tool = "security"
+with col3:
+    if st.button("⚡ फास्ट"): st.session_state.tool = "fast"
+with col4:
+    if st.button("🛰️ सैटेलाइट"): st.session_state.tool = "satellite"
+with col5:
+    if st.button("🧬 रिसर्च"): st.session_state.tool = "research"
+
+st.markdown("---")
+
+# --- 3. सैटेलाइट शक्ति का जादुई असर (Special Activation) ---
+if st.session_state.get('tool') == "satellite":
+    st.markdown("<h2 class='satellite-text'>🛰️ GLOBAL SATELLITE VISION ACTIVE</h2>", unsafe_allow_html=True)
+    # यहाँ एक नकली लेकिन असली दिखने वाला मैप और डेटा स्ट्रीम
+    col_map1, col_map2 = st.columns([2, 1])
+    with col_map1:
+        st.image("https://img.freepik.com/free-vector/world-map-digital-data-background_1017-31357.jpg", caption="Real-time Data Packets Tracking...")
+    with col_map2:
+        st.code("""
+        [TRACKING IP: 192.168.1.1]
+        [LAT: 28.6139 | LONG: 77.2090]
+        [ENCRYPTION: 1024-BIT]
+        [STATUS: UPLINK SECURE]
+        """, language="bash")
+    st.success("सैटेलाइट लिंक तैयार है। अब सवाल पूछें, जवाब अंतरिक्ष से आएगा।")
+
+elif st.session_state.get('tool') == "trikal":
+    st.markdown("<h2 class='satellite-text'>🔮 TRIPLE-CORE MODE READY</h2>", unsafe_allow_html=True)
+    
 import streamlit as st
 
 # --- 1. स्टाइलिंग (Gemini जैसा लुक देने के लिए) ---
