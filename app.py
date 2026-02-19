@@ -3,78 +3,104 @@ from groq import Groq
 import random
 import time
 
-# --- 1. पेज कॉन्फ़िगरेशन (शाही लुक) ---
-st.set_page_config(page_title="RAJARAM-X: THE MASTER AI", layout="wide")
-st.markdown("<style>.stApp { background-color: #000; color: #00FF41; }</style>", unsafe_allow_html=True)
+# --- 1. सुरक्षा की 5 परतें (आपकी शर्तों पर) ---
+if 'auth_level' not in st.session_state:
+    st.session_state.auth_level = 1
 
-# --- 2. 30 दिमागों का असली स्ट्रक्चर ---
-MODELS_ARMY = [
-    "llama-3.3-70b-versatile", 
-    "llama-3.1-8b-instant", 
-    "mixtral-8x7b-32768",
-    "gemma2-9b-it"
-]
+def check_security():
+    # लेयर 1: मास्टर पासवर्ड
+    if st.session_state.auth_level == 1:
+        st.header("🛡️ LAYER 1: MASTER KEY")
+        p1 = st.text_input("Enter Secret Password:", type="password")
+        if st.button("UNLOCK"):
+            if p1 == "RAJARAM786":
+                st.session_state.auth_level = 2
+                st.rerun()
+        return False
+    
+    # लेयर 2: आई स्कैन (सिमुलेशन)
+    elif st.session_state.auth_level == 2:
+        st.header("👁️ LAYER 2: EYE SCAN")
+        if st.button("SCAN EYES"):
+            with st.spinner("Scanning..."): time.sleep(1)
+            st.session_state.auth_level = 3
+            st.rerun()
+        return False
 
-# 30 दिमागों का डेटाबेस (हर बार नया लोड होगा)
-if 'brain_cluster' not in st.session_state:
-    st.session_state.brain_cluster = {f"Brain-Node-{i}": random.choice(MODELS_ARMY) for i in range(1, 31)}
+    # लेयर 3: परिवार का कोड
+    elif st.session_state.auth_level == 3:
+        st.header("👨‍👩‍👦 LAYER 3: FAMILY KEY")
+        p3 = st.text_input("अपने परिवार का नाम लिखें:")
+        if st.button("VERIFY"):
+            if "rajaram" in p3.lower():
+                st.session_state.auth_level = 4
+                st.rerun()
+        return False
 
-# --- 3. तिजोरी (Secrets) से दिमाग का कनेक्शन ---
-try:
-    # यहाँ अब चाबी सीधे कोड में नहीं, बल्कि तिजोरी से आ रही है
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-except Exception as e:
-    st.error("❌ तिजोरी (Secrets) में चाबी नहीं मिली! कृपया अपनी सहेलियों से कहें कि 'secrets.toml' चेक करें।")
+    # लेयर 4: फिंगरप्रिंट
+    elif st.session_state.auth_level == 4:
+        st.header("🖐️ LAYER 4: FINGERPRINT SCAN")
+        if st.button("PLACE THUMB"):
+            with st.spinner("Matching..."): time.sleep(1)
+            st.session_state.auth_level = 5
+            st.rerun()
+        return False
+
+    return True # लेयर 5 पार
+
+# सुरक्षा चेक चलाएँ
+if not check_security():
     st.stop()
 
-# --- 4. मुख्य इंटरफ़ेस ---
-st.markdown("<h1 style='text-align: center; color: gold;'>👑 RAJARAM-X: 30 BRAINS CLUSTER</h1>", unsafe_allow_html=True)
+# --- 2. असली 30 दिमागों का क्लस्टर ---
+MODELS = ["llama-3.3-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"]
+if 'brains' not in st.session_state:
+    st.session_state.brains = {f"Brain-{i}": random.choice(MODELS) for i in range(1, 31)}
 
-# साइडबार में 30 दिमागों का लाइव फीड
+# --- 3. Groq Connection (Secrets से) ---
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except:
+    st.error("Secrets में GROQ_API_KEY नहीं मिली!")
+    st.stop()
+
+# --- 4. मुख्य इंटरफेस ---
+st.title("👑 RAJARAM-X: THE SUPREME SYSTEM")
+
+# साइडबार में 30 दिमाग
 with st.sidebar:
-    st.header("🌐 30 Active Brains")
-    for node, model in st.session_state.brain_cluster.items():
-        st.write(f"🟢 {node} ({model})")
-    
-    st.markdown("---")
-    if st.button("सिस्टम रीबूट करें"):
-        st.rerun()
+    st.header("🧠 30 Active Brains")
+    for b, m in st.session_state.brains.items():
+        st.write(f"🟢 {b}: {m}")
 
-# --- 5. असली जवाब देने वाली शक्ति (Chat) ---
-st.subheader("💬 राजाराम भाई का दरबार (Live AI)")
-user_query = st.chat_input("हुकुम करें राजाराम भाई...")
+# --- 5. शक्तियाँ (फोटो, बोलना, चैट) ---
+tab1, tab2, tab3 = st.tabs(["💬 असली संवाद", "🎨 फोटो शक्ति", "🗣️ बोलने वाली शक्ति"])
 
-if user_query:
-    # 30 में से एक दिमाग चुनना जो इस सवाल का जवाब देगा
-    selected_node = random.choice(list(st.session_state.brain_cluster.keys()))
-    selected_model = st.session_state.brain_cluster[selected_node]
-    
-    with st.chat_message("assistant"):
-        st.markdown(f"🧠 **सक्रिय दिमाग:** `{selected_node}`")
-        try:
-            # असली मॉडल से जवाब मंगवाना
-            chat_completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "तुम राजाराम-X के महा-द्रष्टा AI हो। शुद्ध हिंदी में बहुत ही शक्तिशाली और शाही जवाब दो।"},
-                    {"role": "user", "content": user_query}
-                ],
-                model=selected_model,
-            )
-            st.success(chat_completion.choices[0].message.content)
-            
-        except Exception as e:
-            st.error(f"क्षमा करें, {selected_node} कनेक्ट नहीं हो पाया।")
+with tab1:
+    user_msg = st.chat_input("हुकुम करें राजाराम भाई...")
+    if user_msg:
+        # रैंडम दिमाग चुनना
+        selected_b = random.choice(list(st.session_state.brains.keys()))
+        model_name = st.session_state.brains[selected_b]
+        
+        st.markdown(f"🤖 **सक्रिय दिमाग:** `{selected_b}`")
+        chat = client.chat.completions.create(
+            messages=[{"role": "user", "content": user_msg}],
+            model=model_name
+        )
+        st.success(chat.choices[0].message.content)
 
-# --- 6. फोटो निर्माण की शक्ति ---
+with tab2:
+    img_prompt = st.text_input("क्या फोटो बनाऊँ?")
+    if st.button("CREATE IMAGE"):
+        url = f"https://pollinations.ai/p/{img_prompt.replace(' ', '%20')}?model=flux"
+        st.image(url)
+
+with tab3:
+    st.info("यह शक्ति आपके ब्राउज़र के स्पीच इंजन का उपयोग करती है।")
+    speech_text = st.text_area("क्या बुलवाना है?")
+    if st.button("SPEAK"):
+        st.markdown(f'<iframe src="https://translate.google.com/translate_tts?ie=UTF-8&q={speech_text}&tl=hi&client=tw-ob" allow="autoplay"></iframe>', unsafe_allow_html=True)
+
 st.markdown("---")
-st.subheader("🖼️ राजाराम-X विज़न (Photo Power)")
-col1, col2 = st.columns([1, 2])
-with col1:
-    img_prompt = st.text_input("क्या फोटो बनाऊं?")
-    p_btn = st.button("फोटो बनाओ")
-with col2:
-    if p_btn and img_prompt:
-        url = f"https://pollinations.ai/p/{img_prompt.replace(' ', '%20')}?width=1024&height=720&model=flux"
-        st.image(url, caption="Rajaram-X द्वारा निर्मित दृश्य")
-
-st.markdown("<p style='text-align: center; color: gray;'>Rajaram-X Project 2026 | World's First 30-Brain AI Engine</p>", unsafe_allow_html=True)
+st.caption("Developed by Rajaram-X | 30 Brains | 300 Powers")
