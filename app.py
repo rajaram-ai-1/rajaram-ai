@@ -1,60 +1,92 @@
-import streamlit as st
+import os
+import json
+from datetime import datetime
+from dotenv import load_dotenv
 from groq import Groq
-import random
 
-# --- 1. 30 दिमागों की मास्टर लिस्ट और उनके अलग-अलग काम ---
-BRAIN_SYSTEM = {
-    "Brain-1": "Security Analysis", "Brain-2": "Creative Coding", "Brain-3": "Future Prediction",
-    "Brain-4": "Data Mining", "Brain-5": "Satellite Tracking", "Brain-6": "Financial Strategy",
-    "Brain-7": "Logic Solving", "Brain-8": "Image Generation", "Brain-9": "Voice Synthesis",
-    "Brain-10": "System Hacking", "Brain-11": "Global Networking", "Brain-12": "Memory Storage",
-    "Brain-13": "Neural Mapping", "Brain-14": "Bio-Scanning", "Brain-15": "Speed Optimization",
-    "Brain-16": "Encryption Expert", "Brain-17": "History Analysis", "Brain-18": "Legal Research",
-    "Brain-19": "Weather Control", "Brain-20": "Robotics Control", "Brain-21": "AI Training",
-    "Brain-22": "Physics Engine", "Brain-23": "Mathematical Master", "Brain-24": "Language Translator",
-    "Brain-25": "Crisis Manager", "Brain-26": "Health Diagnostics", "Brain-27": "Music Creation",
-    "Brain-28": "Space Exploration", "Brain-29": "Traffic Control", "Brain-30": "Final Admin Soul"
-}
+# Load environment variables
+load_dotenv()
 
-# --- 2. कनेक्शन (Secrets से) ---
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-
-# --- 3. दिमाग बदलने का सिस्टम (Logic) ---
-def get_best_brain(user_input):
-    # यह सिस्टम सवाल देखकर सही दिमाग चुनता है
-    if "photo" in user_input.lower(): return "Brain-8"
-    if "code" in user_input.lower(): return "Brain-2"
-    if "security" in user_input.lower(): return "Brain-1"
-    # अगर कुछ समझ न आए तो रैंडम दिमाग चुनना
-    return random.choice(list(BRAIN_SYSTEM.keys()))
-
-# --- 4. मुख्य इंटरफेस ---
-st.title("RAJARAM-X: 30 BRAINS")
-
-user_query = st.chat_input("अपना आदेश यहाँ लिखें...")
-
-if user_query:
-    # दिमाग बदलना
-    active_brain = get_best_brain(user_query)
-    brain_task = BRAIN_SYSTEM[active_brain]
+class AIChatbot:
+    def __init__(self):
+        """Initialize the AI Chatbot with Groq API"""
+        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.conversation_history = []
+        self.model_meta_70b = "llama-3.1-70b-versatile"
+        self.model_google_gemma = "gemma-7b-it"
+        
+    def add_message(self, role, content):
+        """Add message to conversation history"""
+        self.conversation_history.append({
+            "role": role,
+            "content": content,
+            "timestamp": datetime.now().isoformat()
+        })
     
-    st.write(f"🧠 **सक्रिय दिमाग:** {active_brain} | **कार्य:** {brain_task}")
+    def get_chat_history(self):
+        """Get chat history without timestamps for API"""
+        return [
+            {"role": msg["role"], "content": msg["content"]}
+            for msg in self.conversation_history[-10:]  # Last 10 messages
+        ]
     
-    # Groq Model से जवाब लेना
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": f"तुम Rajaram-X के {active_brain} हो। तुम्हारा काम {brain_task} है।"},
-                {"role": "user", "content": user_query}
-            ]
-        )
-        st.success(response.choices[0].message.content)
-    except Exception as e:
-        st.error(f"Error: {e}")
-
-# --- 5. साइडबार में सभी 30 दिमागों की लिस्ट ---
-with st.sidebar:
-    st.header("Brain Cluster Status")
-    for b_id, task in BRAIN_SYSTEM.items():
-        st.write(f"🟢 {b_id}: {task}")
+    def stream_response(self, user_message, model="llama"):
+        """Get streaming response from Groq API"""
+        try:
+            # Add user message to history
+            self.add_message("user", user_message)
+            
+            # Select model
+            selected_model = (
+                self.model_meta_70b if model == "llama" 
+                else self.model_google_gemma
+            )
+            
+            # Create message for API
+            messages = self.get_chat_history()
+            
+            # Get streaming response
+            response_text = ""
+            with self.client.messages.stream(
+                model=selected_model,
+                messages=messages,
+                max_tokens=1024,
+                temperature=0.7,
+            ) as stream:
+                for text in stream.text_stream:
+                    response_text += text
+                    yield text
+            
+            # Add assistant response to history
+            self.add_message("assistant", response_text)
+            
+        except Exception as e:
+            error_msg = f"❌ Error: {str(e)}"
+            print(error_msg)
+            yield error_msg
+    
+    def get_conversation_history(self):
+        """Get formatted conversation history"""
+        return self.conversation_history
+    
+    def clear_history(self):
+        """Clear conversation history"""
+        self.conversation_history = []
+    
+    def save_conversation(self, filename="conversation.json"):
+        """Save conversation to file"""
+        try:
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(self.conversation_history, f, indent=2, ensure_ascii=False)
+            return f"✅ Conversation saved to {filename}"
+        except Exception as e:
+            return f"❌ Error saving conversation: {str(e)}"
+    
+    def load_conversation(self, filename="conversation.json"):
+        """Load conversation from file"""
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                self.conversation_history = json.load(f)
+            return f"✅ Conversation loaded from {filename}"
+        except Exception as e:
+            return f"❌ Error loading conversation: {str(e)}"
