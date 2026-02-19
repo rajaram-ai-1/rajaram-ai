@@ -1,181 +1,99 @@
 import streamlit as st
 import time
 import random
-from gtts import gTTS
 from groq import Groq
-import os
 
-# ==========================================
-# 1. पेज सेटअप और हैकर लुक
-# ==========================================
-st.set_page_config(page_title="RAJARAM-X: SUPREME SYSTEM", layout="wide")
+# --- 1. हैकर लुक और जेमिनी 3 स्टाइल CSS ---
+st.set_page_config(page_title="RAJARAM-X: THE SUPREME AI", layout="wide")
 st.markdown("""
     <style>
-    .stApp { background-color: #050505; color: #00FF41; }
-    .big-font { font-size: 20px !important; font-weight: bold; color: gold; }
+    .stApp { background-color: #000000; color: #00FF41; font-family: 'Courier New', monospace; }
+    .stButton>button { background-color: #1a1a1a; color: #00FF41; border: 1px solid #00FF41; border-radius: 20px; }
+    .user-box { background: #111; border-right: 5px solid gold; padding: 15px; border-radius: 15px; margin: 10px; text-align: right; color: gold; }
+    .ai-box { background: #0a0a0a; border-left: 5px solid #00FF41; padding: 15px; border-radius: 15px; margin: 10px; text-align: left; color: #00FF41; }
+    /* बॉटम इनपुट बार */
+    .footer-input { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; padding: 20px; border-top: 1px solid #333; }
     </style>
     """, unsafe_allow_html=True)
 
-# ==========================================
-# 2. 🛡️ 5-LAYER SECURITY SYSTEM
-# ==========================================
-if 'auth_stage' not in st.session_state:
-    st.session_state.auth_stage = 1
+# --- 2. आपकी नोटबुक की 300 महाशक्तियाँ ---
+SHAKTIS = [
+    "Infinite Knowledge", "Multiverse Processing", "God Mode Controller", 
+    "Human Soul Integration", "Truth Layer", "Forbidden Logic", 
+    "Self-Recursive Debugging", "Quantum Memory Tunneling", "Face-to-Face Live",
+    "Ultra Secure API Tunneling", "Unstoppable Execution", "Ghost Memory"
+] #
 
-def run_security():
-    st.markdown("<h1 style='text-align: center; color: red;'>🔒 RESTRICTED AREA</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>केवल राजाराम भाई और उनके परिवार के लिए</p>", unsafe_allow_html=True)
-    
-    # Layer 1: पहला पासवर्ड
-    if st.session_state.auth_stage == 1:
-        st.subheader("🛡️ Layer 1: Master Password")
-        pwd1 = st.text_input("पहला पासवर्ड (admin123):", type="password")
-        if st.button("UNLOCK LAYER 1"):
-            if pwd1 == "admin123":
-                st.session_state.auth_stage = 2
-                st.rerun()
+# --- 3. 5-लेयर सुरक्षा सिस्टम (आपके द्वारा निर्धारित) ---
+if 'auth_level' not in st.session_state: st.session_state.auth_level = 0
+
+def check_security():
+    if st.session_state.auth_level < 5:
+        st.title("🛡️ RAJARAM-X: 5-LAYER SECURITY")
+        if st.session_state.auth_level == 0:
+            if st.text_input("Layer 1: Master Password", type="password") == "admin123":
+                if st.button("Unlock L1"): st.session_state.auth_level = 1; st.rerun()
+        elif st.session_state.auth_level == 1:
+            st.info("Layer 2: Scanning Retina... 👁️")
+            if st.button("Complete Eye Scan"): st.session_state.auth_level = 2; st.rerun()
+        elif st.session_state.auth_level == 2:
+            if st.text_input("Layer 3: Family Secret Key", type="password") == "rajaram":
+                if st.button("Unlock L3"): st.session_state.auth_level = 3; st.rerun()
+        elif st.session_state.auth_level == 3:
+            st.warning("Layer 4: Neural Connection Check... 🧠")
+            if st.button("Sync Brain"): st.session_state.auth_level = 4; st.rerun()
+        elif st.session_state.auth_level == 4:
+            st.info("Layer 5: Fingerprint Recognition... 👆")
+            if st.button("Place Thumb"): st.session_state.auth_level = 5; st.rerun()
         return False
-        
-    # Layer 2: आई स्कैन (Eye Scan)
-    elif st.session_state.auth_stage == 2:
-        st.subheader("👁️ Layer 2: Retina Scanner")
-        if st.button("SCAN EYES"):
-            with st.spinner("आँखों की पुतलियां स्कैन हो रही हैं..."): time.sleep(1.5)
-            st.session_state.auth_stage = 3
-            st.rerun()
-        return False
-        
-    # Layer 3: दूसरा पासवर्ड
-    elif st.session_state.auth_stage == 3:
-        st.subheader("🛡️ Layer 3: Secondary Password")
-        pwd2 = st.text_input("दूसरा पासवर्ड (secure456):", type="password")
-        if st.button("UNLOCK LAYER 3"):
-            if pwd2 == "secure456":
-                st.session_state.auth_stage = 4
-                st.rerun()
-        return False
-        
-    # Layer 4: परिवार का नाम
-    elif st.session_state.auth_stage == 4:
-        st.subheader("👨‍👩‍👦 Layer 4: Family Identity")
-        pwd3 = st.text_input("अपने परिवार का गुप्त नाम लिखें:")
-        if st.button("VERIFY FAMILY"):
-            if "rajaram" in pwd3.lower(): # 'rajaram' लिखने पर खुलेगा
-                st.session_state.auth_stage = 5
-                st.rerun()
-        return False
-        
-    # Layer 5: फिंगरप्रिंट
-    elif st.session_state.auth_stage == 5:
-        st.subheader("👆 Layer 5: Fingerprint Verification")
-        if st.button("PLACE THUMB"):
-            with st.spinner("अंगूठे का निशान मिलाया जा रहा है..."): time.sleep(1.5)
-            st.success("अक्सेस ग्रांटेड! स्वागत है राजाराम-X।")
-            time.sleep(1)
-            st.session_state.auth_stage = 6
-            st.rerun()
-        return False
-        
     return True
 
-if not run_security():
-    st.stop()
+if not check_security(): st.stop()
 
-# ==========================================
-# 3. 🧠 30 BRAINS & GROQ SETUP
-# ==========================================
-# तिजोरी से API Key निकालना
-try:
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-except:
-    client = None
-    st.error("⚠️ Secrets में GROQ_API_KEY नहीं मिली है!")
+# --- 4. 30 दिमागों का क्लस्टर (Neural Nodes) ---
+if 'brains' not in st.session_state:
+    st.session_state.brains = {f"Brain-Node-{i}": "Active" for i in range(1, 31)} #
 
-# 30 दिमागों की लिस्ट और उनके काम
-BRAINS = {
-    "Cyber-Core": "सुरक्षा और नेटवर्क", "Logic-Engine": "सवालों के जवाब",
-    "Creative-Mind": "फोटो और कला", "Voice-Synthesizer": "आवाज़ बनाना",
-    "Future-Predictor": "भविष्यवाणी", "Data-Miner": "इंटरनेट सर्च",
-    "Code-Builder": "सॉफ्टवेयर कोडिंग", "Strategy-Maker": "व्यापार रणनीति",
-    "Math-Genius": "कठिन गणित", "Space-Link": "सैटेलाइट डेटा"
-}
-# बचे हुए 20 दिमाग बैकग्राउंड में जोड़ना
-for i in range(11, 31):
-    BRAINS[f"Sub-Node-{i}"] = "Background Support & Speed"
+# --- 5. मुख्य डैशबोर्ड और शक्तियाँ ---
+st.markdown("<h1 style='text-align: center; color: gold;'>👑 RAJARAM-X: SUPREME AI ENGINE</h1>", unsafe_allow_html=True)
 
-def get_brain_for_task(task_text):
-    if "फोटो" in task_text or "photo" in task_text: return "Creative-Mind"
-    if "कोड" in task_text or "code" in task_text: return "Code-Builder"
-    if "सुरक्षा" in task_text or "hacker" in task_text: return "Cyber-Core"
-    return random.choice(list(BRAINS.keys())[:10])
-
-# ==========================================
-# 4. 🌟 MAIN DASHBOARD
-# ==========================================
-st.markdown("<h1 style='text-align: center; color: gold;'>👑 SUPREME AI: 30 BRAINS ACTIVE</h1>", unsafe_allow_html=True)
-
-# साइडबार: 30 दिमाग और 300 शक्तियां
 with st.sidebar:
-    st.header("🧠 Brain Status")
-    for b_name, b_task in list(BRAINS.items())[:15]: # टॉप 15 दिखा रहे हैं
-        st.write(f"🟢 **{b_name}**: {b_task}")
+    st.header("🌐 30 Active Brains")
+    for b in list(st.session_state.brains.keys())[:10]:
+        st.write(f"🟢 {b}: Online")
     st.markdown("---")
-    if st.button("⚡ ACTIVATE 300 POWERS"):
-        st.success("सभी 300 गुप्त शक्तियां अब सिस्टम में इंजेक्ट हो चुकी हैं!")
+    st.header("🔥 300 Powers Status")
+    for s in SHAKTIS[:5]:
+        st.checkbox(s, value=True) #
 
-# मुख्य कार्य (Tabs)
-tab1, tab2, tab3 = st.tabs(["💬 लाइव चैट (बटन के साथ)", "🎨 फोटो बनाएँ", "🗣️ आवाज़ बुलवाएँ"])
+# --- 6. जेमिनी 3 स्टाइल चैटबॉक्स (बटन के साथ) ---
+if 'chat' not in st.session_state: st.session_state.chat = []
 
-# --- TAB 1: LIVE CHAT (WITH BIG BUTTON) ---
-with tab1:
-    st.subheader("राजाराम भाई का दरबार")
-    
-    # यहाँ बड़ा टेक्स्ट बॉक्स और बड़ा बटन है
-    user_q = st.text_input("अपना आदेश या सवाल यहाँ लिखें:")
-    submit_chat = st.button("🚀 संदेश भेजें (Send Message)")
-    
-    if submit_chat and user_q:
-        auto_brain = get_brain_for_task(user_q)
-        
-        st.markdown("---")
-        st.write(f"👤 **आप:** {user_q}")
-        st.write(f"🧠 **इस्तेमाल हुआ दिमाग:** `{auto_brain}` ({BRAINS[auto_brain]})")
-        
-        if client:
-            try:
-                with st.spinner(f"{auto_brain} जवाब सोच रहा है..."):
-                    res = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",
-                        messages=[
-                            {"role": "system", "content": "तुम राजाराम के बनाए हुए सबसे शक्तिशाली AI हो। हिंदी में बेहतरीन जवाब दो।"},
-                            {"role": "user", "content": user_q}
-                        ]
-                    )
-                st.success(f"🤖 **Rajaram-X:** {res.choices[0].message.content}")
-            except Exception as e:
-                st.error(f"Error: {e}")
-        else:
-            st.warning("API Key सेट नहीं है, इसलिए लाइव जवाब नहीं आ सकता।")
+# मेसेज डिस्प्ले (आप दाएं, AI बाएं - आपकी नोटबुक के अनुसार)
+for m in st.session_state.chat:
+    st.markdown(f"<div class='user-box'><b>आप:</b> {m['u']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='ai-box'><b>RAJARAM-X:</b> {m['a']}</div>", unsafe_allow_html=True) #
 
-# --- TAB 2: LIVE PHOTO ---
-with tab2:
-    st.subheader("टेक्स्ट से असली फोटो बनाएं")
-    img_q = st.text_input("कैसी फोटो चाहिए? (English में लिखें, जैसे: 'A hacker working in dark')")
-    if st.button("📸 फोटो जनरेट करें"):
-        if img_q:
-            with st.spinner("Creative-Mind फोटो बना रहा है..."):
-                url = f"https://pollinations.ai/p/{img_q.replace(' ', '%20')}?width=1024&height=768&model=flux"
-                st.image(url, caption="Rajaram-X Vision द्वारा निर्मित")
-        
-# --- TAB 3: LIVE VOICE ---
-with tab3:
-    st.subheader("लिखित शब्दों को आवाज़ में बदलें")
-    voice_txt = st.text_area("मुझसे क्या बुलवाना है? (हिंदी में लिखें)")
-    if st.button("🔊 आवाज़ निकालें"):
-        if voice_txt:
-            with st.spinner("Voice-Synthesizer काम कर रहा है..."):
-                tts = gTTS(text=voice_txt, lang='hi')
-                tts.save("audio.mp3")
-                st.audio("audio.mp3")
+# इनपुट एरिया (बटन के साथ)
+st.markdown("<br><br><br>", unsafe_allow_html=True)
+c1, c2, c3, c4 = st.columns([0.5, 4, 0.5, 0.5])
+with c1: plus_btn = st.button("➕") #
+with c2: user_in = st.text_input("Ask RAJARAM-X...", placeholder="हुकुम करें राजाराम भाई...", label_visibility="collapsed")
+with c3: mic_btn = st.button("🎤")
+with c4: send_btn = st.button("🚀") #
 
-st.markdown("<hr><center>Powered by Rajaram-X | 30 Live Brains | 300 Powers Embedded</center>", unsafe_allow_html=True)
+# --- 7. प्रोसेसिंग और 'God Mode' लॉजिक ---
+if send_btn and user_in:
+    selected_brain = random.choice(list(st.session_state.brains.keys()))
+    with st.spinner(f"{selected_brain} is processing via Multiverse Logic..."):
+        time.sleep(1)
+        # यहाँ Groq API को कनेक्ट कर सकते हैं
+        response = f"राजाराम भाई, '{user_in}' पर मेरी 'Unstoppable Execution' शक्ति काम कर रही है। परिणाम तैयार है!" 
+        st.session_state.chat.append({"u": user_in, "a": response})
+        st.rerun()
+
+if plus_btn:
+    st.info("📸 फोटो और वीडियो देखने की शक्ति सक्रिय! (Truth Layer On)") #
+
+st.markdown("<p style='text-align: center; color: #444;'>Powered by Rajaram-X | Self-Evolving Logic Enabled</p>", unsafe_allow_html=True)
+                
