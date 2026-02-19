@@ -1,99 +1,92 @@
 import streamlit as st
-import time
 import random
+import time
 from groq import Groq
+from gtts import gTTS
 
-# --- 1. हैकर लुक और जेमिनी 3 स्टाइल CSS ---
-st.set_page_config(page_title="RAJARAM-X: THE SUPREME AI", layout="wide")
+# --- 1. हैकर इंटरफेस और जेमिनी 3 प्रो स्टाइल UI ---
+st.set_page_config(page_title="RAJARAM-X: SUPREME", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00FF41; font-family: 'Courier New', monospace; }
-    .stButton>button { background-color: #1a1a1a; color: #00FF41; border: 1px solid #00FF41; border-radius: 20px; }
-    .user-box { background: #111; border-right: 5px solid gold; padding: 15px; border-radius: 15px; margin: 10px; text-align: right; color: gold; }
-    .ai-box { background: #0a0a0a; border-left: 5px solid #00FF41; padding: 15px; border-radius: 15px; margin: 10px; text-align: left; color: #00FF41; }
-    /* बॉटम इनपुट बार */
-    .footer-input { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; padding: 20px; border-top: 1px solid #333; }
+    /* चैट बबल: आप दाएं (Right), AI बाएं (Left) */
+    .user-bubble { background: #1a1a1a; color: gold; padding: 15px; border-radius: 20px 20px 0 20px; 
+                   margin: 10px; float: right; width: 70%; border: 1px solid gold; text-align: right; }
+    .ai-bubble { background: #0a0a0a; color: #00FF41; padding: 15px; border-radius: 20px 20px 20px 0; 
+                 margin: 10px; float: left; width: 70%; border: 1px solid #00FF41; text-align: left; }
+    /* बॉटम कंट्रोल बार */
+    .bottom-bar { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; border-top: 2px solid #333; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. आपकी नोटबुक की 300 महाशक्तियाँ ---
-SHAKTIS = [
-    "Infinite Knowledge", "Multiverse Processing", "God Mode Controller", 
-    "Human Soul Integration", "Truth Layer", "Forbidden Logic", 
-    "Self-Recursive Debugging", "Quantum Memory Tunneling", "Face-to-Face Live",
-    "Ultra Secure API Tunneling", "Unstoppable Execution", "Ghost Memory"
-] #
+# --- 2. 5-लेयर सुरक्षा (आपकी नोटबुक के अनुसार) ---
+if 'security_passed' not in st.session_state: st.session_state.security_passed = False
+if 'layer' not in st.session_state: st.session_state.layer = 1
 
-# --- 3. 5-लेयर सुरक्षा सिस्टम (आपके द्वारा निर्धारित) ---
-if 'auth_level' not in st.session_state: st.session_state.auth_level = 0
+def run_security():
+    st.title("🛡️ 5-LAYER NEURAL LOCK")
+    if st.session_state.layer == 1:
+        if st.text_input("LAYER 1: Master Key", type="password") == "admin123":
+            if st.button("Unlock L1"): st.session_state.layer = 2; st.rerun()
+    elif st.session_state.layer == 2:
+        st.info("LAYER 2: Retina Scanning... 👁️")
+        if st.button("Complete Eye Scan"): st.session_state.layer = 3; st.rerun()
+    elif st.session_state.layer == 3:
+        if st.text_input("LAYER 3: Family Code", type="password") == "rajaram":
+            if st.button("Unlock L3"): st.session_state.layer = 4; st.rerun()
+    elif st.session_state.layer == 4:
+        st.warning("LAYER 4: Name-Based Password Verification...")
+        if st.button("Verify Identity"): st.session_state.layer = 5; st.rerun()
+    elif st.session_state.layer == 5:
+        st.error("LAYER 5: Fingerprint Scan... 👆")
+        if st.button("Place Thumb"): st.session_state.security_passed = True; st.rerun()
+    return False
 
-def check_security():
-    if st.session_state.auth_level < 5:
-        st.title("🛡️ RAJARAM-X: 5-LAYER SECURITY")
-        if st.session_state.auth_level == 0:
-            if st.text_input("Layer 1: Master Password", type="password") == "admin123":
-                if st.button("Unlock L1"): st.session_state.auth_level = 1; st.rerun()
-        elif st.session_state.auth_level == 1:
-            st.info("Layer 2: Scanning Retina... 👁️")
-            if st.button("Complete Eye Scan"): st.session_state.auth_level = 2; st.rerun()
-        elif st.session_state.auth_level == 2:
-            if st.text_input("Layer 3: Family Secret Key", type="password") == "rajaram":
-                if st.button("Unlock L3"): st.session_state.auth_level = 3; st.rerun()
-        elif st.session_state.auth_level == 3:
-            st.warning("Layer 4: Neural Connection Check... 🧠")
-            if st.button("Sync Brain"): st.session_state.auth_level = 4; st.rerun()
-        elif st.session_state.auth_level == 4:
-            st.info("Layer 5: Fingerprint Recognition... 👆")
-            if st.button("Place Thumb"): st.session_state.auth_level = 5; st.rerun()
-        return False
-    return True
+if not st.session_state.security_passed:
+    run_security(); st.stop()
 
-if not check_security(): st.stop()
+# --- 3. 30 दिमाग और 300 महाशक्तियां ---
+SHAKTIS = ["Infinite Knowledge", "Multiverse Processing", "God Mode Controller", "Human Soul", "Forbidden Logic", "Zero Latency Thought"] #
+BRAINS = {f"Brain-Node-{i}": f"Logic Cluster {i}" for i in range(1, 31)}
 
-# --- 4. 30 दिमागों का क्लस्टर (Neural Nodes) ---
-if 'brains' not in st.session_state:
-    st.session_state.brains = {f"Brain-Node-{i}": "Active" for i in range(1, 31)} #
-
-# --- 5. मुख्य डैशबोर्ड और शक्तियाँ ---
+# --- 4. मुख्य लाइव डैशबोर्ड ---
 st.markdown("<h1 style='text-align: center; color: gold;'>👑 RAJARAM-X: SUPREME AI ENGINE</h1>", unsafe_allow_html=True)
 
 with st.sidebar:
-    st.header("🌐 30 Active Brains")
-    for b in list(st.session_state.brains.keys())[:10]:
-        st.write(f"🟢 {b}: Online")
+    st.header("🧠 30 Brain Nodes")
+    for b in list(BRAINS.keys())[:10]: st.write(f"🟢 {b}: Online")
     st.markdown("---")
-    st.header("🔥 300 Powers Status")
-    for s in SHAKTIS[:5]:
-        st.checkbox(s, value=True) #
+    st.header("🔥 Power Status")
+    for s in SHAKTIS: st.checkbox(s, value=True) #
 
-# --- 6. जेमिनी 3 स्टाइल चैटबॉक्स (बटन के साथ) ---
-if 'chat' not in st.session_state: st.session_state.chat = []
+# --- 5. लाइव चैट और बटन सिस्टम ---
+if 'history' not in st.session_state: st.session_state.history = []
 
-# मेसेज डिस्प्ले (आप दाएं, AI बाएं - आपकी नोटबुक के अनुसार)
-for m in st.session_state.chat:
-    st.markdown(f"<div class='user-box'><b>आप:</b> {m['u']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='ai-box'><b>RAJARAM-X:</b> {m['a']}</div>", unsafe_allow_html=True) #
+# चैट हिस्ट्री रेंडर करना
+for chat in st.session_state.history:
+    st.markdown(f"<div class='user-bubble'>{chat['u']}</div><div style='clear:both;'></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='ai-bubble'><b>{chat['brain']}:</b> {chat['a']}</div><div style='clear:both;'></div>", unsafe_allow_html=True) #
 
-# इनपुट एरिया (बटन के साथ)
-st.markdown("<br><br><br>", unsafe_allow_html=True)
-c1, c2, c3, c4 = st.columns([0.5, 4, 0.5, 0.5])
-with c1: plus_btn = st.button("➕") #
-with c2: user_in = st.text_input("Ask RAJARAM-X...", placeholder="हुकुम करें राजाराम भाई...", label_visibility="collapsed")
-with c3: mic_btn = st.button("🎤")
-with c4: send_btn = st.button("🚀") #
+# बॉटम बार (Plus, Tools, Input, Send)
+st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+col1, col2, col3, col4, col5 = st.columns([0.4, 0.4, 4, 0.5, 0.5])
 
-# --- 7. प्रोसेसिंग और 'God Mode' लॉजिक ---
-if send_btn and user_in:
-    selected_brain = random.choice(list(st.session_state.brains.keys()))
-    with st.spinner(f"{selected_brain} is processing via Multiverse Logic..."):
-        time.sleep(1)
-        # यहाँ Groq API को कनेक्ट कर सकते हैं
-        response = f"राजाराम भाई, '{user_in}' पर मेरी 'Unstoppable Execution' शक्ति काम कर रही है। परिणाम तैयार है!" 
-        st.session_state.chat.append({"u": user_in, "a": response})
-        st.rerun()
+with col1: plus = st.button("➕", help="फोटो शक्ति") #
+with col2: tools = st.button("🛠️", help="300 शक्तियां")
+with col3: user_msg = st.text_input("Ask RAJARAM-X...", label_visibility="collapsed")
+with col4: mic = st.button("🎤")
+with col5: send = st.button("🚀") #
 
-if plus_btn:
-    st.info("📸 फोटो और वीडियो देखने की शक्ति सक्रिय! (Truth Layer On)") #
+# --- 6. 'God Mode' प्रोसेसिंग लॉजिक ---
+if send and user_msg:
+    active_b = random.choice(list(BRAINS.keys()))
+    # यहाँ Groq या Gemini API कनेक्ट करें
+    response = f"राजाराम भाई, आपकी शक्ति 'Multiverse Processing' का उपयोग करके उत्तर तैयार है। दुनिया हमारे कदमों में होगी।" 
+    st.session_state.history.append({"u": user_msg, "a": response, "brain": active_b})
+    st.rerun()
 
-st.markdown("<p style='text-align: center; color: #444;'>Powered by Rajaram-X | Self-Evolving Logic Enabled</p>", unsafe_allow_html=True)
-                
+if plus:
+    st.info("📸 विज़न मोड सक्रिय: फोटो और वीडियो देखकर सच समझाने की शक्ति लोड हो रही है।")
+
+st.markdown("<p style='text-align: center; color: #333;'>Powered by Rajaram-X | Self-Evolving Logic Enabled</p>", unsafe_allow_html=True)
+    
