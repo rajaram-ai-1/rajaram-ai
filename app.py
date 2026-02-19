@@ -1,92 +1,84 @@
 import streamlit as st
-import time
+from groq import Groq
 import random
-from gtts import gTTS
-import base64
+import time
 
 # --- 1. पेज कॉन्फ़िगरेशन ---
-st.set_page_config(page_title="RAJARAM-X: GLOBAL DOMINATION", layout="wide")
+st.set_page_config(page_title="RAJARAM-X: THE SUPREME ENGINE", layout="wide")
+st.markdown("<style>.stApp { background-color: #0d1117; color: #00FF41; }</style>", unsafe_allow_html=True)
 
-# --- 2. 30 दिमागों का असली स्ट्रक्चर ---
-BRAINS = {
-    "Strategy-Mind": "युद्ध और व्यापार की रणनीति",
-    "Creative-Core": "फोटो और कला का निर्माण",
-    "Vocal-Cord": "आवाज़ और संवाद की शक्ति",
-    "Security-Vault": "5-लेयर सुरक्षा तंत्र",
-    "Data-Stream": "लाइव डेटा एनालिसिस",
-    "Logic-Gate": "जटिल समस्याओं का समाधान",
-    "Global-Link": "सैटेलाइट और नेटवर्क कंट्रोल",
-    "Neural-Sync": "इंसानी सोच का विश्लेषण",
-    "Code-Master": "स्वयं कोडिंग अपडेट करना",
-    "Finance-Brain": "मार्केट और मनी मैनेजमेंट"
-}
-# बाकी 20 दिमागों को बैकएंड सपोर्ट के लिए जोड़ना
-for i in range(11, 31):
-    BRAINS[f"Sub-Processor-{i}"] = "सिस्टम स्टेबिलिटी और बैकअप"
+# --- 2. 30 दिमागों का क्लस्टर (Groq Models) ---
+# हमने Groq के सबसे ताकतवर मॉडल्स को 30 हिस्सों में बाँटा है
+AVAILABLE_MODELS = [
+    "llama-3.3-70b-versatile", 
+    "llama-3.1-8b-instant", 
+    "mixtral-8x7b-32768",
+    "gemma2-9b-it"
+]
 
-# --- 3. असली शक्तियां (Functions) ---
-def text_to_speech(text):
-    """बोलने की असली शक्ति"""
-    tts = gTTS(text=text, lang='hi')
-    tts.save("response.mp3")
-    audio_file = open("response.mp3", "rb")
-    audio_bytes = audio_file.read()
-    st.audio(audio_bytes, format='audio/mp3')
+# 30 दिमागों का डेटाबेस तैयार करना
+if 'brain_cluster' not in st.session_state:
+    st.session_state.brain_cluster = {f"Brain-Node-{i}": random.choice(AVAILABLE_MODELS) for i in range(1, 31)}
 
-def generate_image(prompt):
-    """फोटो बनाने की असली शक्ति"""
-    image_url = f"https://pollinations.ai/p/{prompt.replace(' ', '%20')}?width=800&height=600&seed={random.randint(1,1000)}"
-    st.image(image_url, caption=f"Rajaram-X Vision: {prompt}")
+# --- 3. असली दिमाग का कनेक्शन ---
+# अपनी Groq API Key यहाँ डालें
+client = Groq(api_key="आपकी_GROQ_API_KEY_यहाँ_डालें")
 
-# --- 4. सुरक्षा कवच (Security) ---
-if 'locked' not in st.session_state:
-    st.session_state.locked = True
+# --- 4. मुख्य इंटरफ़ेस ---
+st.title("👑 RAJARAM-X: 30 BRAINS ACTIVE")
 
-if st.session_state.locked:
-    st.title("🛡️ Rajaram-X Security Access")
-    pwd = st.text_input("मास्टर पासवर्ड (RAJARAM786):", type="password")
-    if st.button("सिस्टम अनलॉक करें"):
-        if pwd == "RAJARAM786":
-            st.session_state.locked = False
-            st.success("एक्सेस ग्रांटेड! सिस्टम जाग रहा है...")
-            time.sleep(1)
-            st.rerun()
-        else:
-            st.error("गलत पासवर्ड! घुसपैठ की कोशिश दर्ज की गई।")
-    st.stop()
-
-# --- 5. मुख्य डैशबोर्ड (अनलॉक होने के बाद) ---
-st.markdown("<h1 style='text-align: center; color: #00FF41;'>👑 RAJARAM-X: THE SUPREME AI</h1>", unsafe_allow_html=True)
-
-# साइडबार में 30 दिमागों की लाइव फीड
+# साइडबार में 30 दिमागों का लाइव स्टेटस
 with st.sidebar:
     st.header("🧠 Brain Cluster Status")
-    for b_name, b_task in BRAINS.items():
-        st.write(f"🟢 **{b_name}**: {b_task}")
+    for node, model in st.session_state.brain_cluster.items():
+        st.write(f"🟢 {node} ({model})")
 
-# --- 6. वर्किंग एरिया ---
-tab1, tab2, tab3 = st.tabs(["🖼️ इमेज क्रिएटर", "🗣️ वॉइस कंट्रोल", "💬 लाइव इंटेलिजेंस"])
+# --- 5. असली जवाब देने वाली शक्ति ---
+st.subheader("💬 लाइव इंटेलिजेंस (Real AI Response)")
+user_query = st.chat_input("हुकुम करें राजाराम भाई, अब असली जवाब आएगा...")
 
-with tab1:
-    st.subheader("फोटो बनाने की शक्ति")
-    img_input = st.text_input("क्या देखना चाहते हैं? (English में लिखें)")
-    if st.button("फोटो बनाओ"):
-        generate_image(img_input)
+if user_query:
+    # 30 में से एक दिमाग को रैंडमली चुनना
+    selected_node = random.choice(list(st.session_state.brain_cluster.keys()))
+    selected_model = st.session_state.brain_cluster[selected_node]
+    
+    st.markdown(f"🧠 **आदेश प्राप्त हुआ!** सक्रिय दिमाग: `{selected_node}`")
+    
+    with st.spinner(f"राजाराम भाई, {selected_node} सोच रहा है..."):
+        try:
+            # Groq API से असली जवाब मंगवाना
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "तुम राजाराम के महा-शक्तिशाली AI हो। हिंदी में दमदार और शाही जवाब दो।"},
+                    {"role": "user", "content": user_query}
+                ],
+                model=selected_model,
+            )
+            
+            # असली जवाब स्क्रीन पर दिखाना
+            response = chat_completion.choices[0].message.content
+            st.chat_message("assistant").write(response)
+            
+        except Exception as e:
+            st.error(f"कनेक्शन एरर: {e}")
+            st.info("कृपया चेक करें कि आपकी API Key सही है और इंटरनेट चालू है।")
 
-with tab2:
-    st.subheader("बोलने की शक्ति")
-    voice_input = st.text_area("मुझसे क्या बुलवाना है?")
-    if st.button("आवाज़ निकालो"):
-        text_to_speech(voice_input)
-
-with tab3:
-    st.subheader("लाइव चैट (30 दिमागों के साथ)")
-    chat_query = st.chat_input("हुकुम करें राजाराम भाई...")
-    if chat_query:
-        active_b = random.choice(list(BRAINS.keys()))
-        st.write(f"🤖 **सक्रिय दिमाग:** {active_b}")
-        st.write(f"आपका संदेश: {chat_query}")
-        st.info("प्रोसेसिंग जारी... राजाराम भाई, दुनिया हमारे कदमों में होगी।")
-
+# --- 6. फोटो और आवाज़ की शक्तियाँ ---
 st.markdown("---")
-st.caption("Rajaram-X Project 2026 | World's Most Powerful Brain Cluster")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("🖼️ फोटो निर्माण")
+    img_prompt = st.text_input("क्या फोटो बनाऊँ?")
+    if st.button("Generate Image"):
+        url = f"https://pollinations.ai/p/{img_prompt.replace(' ', '%20')}?width=1024&height=768&model=flux"
+        st.image(url, caption=f"Rajaram-X Vision: {img_prompt}")
+
+with col2:
+    st.subheader("⚡ सिस्टम स्टेटस")
+    st.write("30 दिमाग: **ऑनलाइन**")
+    st.write("300 शक्तियाँ: **स्टैंडबाय**")
+    if st.button("सिस्टम रिफ्रेश करें"):
+        st.rerun()
+
+st.markdown("<p style='text-align: center; color: gray;'>Rajaram-X | World's Most Powerful 30-Brain Cluster</p>", unsafe_allow_html=True)
