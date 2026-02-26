@@ -2,5 +2,6 @@ streamlit
 langchain
 langchain-groq
 langchain-community
+langchain-core
 tavily-python
 python-dotenv
