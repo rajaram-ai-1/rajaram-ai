@@ -23,7 +23,7 @@ if "chat_history" not in st.session_state:
 
 # 5. Initialize AI
 try:
-    llm = ChatGroq(groq_api_key=GROQ_KEY, model_name="llama-3.3-70b-specdec")
+    llm = ChatGroq(groq_api_key=GROQ_KEY, model_name="llama-3.3-70b-versatile")
     search = TavilySearchResults(api_key=TAVILY_KEY)
 except Exception as e:
     st.error("Check your API Keys in Streamlit Secrets!")
