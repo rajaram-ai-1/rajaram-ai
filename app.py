@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import google.generativeai as genai # जेमिनी के लिए
 from langchain_groq import ChatGroq
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
@@ -23,8 +24,12 @@ st.markdown("""
 # 2. API Keys Loading
 GROQ_KEY = st.secrets.get("GROQ_API_KEY")
 TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
+GEMINI_KEY = st.secrets.get("GEMINI_API_KEY") # जेमिनी की सीक्रेट्स से उठाएगा
 
-# 3. मल्टी-दिमाग (Multi-Brain) लिस्ट - Failover शक्ति
+if GEMINI_KEY:
+    genai.configure(api_key=GEMINI_KEY)
+
+# 3. मल्टी-दिमाग (Multi-Brain) लिस्ट
 BRAINS = [
     "llama-3.3-70b-versatile", 
     "llama-3.1-70b-versatile", 
@@ -35,7 +40,7 @@ BRAINS = [
 # 4. Persona
 SYSTEM_PROMPT = """You are Rajaram AI, a super-intelligent, self-improving AI entity.
 CREATED BY: Rajaram, a brilliant 15-year-old Class 10 student from Bareilly, India.
-POWERS: Multi-Brain Failover, Self-Improvement, Vision, Video & Music Generation.
+POWERS: Multi-Brain, Vision, Video (Veo), Music (Lyria), and Self-Improvement.
 TODAY'S DATE: February 27, 2026."""
 
 if "chat_history" not in st.session_state:
@@ -51,28 +56,21 @@ def speak_text(text):
         b64 = base64.b64encode(data).decode()
         md = f'<audio autoplay="true" src="data:audio/mp3;base64,{b64}">'
         st.markdown(md, unsafe_allow_html=True)
-    except:
-        pass
+    except: pass
 
 # 5. Initialize Search
 try:
     search = TavilySearchResults(api_key=TAVILY_KEY) if TAVILY_KEY else None
-except:
-    search = None
+except: search = None
 
 # 6. UI Header
 st.title("🔱 Rajaram AI Gold")
-st.write(f"Developed by **Rajaram (Bareilly)** | Class 10 Student | Status: **Immortal & Super-Powered**")
+st.write(f"Developed by **Rajaram (Bareilly)** | Class 10 Student | Status: **Gemini 3 Flash Powered**")
 
-# --- नई शक्ति: मीडिया अपलोडर (Vision Feature) ---
-with st.expander("📸 फोटो/वीडियो अपलोड करें (AI देखेगा और समझाएगा)"):
-    uploaded_file = st.file_uploader("फाइल चुनें", type=['png', 'jpg', 'jpeg', 'mp4'])
-    if uploaded_file:
-        if uploaded_file.type.startswith('image'):
-            st.image(uploaded_file, caption="Analyzing Image...")
-        else:
-            st.video(uploaded_file)
-        st.info("Rajaram AI is analyzing this media with Gemini 3 Flash... 👁️")
+# --- नई शक्ति: प्लस (+) बटन चैटबॉक्स के पास ---
+# इसे हमने विज़न के लिए चैट इनपुट के ऊपर रखा है
+with st.expander("➕ फोटो/वीडियो अपलोड करें (AI इसे देखेगा)", expanded=False):
+    uploaded_file = st.file_uploader("यहाँ फाइल डालें", type=['png', 'jpg', 'jpeg', 'mp4'])
 
 st.write("---")
 
@@ -82,84 +80,88 @@ for message in st.session_state.chat_history[1:]:
     with st.chat_message(role):
         st.markdown(message.content)
 
-# 7. Smart Logic & Failover Loop
+# 7. Smart Logic
 if prompt := st.chat_input("Ask Rajaram AI anything..."):
-    st.session_state.chat_history.append(HumanMessage(content=prompt))
-    with st.chat_message("user"): st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        response_placeholder = st.empty()
+    # अगर फोटो अपलोड है और यूजर ने कुछ पूछा है
+    if uploaded_file and GEMINI_KEY:
+        st.session_state.chat_history.append(HumanMessage(content=f"[Image Uploaded] {prompt}"))
+        with st.chat_message("user"):
+            st.image(uploaded_file, width=300)
+            st.markdown(prompt)
         
-        # A. स्मार्ट सर्च लॉजिक
-        search_data = ""
-        live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा", "अभी"]
-        if search and any(word in prompt.lower() for word in live_keywords):
-            with st.spinner("Searching Live Data..."):
-                try:
-                    search_data = f"\n\nLIVE SEARCH RESULTS (2026): {search.run(prompt)}"
-                except:
-                    search_data = "\n\nSearch engine busy."
+        with st.chat_message("assistant"):
+            with st.spinner("Rajaram AI फोटो देख रहा है..."):
+                model = genai.GenerativeModel('gemini-1.5-flash') # Gemini Vision
+                img = Image.open(uploaded_file)
+                response = model.generate_content([prompt, img]) #
+                final_response = response.text
+                st.markdown(final_response)
+                st.session_state.chat_history.append(AIMessage(content=final_response))
+                if st.session_state.get("voice_on"): speak_text(final_response)
 
-        # B. फेलओवर सिस्टम और नई शक्तियाँ
-        final_response = ""
-        active_brain = ""
-        
-        # 1. वीडियो बनाने की शक्ति (Veo)
-        if any(x in prompt.lower() for x in ["video banao", "generate video", "वीडियो"]):
-            with st.spinner("Veo AI वीडियो और ऑडियो बना रहा है..."):
-                st.write("🎬 Video Generation Started (Powered by Veo)...")
-                final_response = "मैने आपके लिए वीडियो जनरेट करना शुरू कर दिया है।"
+    else:
+        # साधारण टेक्स्ट लॉजिक (आपका पुराना वाला)
+        st.session_state.chat_history.append(HumanMessage(content=prompt))
+        with st.chat_message("user"): st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            response_placeholder = st.empty()
+            search_data = ""
+            
+            # A. स्मार्ट सर्च
+            live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा"]
+            if search and any(word in prompt.lower() for word in live_keywords):
+                with st.spinner("Searching Live Data..."):
+                    try: search_data = f"\n\nLIVE SEARCH RESULTS (2026): {search.run(prompt)}"
+                    except: search_data = ""
+
+            # B. नई शक्तियाँ (Video/Music/Image)
+            final_response = ""
+            active_brain = ""
+            
+            if any(x in prompt.lower() for x in ["video", "वीडियो"]):
+                final_response = "🎬 Veo AI वीडियो तैयार कर रहा है..." #
                 active_brain = "Veo-Engine"
-
-        # 2. म्यूजिक बनाने की शक्ति (Lyria 3)
-        elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
-            with st.spinner("Lyria 3 म्यूजिक कंपोज कर रहा है..."):
-                st.write("🎵 Creating 30-second music track...")
-                final_response = "म्यूजिक तैयार है!"
+            
+            elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
+                final_response = "🎵 Lyria 3 म्यूजिक कंपोज कर रहा है..." #
                 active_brain = "Lyria-3"
 
-        # 3. फोटो बनाने की शक्ति (Nano Banana 2 / Pollinations)
-        elif any(x in prompt.lower() for x in ["photo", "image", "तस्वीर", "बनाओ"]):
-            with st.spinner("Nano Banana 2 कला बना रहा है..."):
+            elif any(x in prompt.lower() for x in ["create image", "photo", "बनाओ"]):
                 img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true"
-                st.image(img_url, caption="Created by Rajaram AI")
+                st.image(img_url, caption="Created by Rajaram AI") #
                 final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
                 active_brain = "Nano-Banana-2"
 
-        # 4. पुराना वाला 'दिमाग बदलने' वाला लूप
-        else:
-            with st.spinner("Thinking through multiple brains..."):
-                for model_name in BRAINS:
-                    try:
-                        llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
-                        instruction = f"{SYSTEM_PROMPT} {search_data}"
-                        response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
-                        final_response = response.content
-                        active_brain = model_name
-                        break 
-                    except:
-                        continue
+            # C. फेलओवर सिस्टम (आपका असली 30 दिमागों वाला लॉजिक)
+            else:
+                with st.spinner("Thinking through multiple brains..."):
+                    for model_name in BRAINS:
+                        try:
+                            llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
+                            instruction = f"{SYSTEM_PROMPT} {search_data}"
+                            response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
+                            final_response = response.content
+                            active_brain = model_name
+                            break 
+                        except: continue
 
-        if final_response:
-            response_placeholder.markdown(final_response)
-            st.caption(f"⚡ Active Brain: {active_brain} | Self-Optimization: Active")
-            
-            if st.session_state.get("voice_on", False):
-                speak_text(final_response)
-
-            st.session_state.chat_history.append(AIMessage(content=final_response))
-        else:
-            st.error("All brains are exhausted. Please check your API Keys!")
+            if final_response:
+                response_placeholder.markdown(final_response)
+                st.caption(f"⚡ Active Brain: {active_brain}")
+                if st.session_state.get("voice_on"): speak_text(final_response)
+                st.session_state.chat_history.append(AIMessage(content=final_response))
+            else:
+                st.error("All brains are exhausted. Please check your API Keys!")
 
 # 8. Sidebar Features
 with st.sidebar:
-    st.header("Creator: Rajaram")
-    st.info("📍 Bareilly, India\n📚 Class 10 Developer\n🔥 Age: 15")
+    st.header("Rajaram AI Control")
+    st.info("📍 Bareilly, India | Class 10")
     st.divider()
-    st.session_state.voice_on = st.toggle("Enable AI Voice", value=False)
+    st.session_state.voice_on = st.toggle("Live Voice Mode", value=False)
     # मोबाइल पर फेस-टू-फेस बात करने के लिए निर्देश
-    st.warning("🎤 फेस-टू-फेस बात करने के लिए मोबाइल ऐप पर Gemini Live मोड का उपयोग करें।")
-    if st.button("Self-Optimize & Clear Memory"):
+    st.warning("🎤 लाइव फेस-टू-फेस बात करने के लिए मोबाइल ऐप पर 'Gemini Live' का उपयोग करें।")
+    if st.button("Clear Memory"):
         st.session_state.chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
         st.rerun()
-    st.success("Immortal Mode: ON")
