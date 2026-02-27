@@ -146,10 +146,10 @@ UNIVERSAL_FAILOVER_LIST = [
     "llama-3.2-3b-preview", "gemma-7b-it"
     # (Groq और Google के सभी उपलब्ध वर्जन यहाँ ऑटो-इंजेक्ट हो रहे हैं)
 # यहाँ आपका दिमागों वाला ब्रैकेट खत्म हो रहा है
-        ]
+    ]
         
         # ध्यान दो: ये 'if' एकदम ऊपर वाली लाइन की सीध में होना चाहिए
-         if self.GEMINI_KEY:
+    if self.GEMINI_KEY:
             genai.configure(api_key=self.GEMINI_KEY)
         
         self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
