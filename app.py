@@ -109,8 +109,8 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
                 final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
                 active_brain = "Art-Engine"
        else:
-        with st.spinner("Thinking through multiple brains..."):
-            for model_name in BRAINS:
+             with st.spinner("Thinking through multiple brains..."):
+               for model_name in BRAINS:
                 try:
                     llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
                     instruction = f"{SYSTEM_PROMPT} {search_data}"
