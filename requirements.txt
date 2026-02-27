@@ -6,3 +6,6 @@ langchain-core
 tavily-python
 python-dotenv
 gtts
+google-generativeai
+Pillow
+requests
