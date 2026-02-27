@@ -110,6 +110,13 @@ class GlobalCore:
             "CREATIVE": "mixtral-8x7b-32768",
             "FAST": "llama-3.1-8b-instant",
             "VISION": "gemini-1.5-flash"
+             "SUPREME": "llama-3.3-70b-specdec",      # सबसे बुद्धिमान और तेज़ (Primary Brain)
+    "LOGIC": "llama-3.3-70b-versatile",    # मुश्किल सवालों के लिए बैकअप
+    "FAST": "llama-3.2-11b-vision-preview", # पलक झपकते जवाब देने वाला
+    "CREATIVE": "mixtral-8x7b-32768",       # कहानियों और शायरी के लिए
+    "VISION": "gemini-1.5-flash",           # फोटो देखने वाली आँखें (Google)
+    "VISION_PRO": "gemini-1.5-pro"          # सबसे गहरी विज़न शक्ति
+
         }
         
         if self.GEMINI_KEY:
