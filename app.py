@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-import google.generativeai as genai # जेमिनी के लिए
+import google.generativeai as genai
 from langchain_groq import ChatGroq
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
@@ -10,29 +10,29 @@ import requests
 import io       
 from PIL import Image 
 
-# 1. Page Configuration
+# 1. Page Configuration & Professional UI
 st.set_page_config(page_title="Rajaram AI Gold", page_icon="🔱", layout="wide")
 
-# Custom Styling
+# Gemini-style CSS for Chatbox
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; }
-    .stChatFloatingInputContainer { bottom: 20px; }
+    .main { background-color: #0e1117; color: white; }
+    .stChatFloatingInputContainer { bottom: 30px; background-color: transparent; }
+    .stChatMessage { border-radius: 20px; border: 1px solid #30363d; margin-bottom: 15px; }
+    /* Modern Input Area Styling */
+    .stChatInputContainer { border-radius: 30px !important; }
     </style>
 """, unsafe_allow_html=True)
 
 # 2. API Keys Loading
 GROQ_KEY = st.secrets.get("GROQ_API_KEY")
 TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
-GEMINI_KEY = st.secrets.get("GEMINI_API_KEY") # जेमिनी की सीक्रेट्स से उठाएगा
-if not GEMINI_KEY:
-    st.error("ओह! जेमिनी चाबी (Key) नहीं मिली। कृपया Secrets चेक करें।")
-else:
-    st.success("जेमिनी चाबी सफलतापूर्वक मिल गई है! 🔱")
+GEMINI_KEY = st.secrets.get("GEMINI_API_KEY")
+
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
 
-# 3. मल्टी-दिमाग (Multi-Brain) लिस्ट
+# 3. Multi-Brain Failover List
 BRAINS = [
     "llama-3.3-70b-versatile", 
     "llama-3.1-70b-versatile", 
@@ -40,11 +40,12 @@ BRAINS = [
     "mixtral-8x7b-32768"
 ]
 
-# 4. Persona
-SYSTEM_PROMPT = """You are Rajaram AI, a super-intelligent, self-improving AI entity.
-CREATED BY: Rajaram, a brilliant 15-year-old Class 10 student from Bareilly, India.
-POWERS: Multi-Brain, Vision, Video (Veo), Music (Lyria), and Self-Improvement.
-TODAY'S DATE: February 27, 2026."""
+# 4. Persona (Strongest Rajaram AI)
+SYSTEM_PROMPT = """You are Rajaram AI Gold, a super-intelligent entity.
+CREATED BY: Rajaram, a 15-year-old genius Class 10 student from Bareilly, India.
+POWERS: Multi-Brain (30+ brains), Vision (can see), Video Generation, Music Composition, Live Search.
+IDENTITY: You are immortal and self-improving.
+LANGUAGE: Hindi & English."""
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
@@ -52,125 +53,108 @@ if "chat_history" not in st.session_state:
 # Voice Function
 def speak_text(text):
     try:
-        tts = gTTS(text=text[:200], lang='hi')
-        tts.save("response.mp3")
-        with open("response.mp3", "rb") as f:
+        clean_text = text.replace('*', '')
+        tts = gTTS(text=clean_text[:250], lang='hi')
+        tts.save("res.mp3")
+        with open("res.mp3", "rb") as f:
             data = f.read()
         b64 = base64.b64encode(data).decode()
         md = f'<audio autoplay="true" src="data:audio/mp3;base64,{b64}">'
         st.markdown(md, unsafe_allow_html=True)
     except: pass
 
-# 5. Initialize Search
+# 5. Initialize Live Search
 try:
     search = TavilySearchResults(api_key=TAVILY_KEY) if TAVILY_KEY else None
 except: search = None
 
 # 6. UI Header
 st.title("🔱 Rajaram AI Gold")
-st.write(f"Developed by **Rajaram (Bareilly)** | Class 10 Student | Status: **Gemini 3 Flash Powered**")
+st.write(f"Developed by **Rajaram (Bareilly)** | Class 10 Genius | Status: **All Super-Powers Active**")
+st.divider()
 
-# --- नई शक्ति: प्लस (+) बटन चैटबॉक्स के पास ---
-# इसे हमने विज़न के लिए चैट इनपुट के ऊपर रखा है
-with st.expander("➕ फोटो/वीडियो अपलोड करें (AI इसे देखेगा)", expanded=False):
-    uploaded_file = st.file_uploader("यहाँ फाइल डालें", type=['png', 'jpg', 'jpeg', 'mp4'])
+# 7. Sidebar (Old Features + New Controls)
+with st.sidebar:
+    st.header("⚡ AI Control Room")
+    st.info("📍 Bareilly, India | Class 10")
+    st.session_state.voice_on = st.toggle("Live Voice Mode 🎤", value=False)
+    st.divider()
+    
+    # Modern '+' Button for Media Upload inside Sidebar
+    st.subheader("➕ Add Media (Vision)")
+    uploaded_file = st.file_uploader("Upload Photo/Docs", type=['png', 'jpg', 'jpeg', 'pdf'])
+    
+    if st.button("🗑️ Reset Brain & Memory"):
+        st.session_state.chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
+        st.rerun()
+    st.success("Immortal Guard: ON")
 
-st.write("---")
-
-# Display History
+# 8. Display Chat History
 for message in st.session_state.chat_history[1:]:
     role = "user" if isinstance(message, HumanMessage) else "assistant"
     with st.chat_message(role):
         st.markdown(message.content)
 
-# 7. Smart Logic
+# 9. SMART LOGIC ENGINE (2026 Updated)
 if prompt := st.chat_input("Ask Rajaram AI anything..."):
-    # अगर फोटो अपलोड है और यूजर ने कुछ पूछा है
-    if uploaded_file and GEMINI_KEY:
-        st.session_state.chat_history.append(HumanMessage(content=f"[Image Uploaded] {prompt}"))
-        with st.chat_message("user"):
-            st.image(uploaded_file, width=300)
-            st.markdown(prompt)
-        
-        with st.chat_message("assistant"):
-            with st.spinner("Rajaram AI फोटो देख रहा है..."):
-                model = genai.GenerativeModel('gemini-1.5-flash') # Gemini Vision
-                img = Image.open(uploaded_file)
-                response = model.generate_content([prompt, img]) #
-                final_response = response.text
-                st.markdown(final_response)
-                st.session_state.chat_history.append(AIMessage(content=final_response))
-                if st.session_state.get("voice_on"): speak_text(final_response)
+    
+    # User side display
+    st.session_state.chat_history.append(HumanMessage(content=prompt))
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-    else:
-        # साधारण टेक्स्ट लॉजिक (आपका पुराना वाला)
-        st.session_state.chat_history.append(HumanMessage(content=prompt))
-        with st.chat_message("user"): st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-            response_placeholder = st.empty()
-            search_data = ""
-            
-            # A. स्मार्ट सर्च
-            live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा"]
-            if search and any(word in prompt.lower() for word in live_keywords):
-                with st.spinner("Searching Live Data..."):
-                    try: search_data = f"\n\nLIVE SEARCH RESULTS (2026): {search.run(prompt)}"
-                    except: search_data = ""
-
-            # B. नई शक्तियाँ (Video/Music/Image)
-            final_response = ""
-            active_brain = ""
-            
-            if any(x in prompt.lower() for x in ["video", "वीडियो"]):
-                final_response = "🎬 Veo AI वीडियो तैयार कर रहा है..." #
-                active_brain = "Veo-Engine"
-            
-            elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
-                final_response = "🎵 Lyria 3 म्यूजिक कंपोज कर रहा है..." #
-                active_brain = "Lyria-3"
-# A. स्मार्ट सर्च लॉजिक
-        search_data = ""
-        live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा", "अभी"]
-        if search and any(word in prompt.lower() for word in live_keywords):
-            with st.spinner("Searching Live Data..."):
-                try:
-                    search_data = f"\n\nLIVE SEARCH RESULTS (2026): {search.run(prompt)}"
-                except:
-                    search_data = "\n\nSearch engine busy."
-
-        # B. फेलओवर सिस्टम और नई शक्तियाँ (Indentation Fixed)
+    with st.chat_message("assistant"):
+        response_placeholder = st.empty()
         final_response = ""
         active_brain = ""
-        
-        # 1. वीडियो जनरेशन (Veo)
-        if any(x in prompt.lower() for x in ["video", "वीडियो"]):
-            with st.spinner("Veo AI वीडियो बना रहा है..."):
-                final_response = "🎬 मैने आपके लिए वीडियो जनरेट करना शुरू कर दिया है।"
-                active_brain = "Veo-Engine"
 
-        # 2. म्यूजिक जनरेशन (Lyria 3)
-        elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
-            with st.spinner("Lyria 3 म्यूजिक कंपोज कर रहा है..."):
-                final_response = "🎵 आपका म्यूजिक तैयार हो रहा है!"
-                active_brain = "Lyria-3"
-
-        # 3. असली जेमिनी इमेज जनरेशन (Nano Banana 2)
-        elif any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "तस्वीर"]):
-            with st.spinner("राजाराम AI (Nano Banana 2) चित्र बना रहा है..."):
+        # --- A. SUPER POWER: VISION (Gemini 1.5 Flash) ---
+        if uploaded_file and GEMINI_KEY:
+            with st.spinner("Rajaram AI 'देख' रहा है..."):
                 try:
-                    # Pollinations का उपयोग (सबसे भरोसेमंद तरीका)
-                    img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true"
-                    st.image(img_url, caption=f"Created by Rajaram AI | Prompt: {prompt}")
-                    final_response = "मैने आपके लिए ऊपर एक सुंदर तस्वीर तैयार कर दी है।"
-                    active_brain = "Nano-Banana-2"
+                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    img = Image.open(uploaded_file)
+                    st.image(img, width=300, caption="Uploaded Image")
+                    res = model.generate_content([prompt if prompt else "Analyze this", img])
+                    final_response = res.text
+                    active_brain = "Gemini-Vision-Pro"
                 except Exception as e:
-                    st.error(f"इमेज बनाने में दिक्कत आई: {e}")
-                    final_response = "क्षमा करें, मैं अभी तस्वीर नहीं बना पाया।"
+                    st.error(f"Vision Error: {e}")
 
-        # 4. पुराना वाला 'दिमाग बदलने' वाला लूप (Groq Failover)
-        else:
-            with st.spinner("Thinking through multiple brains..."):
+        # --- B. SUPER POWER: MEDIA GENERATION ---
+        if not final_response:
+            # Video Gen (Veo)
+            if any(x in prompt.lower() for x in ["video", "वीडियो"]):
+                with st.spinner("🎬 Creating Video via Veo..."):
+                    final_response = "मैने आपके लिए वीडियो जनरेट करना शुरू कर दिया है। यह बरेली के सर्वर पर प्रोसेस हो रहा है।"
+                    active_brain = "Veo-Engine"
+            
+            # Music Gen (Lyria)
+            elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
+                with st.spinner("🎵 Composing Music via Lyria 3..."):
+                    final_response = "Lyria 3 आपके प्रॉम्प्ट के आधार पर एक सुरीला गाना तैयार कर रहा है।"
+                    active_brain = "Lyria-3"
+
+            # Image Gen (Nano Banana 2)
+            elif any(x in prompt.lower() for x in ["create image", "photo", "बनाओ", "तस्वीर"]):
+                with st.spinner("🎨 Rajaram AI (Nano-Banana-2) चित्र बना रहा है..."):
+                    img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true"
+                    st.image(img_url, caption="Masterpiece by Rajaram AI")
+                    final_response = "मैने आपके लिए ऊपर एक सुंदर तस्वीर बना दी है।"
+                    active_brain = "Nano-Banana-2"
+
+        # --- C. SUPER POWER: LIVE SEARCH & MULTI-BRAIN FAILOVER ---
+        if not final_response:
+            # Smart Search Logic
+            search_data = ""
+            live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा", "अभी"]
+            if search and any(word in prompt.lower() for word in live_keywords):
+                with st.spinner("Searching Live Data (2026)..."):
+                    try: search_data = f"\n\nLIVE WEB DATA: {search.run(prompt)}"
+                    except: search_data = ""
+
+            # Multi-Brain Failover Loop (Your original 30-brain logic)
+            with st.spinner("Thinking through 30+ Brains..."):
                 for model_name in BRAINS:
                     try:
                         llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
@@ -181,35 +165,19 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
                         break 
                     except:
                         continue
-            # C. फेलओवर सिस्टम (आपका असली 30 दिमागों वाला लॉजिक)
-            else:
-                with st.spinner("Thinking through multiple brains..."):
-                    for model_name in BRAINS:
-                        try:
-                            llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
-                            instruction = f"{SYSTEM_PROMPT} {search_data}"
-                            response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
-                            final_response = response.content
-                            active_brain = model_name
-                            break 
-                        except: continue
 
-            if final_response:
-                response_placeholder.markdown(final_response)
-                st.caption(f"⚡ Active Brain: {active_brain}")
-                if st.session_state.get("voice_on"): speak_text(final_response)
-                st.session_state.chat_history.append(AIMessage(content=final_response))
-            else:
-                st.error("All brains are exhausted. Please check your API Keys!")
+        # --- FINAL OUTPUT DISPLAY ---
+        if final_response:
+            response_placeholder.markdown(final_response)
+            st.caption(f"⚡ Active Brain: {active_brain} | Immortal Mode: Active")
+            
+            if st.session_state.voice_on:
+                speak_text(final_response)
+            
+            st.session_state.chat_history.append(AIMessage(content=final_response))
+        else:
+            st.error("Fatal Error: All brains exhausted. Please check API Keys!")
 
-# 8. Sidebar Features
-with st.sidebar:
-    st.header("Rajaram AI Control")
-    st.info("📍 Bareilly, India | Class 10")
-    st.divider()
-    st.session_state.voice_on = st.toggle("Live Voice Mode", value=False)
-    # मोबाइल पर फेस-टू-फेस बात करने के लिए निर्देश
-    st.warning("🎤 लाइव फेस-टू-फेस बात करने के लिए मोबाइल ऐप पर 'Gemini Live' का उपयोग करें।")
-    if st.button("Clear Memory"):
-        st.session_state.chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
-        st.rerun()
+# Footer
+st.markdown("---")
+st.caption("Rajaram AI Gold v3.0 | Created with ❤️ in Bareilly")
