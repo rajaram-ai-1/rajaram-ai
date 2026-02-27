@@ -122,14 +122,19 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
                         break # अगर सफल हुआ तो रुक जाओ
                     except:
                         continue # अगर फेल हुआ तो अगले दिमाग पर जाओ
+           # मान लो यहाँ आपका लूप खत्म हुआ है
+        if final_response:
             response_placeholder.markdown(final_response)
             st.caption(f"⚡ Active Brain: {active_brain} | Self-Optimization: Active")
             
             if st.session_state.get("voice_on", False):
                 speak_text(final_response)
 
+            # इस लाइन को मैंने अंदर (आगे) खिसका दिया है
             st.session_state.chat_history.append(AIMessage(content=final_response))
+        
         else:
+            # अब यह else ऊपर वाले 'if final_response' के बिल्कुल नीचे आ जाएगा
             st.error("All 30 brains are currently exhausted. Please check your API Keys!")
 
 # 8. Sidebar Features
