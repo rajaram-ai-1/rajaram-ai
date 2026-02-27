@@ -108,7 +108,9 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
                 st.image(img_url, caption="Created by Rajaram AI | Bareilly's Pride")
                 final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
                 active_brain = "Art-Engine"
-      else:
+     # मान लो यहाँ आपका "if" वाला कोड खत्म हुआ
+        
+        else:
             with st.spinner("Thinking through multiple brains..."):
                 for model_name in BRAINS:
                     try:
