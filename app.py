@@ -109,15 +109,15 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
                 final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
                 active_brain = "Art-Engine"
         else:
-        with st.spinner("Thinking through multiple brains..."):
-            for model_name in BRAINS:
-                try:
-                    llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
-                    instruction = f"{SYSTEM_PROMPT} {search_data}"
-                    response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
-                    final_response = response.content
-                    active_brain = model_name
-                    break # अगर सफल हुआ तो रुक जाओ
+               with st.spinner("Thinking through multiple brains..."):
+                 for model_name in BRAINS:
+                   try:
+                      llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
+                      instruction = f"{SYSTEM_PROMPT} {search_data}"
+                      response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
+                      final_response = response.content
+                      active_brain = model_name
+                      break # अगर सफल हुआ तो रुक जाओ
                 except:
                     continue # अगर फेल हुआ तो अगले दिमाग पर जाओ
 
