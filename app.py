@@ -147,7 +147,6 @@ UNIVERSAL_FAILOVER_LIST = [
     # (Groq और Google के सभी उपलब्ध वर्जन यहाँ ऑटो-इंजेक्ट हो रहे हैं)
 ]
 # ============================================================
-        }
         
         if self.GEMINI_KEY:
             genai.configure(api_key=self.GEMINI_KEY)
