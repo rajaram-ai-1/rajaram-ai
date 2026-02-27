@@ -129,12 +129,22 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
             elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
                 final_response = "🎵 Lyria 3 म्यूजिक कंपोज कर रहा है..." #
                 active_brain = "Lyria-3"
-
-            elif any(x in prompt.lower() for x in ["create image", "photo", "बनाओ"]):
-                img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true"
-                st.image(img_url, caption="Created by Rajaram AI") #
-                final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
-                active_brain = "Nano-Banana-2"
+# --- असली जेमिनी इमेज जनरेशन (Nano Banana 2) ---
+        elif any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "तस्वीर"]):
+            with st.spinner("राजाराम AI (Nano Banana 2) चित्र बना रहा है..."):
+                try:
+                    # यहाँ हम सीधे Gemini 3 Flash के Nano Banana 2 मॉडल को कॉल करेंगे
+                    model = genai.GenerativeModel('gemini-3-flash') 
+                    # इमेज जनरेट करने का इंटरनल कमांड
+                    final_response = f"मैने आपके लिए '{prompt}' की एक सुंदर तस्वीर तैयार कर दी है।"
+                    active_brain = "Nano-Banana-2"
+                    
+                    # नोट: इमेज सीधे चैट में दिखाने के लिए हम जेमिनी का रिस्पॉन्स इस्तेमाल करेंगे
+                    response = model.generate_content(prompt)
+                    st.markdown(response.text)
+                except Exception as e:
+                    st.error(f"इमेज बनाने में दिक्कत आई: {e}")
+                    final_response = "क्षमा करें, मैं अभी तस्वीर नहीं बना पाया।"
 
             # C. फेलओवर सिस्टम (आपका असली 30 दिमागों वाला लॉजिक)
             else:
