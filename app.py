@@ -5,7 +5,10 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from gtts import gTTS
 import base64
-
+import requests # फोटो बनाने के लिए
+import base64   # फोटो देखने (Vision) के लिए
+import io       # डेटा हैंडल करने के लिए
+from PIL import Image # फोटो खोलने के लिए
 # 1. Page Configuration
 st.set_page_config(page_title="Rajaram AI Gold", page_icon="🔱", layout="wide")
 
@@ -95,7 +98,17 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
         # 
         final_response = ""
         active_brain = ""
+        # फोटो बनाने की कीवर्ड लिस्ट
+        image_keywords = ["create image", "photo banayein", "generate photo", "फोटो बनाओ", "इमेज बनाओ"]
         
+        if any(x in prompt.lower() for x in image_keywords):
+            with st.spinner("राजाराम AI कला बना रहा है..."):
+                # फोटो बनाने का फ्री इंजन (Pollinations)
+                img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?width=1024&height=1024&nologo=true"
+                st.image(img_url, caption="Created by Rajaram AI | Bareilly's Pride")
+                final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
+                active_brain = "Art-Engine"
+        else:
         with st.spinner("Thinking through multiple brains..."):
             for model_name in BRAINS:
                 try:
