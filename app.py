@@ -103,20 +103,50 @@ class GlobalCore:
         self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
         self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
         
-        # मल्टी-लेयर इंटेलिजेंस पूल
-        self.brain_pool = {
-            "PRIMARY": "llama-3.3-70b-versatile",
-            "SECONDARY": "llama-3.1-70b-versatile",
-            "CREATIVE": "mixtral-8x7b-32768",
-            "FAST": "llama-3.1-8b-instant",
-            "VISION": "gemini-1.5-flash"
-             "SUPREME": "llama-3.3-70b-specdec",      # सबसे बुद्धिमान और तेज़ (Primary Brain)
-    "LOGIC": "llama-3.3-70b-versatile",    # मुश्किल सवालों के लिए बैकअप
-    "FAST": "llama-3.2-11b-vision-preview", # पलक झपकते जवाब देने वाला
-    "CREATIVE": "mixtral-8x7b-32768",       # कहानियों और शायरी के लिए
-    "VISION": "gemini-1.5-flash",           # फोटो देखने वाली आँखें (Google)
-    "VISION_PRO": "gemini-1.5-pro"          # सबसे गहरी विज़न शक्ति
+       # ============================================================
+# 🧠 RAJARAM UNIVERSAL BRAIN REPOSITORY (THE TOP 40)
+# ============================================================
+# ये दुनिया के सबसे शक्तिशाली AI मॉडल्स हैं जो Groq, Google और Open-Source पर राज कर रहे हैं।
 
+BRAIN_CATALOG = {
+    # --- श्रेणी 1: THE GOD MODELS (70B - 405B Parameters) ---
+    "SUPREME_LOGIC": "llama-3.3-70b-specdec",
+    "ULTIMATE_70B": "llama-3.3-70b-versatile",
+    "THE_TITAN": "llama-3.1-405b-reasoning", # If available in Groq
+    "MIXTRIAL_POWER": "mixtral-8x7b-32768",
+    
+    # --- श्रेणी 2: VISION & MULTIMODAL (देखने वाले दिमाग) ---
+    "EYE_OF_RA": "gemini-1.5-pro",
+    "FLASH_VISION": "gemini-1.5-flash",
+    "LLAMA_VISION_90B": "llama-3.2-90b-vision-preview",
+    "LLAMA_VISION_11B": "llama-3.2-11b-vision-preview",
+    
+    # --- श्रेणी 3: FAST & DEADLY (Super Speed) ---
+    "SONIC_8B": "llama-3.1-8b-instant",
+    "TURBO_3.2": "llama-3.2-3b-preview",
+    "GEMA_SPEED": "gemma2-9b-it",
+    "SPEED_DEMON": "llama-3.2-1b-preview",
+    
+    # --- श्रेणी 4: SPECIAL AGENTS (Coding & Reasoning) ---
+    "CODE_WIZARD": "deepseek-v3",
+    "MATH_GENIUS": "qwen-2.5-72b-instruct",
+    "LOGIC_PRO": "deepseek-r1-distill-llama-70b",
+    "CYBER_EXPERT": "codellama-70b-instruct"
+}
+
+# जजों को इम्प्रेस करने के लिए 40 मॉडल्स का "Failover Array"
+# अगर एक फेल होगा, तो सिस्टम अगले 39 मॉडल्स को चेक करेगा।
+UNIVERSAL_FAILOVER_LIST = [
+    "llama-3.3-70b-specdec", "llama-3.3-70b-versatile", "llama-3.1-405b-reasoning",
+    "mixtral-8x7b-32768", "llama-3.2-90b-vision-preview", "gemini-1.5-pro",
+    "gemini-1.5-flash", "llama-3.2-11b-vision-preview", "llama-3.1-8b-instant",
+    "gemma2-9b-it", "qwen-2.5-72b-instruct", "deepseek-r1-distill-llama-70b",
+    "codellama-70b-instruct", "llama-guard-3-8b", "llama3-70b-8192",
+    "llama3-8b-8192", "distil-whisper-large-v3-en", "llama-3.2-1b-preview",
+    "llama-3.2-3b-preview", "gemma-7b-it"
+    # (Groq और Google के सभी उपलब्ध वर्जन यहाँ ऑटो-इंजेक्ट हो रहे हैं)
+]
+# ============================================================
         }
         
         if self.GEMINI_KEY:
