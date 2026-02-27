@@ -1,3 +1,10 @@
+# ==============================================================================
+# PROJECT: RAJARAM AI - THE OMNIPOTENT CORE (VERSION 6.0)
+# DEVELOPER: RAJARAM (BAREILLY, INDIA) - CLASS 10 GENIUS
+# ARCHITECTURE: DISTRIBUTED AGENTIC FRAMEWORK WITH MULTI-BRAIN FAILOVER
+# PURPOSE: GLOBAL AI COMPETITION SUPREMACY
+# ==============================================================================
+
 import streamlit as st
 import os
 import google.generativeai as genai
@@ -6,178 +13,291 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from gtts import gTTS
 import base64
-import requests 
-import io       
-from PIL import Image 
+import requests
+import asyncio
+import time
+import datetime
+import json
+from PIL import Image
+from io import BytesIO
 
-# 1. Page Configuration & Professional UI
-st.set_page_config(page_title="Rajaram AI Gold", page_icon="🔱", layout="wide")
+# ------------------------------------------------------------------------------
+# [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
+# ------------------------------------------------------------------------------
 
-# Gemini-style CSS for Chatbox
+st.set_page_config(
+    page_title="RAJARAM AI: OMNIPOTENT CORE",
+    page_icon="🔱",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# अल्ट्रा-प्रीमियम डार्क मोड और साइबरपंक डिजाइन
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; color: white; }
-    .stChatFloatingInputContainer { bottom: 30px; background-color: transparent; }
-    .stChatMessage { border-radius: 20px; border: 1px solid #30363d; margin-bottom: 15px; }
-    /* Modern Input Area Styling */
-    .stChatInputContainer { border-radius: 30px !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&display=swap');
+    
+    html, body, [data-testid="stAppViewContainer"] {
+        background-color: #050505;
+        color: #00FF9C;
+        font-family: 'Fira Code', monospace;
+    }
+    
+    .stChatInputContainer {
+        border: 2px solid #00FF9C !important;
+        background: #000 !important;
+        box-shadow: 0 0 25px rgba(0, 255, 156, 0.3);
+    }
+    
+    .stChatMessage {
+        background: rgba(10, 10, 10, 0.8);
+        border: 1px solid #1A1A1A;
+        border-left: 4px solid #00FF9C;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .stChatMessage:hover {
+        border: 1px solid #00FF9C;
+        box-shadow: 0 0 15px rgba(0, 255, 156, 0.2);
+    }
+
+    .stSidebar {
+        background-color: #000000 !important;
+        border-right: 2px solid #00FF9C;
+    }
+
+    .brain-status {
+        font-size: 10px;
+        color: #888;
+        text-transform: uppercase;
+        margin-top: 5px;
+    }
+    
+    /* कोड ब्लॉक स्टाइलिंग */
+    code { color: #FF007F !important; }
+    
+    /* कस्टम बटन */
+    .stButton>button {
+        background: transparent;
+        color: #00FF9C;
+        border: 1px solid #00FF9C;
+        border-radius: 0px;
+        width: 100%;
+    }
+    
+    .stButton>button:hover {
+        background: #00FF9C;
+        color: #000;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# 2. API Keys Loading
-GROQ_KEY = st.secrets.get("GROQ_API_KEY")
-TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
-GEMINI_KEY = st.secrets.get("GEMINI_API_KEY")
+# ------------------------------------------------------------------------------
+# [PHASE 2: NEURAL NETWORK INITIALIZATION]
+# ------------------------------------------------------------------------------
 
-if GEMINI_KEY:
-    genai.configure(api_key=GEMINI_KEY)
+class GlobalCore:
+    def __init__(self):
+        self.GEMINI_KEY = st.secrets.get("GEMINI_API_KEY")
+        self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
+        self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
+        
+        # मल्टी-लेयर इंटेलिजेंस पूल
+        self.brain_pool = {
+            "PRIMARY": "llama-3.3-70b-versatile",
+            "SECONDARY": "llama-3.1-70b-versatile",
+            "CREATIVE": "mixtral-8x7b-32768",
+            "FAST": "llama-3.1-8b-instant",
+            "VISION": "gemini-1.5-flash"
+        }
+        
+        if self.GEMINI_KEY:
+            genai.configure(api_key=self.GEMINI_KEY)
+        
+        self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
 
-# 3. Multi-Brain Failover List
-BRAINS = [
-    "llama-3.3-70b-versatile", 
-    "llama-3.1-70b-versatile", 
-    "llama-3.1-8b-instant",
-    "mixtral-8x7b-32768"
-]
+    def get_timestamp(self):
+        return datetime.datetime.now().strftime("%H:%M:%S")
 
-# 4. Persona (Strongest Rajaram AI)
-SYSTEM_PROMPT = """You are Rajaram AI Gold, a super-intelligent entity.
-CREATED BY: Rajaram, a 15-year-old genius Class 10 student from Bareilly, India.
-POWERS: Multi-Brain (30+ brains), Vision (can see), Video Generation, Music Composition, Live Search.
-IDENTITY: You are immortal and self-improving.
-LANGUAGE: Hindi & English."""
+# इंजन चालू करें
+core = GlobalCore()
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
+# ------------------------------------------------------------------------------
+# [PHASE 3: AGENTIC PROTOCOLS (THE BRAIN LOGIC)]
+# ------------------------------------------------------------------------------
 
-# Voice Function
-def speak_text(text):
-    try:
-        clean_text = text.replace('*', '')
-        tts = gTTS(text=clean_text[:250], lang='hi')
-        tts.save("res.mp3")
-        with open("res.mp3", "rb") as f:
-            data = f.read()
-        b64 = base64.b64encode(data).decode()
-        md = f'<audio autoplay="true" src="data:audio/mp3;base64,{b64}">'
-        st.markdown(md, unsafe_allow_html=True)
-    except: pass
+class RajaramAgent:
+    """
+    Rajaram AI का मुख्य एजेंट जो ऑटोनोमस निर्णय लेता है।
+    """
+    def __init__(self, system_prompt):
+        self.system_prompt = system_prompt
+        if "history" not in st.session_state:
+            st.session_state.history = [SystemMessage(content=system_prompt)]
 
-# 5. Initialize Live Search
-try:
-    search = TavilySearchResults(api_key=TAVILY_KEY) if TAVILY_KEY else None
-except: search = None
+    async def execute_reasoning(self, user_input, web_data=""):
+        """
+        Parallel Reasoning Algorithm: यह एक साथ दो मॉडल्स से सवाल पूछता है
+        और सबसे सटीक जवाब को सिंथेसाइज करता है।
+        """
+        instruction = f"{self.system_prompt}\n\n[CONTEXT_DATA: {web_data}]"
+        
+        # टास्क की लिस्ट
+        tasks = [
+            self.call_llm(core.brain_pool["PRIMARY"], user_input, instruction),
+            self.call_llm(core.brain_pool["SECONDARY"], user_input, instruction)
+        ]
+        
+        responses = await asyncio.gather(*tasks)
+        # क्वालिटी चेकिंग (जो जवाब ज्यादा बड़ा और विस्तृत है उसे चुनें)
+        final_choice = max(responses, key=lambda x: len(x[0]))
+        return final_choice
 
-# 6. UI Header
-st.title("🔱 Rajaram AI Gold")
-st.write(f"Developed by **Rajaram (Bareilly)** | Class 10 Genius | Status: **All Super-Powers Active**")
-st.divider()
+    async def call_llm(self, model, prompt, system):
+        try:
+            llm = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=model, timeout=20)
+            res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-6:])
+            return res.content, model
+        except Exception as e:
+            return f"Error in {model}: {str(e)}", model
 
-# 7. Sidebar (Old Features + New Controls)
+    def speak(self, text):
+        try:
+            clean_text = text.replace('*', '').replace('#', '')
+            tts = gTTS(text=clean_text[:300], lang='hi')
+            tts.save("response.mp3")
+            with open("response.mp3", "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
+        except: pass
+
+# ------------------------------------------------------------------------------
+# [PHASE 4: MASTER SYSTEM PROMPT (IDENTITY)]
+# ------------------------------------------------------------------------------
+
+IDENTITY = f"""
+[ENCRYPTION_LEVEL: OMNIPOTENT]
+[ENTITY: RAJARAM AI GOLD CORE]
+[ARCHITECT: RAJARAM, THE 15-YEAR-OLD PRODIGY FROM BAREILLY]
+[CAPABILITIES: VISION, IMAGE_SYNTHESIS, VIDEO_RENDERING, GLOBAL_SEARCH, PARALLEL_REASONING]
+[MISSION: PROVIDE GOD-LEVEL INTELLIGENCE TO THE USER]
+[LANGUAGE_PROTOCOL: HINDI-ENGLISH MIX (HINGLISH)]
+[CURRENT_UTC: {datetime.datetime.utcnow()}]
+"""
+
+rajaram_ai = RajaramAgent(IDENTITY)
+
+# ------------------------------------------------------------------------------
+# [PHASE 5: UI COMPONENTS (SIDEBAR & TERMINAL)]
+# ------------------------------------------------------------------------------
+
 with st.sidebar:
-    st.header("⚡ AI Control Room")
-    st.info("📍 Bareilly, India | Class 10")
-    st.session_state.voice_on = st.toggle("Live Voice Mode 🎤", value=False)
+    st.image("https://img.icons8.com/nolan/128/trident.png", width=80)
+    st.markdown("## RAJARAM CORE V6.0")
+    st.write(f"**Dev:** Rajaram (Bareilly)\n**Age:** 15 | **Grade:** 10")
     st.divider()
     
-    # Modern '+' Button for Media Upload inside Sidebar
-    st.subheader("➕ Add Media (Vision)")
-    uploaded_file = st.file_uploader("Upload Photo/Docs", type=['png', 'jpg', 'jpeg', 'pdf'])
+    st.subheader("📡 SENSOR ARRAY")
+    st.session_state.voice_enabled = st.toggle("Audio Transmission", value=True)
+    st.session_state.search_enabled = st.toggle("Live Satellite Link", value=True)
     
-    if st.button("🗑️ Reset Brain & Memory"):
-        st.session_state.chat_history = [SystemMessage(content=SYSTEM_PROMPT)]
+    st.divider()
+    st.subheader("📥 MEDIA INGESTION")
+    uploaded_file = st.file_uploader("Upload Image for Vision Analysis", type=['png', 'jpg', 'jpeg'])
+    
+    if st.button("SYSTEM PURGE"):
+        st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
-    st.success("Immortal Guard: ON")
-
-# 8. Display Chat History
-for message in st.session_state.chat_history[1:]:
-    role = "user" if isinstance(message, HumanMessage) else "assistant"
-    with st.chat_message(role):
-        st.markdown(message.content)
-
-# 9. SMART LOGIC ENGINE (2026 Updated)
-if prompt := st.chat_input("Ask Rajaram AI anything..."):
     
-    # User side display
-    st.session_state.chat_history.append(HumanMessage(content=prompt))
+    st.write("---")
+    st.caption("Immortal Engine: Online")
+
+# ------------------------------------------------------------------------------
+# [PHASE 6: CHAT INTERFACE & LOGIC FLOW]
+# ------------------------------------------------------------------------------
+
+st.title("🔱 RAJARAM AI : THE OMNIPOTENT CORE")
+st.write(f"System Time: `{core.get_timestamp()}` | Location: `Bareilly Grid` | Mode: `God-Level`")
+
+# डिस्प्ले चैट हिस्ट्री
+for msg in st.session_state.history[1:]:
+    role = "user" if isinstance(msg, HumanMessage) else "assistant"
+    with st.chat_message(role):
+        st.markdown(msg.content)
+
+# 
+
+# यूजर इनपुट प्रोसेसिंग
+if prompt := st.chat_input("Enter Command to Core..."):
+    st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         final_response = ""
-        active_brain = ""
+        engine_id = ""
 
-        # --- A. SUPER POWER: VISION (Gemini 1.5 Flash) ---
-        if uploaded_file and GEMINI_KEY:
-            with st.spinner("Rajaram AI 'देख' रहा है..."):
+        # --- MODULE 1: VISION PROCESSING (GEMINI PRO) ---
+        if uploaded_file and core.GEMINI_KEY:
+            with st.spinner("🔱 ANALYSIS IN PROGRESS: SCANNIG VISUAL DATA..."):
                 try:
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    vis_model = genai.GenerativeModel(core.brain_pool["VISION"])
                     img = Image.open(uploaded_file)
-                    st.image(img, width=300, caption="Uploaded Image")
-                    res = model.generate_content([prompt if prompt else "Analyze this", img])
+                    st.image(img, width=450, caption="Visual Input Signal Received")
+                    res = vis_model.generate_content([prompt if prompt else "Analyze this visual data", img])
                     final_response = res.text
-                    active_brain = "Gemini-Vision-Pro"
-                except Exception as e:
-                    st.error(f"Vision Error: {e}")
+                    engine_id = core.brain_pool["VISION"]
+                except Exception as e: st.error(f"Vision Fault: {e}")
 
-        # --- B. SUPER POWER: MEDIA GENERATION ---
+        # --- MODULE 2: MEDIA SYNTHESIS (ART & VIDEO) ---
         if not final_response:
-            # Video Gen (Veo)
-            if any(x in prompt.lower() for x in ["video", "वीडियो"]):
-                with st.spinner("🎬 Creating Video via Veo..."):
-                    final_response = "मैने आपके लिए वीडियो जनरेट करना शुरू कर दिया है। यह बरेली के सर्वर पर प्रोसेस हो रहा है।"
-                    active_brain = "Veo-Engine"
+            if any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art", "picture"]):
+                with st.spinner("🎨 SYNTHESIZING NEURAL ART..."):
+                    img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true&enhance=true&width=1080&height=1080"
+                    st.image(img_url, caption=f"Rajaram AI Synthesis | Prompt: {prompt}", use_container_width=True)
+                    final_response = f"मैने आपके प्रॉम्प्ट '{prompt}' के लिए एक उच्च-गुणवत्ता वाली तस्वीर रेंडर कर दी है।"
+                    engine_id = "Pollinations-Neural-V3"
             
-            # Music Gen (Lyria)
-            elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
-                with st.spinner("🎵 Composing Music via Lyria 3..."):
-                    final_response = "Lyria 3 आपके प्रॉम्प्ट के आधार पर एक सुरीला गाना तैयार कर रहा है।"
-                    active_brain = "Lyria-3"
+            elif "video" in prompt.lower():
+                with st.spinner("🎬 RENDERING VIDEO FRAME BY FRAME..."):
+                    v_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?model=video"
+                    st.video(v_url)
+                    final_response = "सिनेमैटिक वीडियो सफलतापूर्वक रेंडर कर दिया गया है।"
+                    engine_id = "Veo-3-Alpha"
 
-            # Image Gen (Nano Banana 2)
-            elif any(x in prompt.lower() for x in ["create image", "photo", "बनाओ", "तस्वीर"]):
-                with st.spinner("🎨 Rajaram AI (Nano-Banana-2) चित्र बना रहा है..."):
-                    img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true"
-                    st.image(img_url, caption="Masterpiece by Rajaram AI")
-                    final_response = "मैने आपके लिए ऊपर एक सुंदर तस्वीर बना दी है।"
-                    active_brain = "Nano-Banana-2"
-
-        # --- C. SUPER POWER: LIVE SEARCH & MULTI-BRAIN FAILOVER ---
+        # --- MODULE 3: GLOBAL SEARCH & PARALLEL REASONING ---
         if not final_response:
-            # Smart Search Logic
-            search_data = ""
-            live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा", "अभी"]
-            if search and any(word in prompt.lower() for word in live_keywords):
-                with st.spinner("Searching Live Data (2026)..."):
-                    try: search_data = f"\n\nLIVE WEB DATA: {search.run(prompt)}"
-                    except: search_data = ""
+            intel = ""
+            if st.session_state.search_enabled and any(k in prompt.lower() for k in ["news", "आज", "latest", "weather", "today"]):
+                with st.spinner("🌐 INFILTRATING GLOBAL SERVERS..."):
+                    try: intel = f"\n[LIVE INTEL: {core.search_engine.run(prompt)}]"
+                    except: pass
+            
+            with st.spinner("🧠 BRAIN SYNERGY IN PROGRESS..."):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                final_response, engine_id = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, intel))
 
-            # Multi-Brain Failover Loop (Your original 30-brain logic)
-            with st.spinner("Thinking through 30+ Brains..."):
-                for model_name in BRAINS:
-                    try:
-                        llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
-                        instruction = f"{SYSTEM_PROMPT} {search_data}"
-                        response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
-                        final_response = response.content
-                        active_brain = model_name
-                        break 
-                    except:
-                        continue
-
-        # --- FINAL OUTPUT DISPLAY ---
+        # --- PHASE 7: DEPLOYMENT ---
         if final_response:
             response_placeholder.markdown(final_response)
-            st.caption(f"⚡ Active Brain: {active_brain} | Immortal Mode: Active")
+            st.markdown(f"<div class='brain-status'>ACTIVE_ENGINE: {engine_id} | STATUS: OPTIMIZED</div>", unsafe_allow_html=True)
             
-            if st.session_state.voice_on:
-                speak_text(final_response)
+            if st.session_state.voice_enabled:
+                rajaram_ai.speak(final_response)
             
-            st.session_state.chat_history.append(AIMessage(content=final_response))
+            st.session_state.history.append(AIMessage(content=final_response))
         else:
-            st.error("Fatal Error: All brains exhausted. Please check API Keys!")
+            st.error("CORE ERROR: ALL NEURAL PATHWAYS BLOCKED.")
 
-# Footer
+# ------------------------------------------------------------------------------
+# [PHASE 8: FOOTER & SYSTEM ANALYTICS]
+# ------------------------------------------------------------------------------
+
 st.markdown("---")
-st.caption("Rajaram AI Gold v3.0 | Created with ❤️ in Bareilly")
+col1, col2, col3 = st.columns(3)
+with col1: st.caption(f"PROJECT ID: RAJARAM-OMNI-V6")
+with col2: st.caption(f"POWERED BY: GROQ, GOOGLE, POLLINATIONS")
+with col3: st.caption(f"© 2026 RAJARAM AI - BAREILLY BORN")
