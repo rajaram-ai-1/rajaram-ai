@@ -107,7 +107,7 @@ class GlobalCore:
         # 🧠 RAJARAM UNIVERSAL BRAIN REPOSITORY (THE TOP 40)
         # ============================================================
         self.BRAIN_CATALOG = {
-            "SUPREME_LOGIC": "llama-3.3-70b-specdec",
+            "SUPREME_LOGIC": "llama-3.1-70b-versatile",
             "ULTIMATE_70B": "llama-3.3-70b-versatile",
             "THE_TITAN": "llama-3.1-405b-reasoning",
             "MIXTRIAL_POWER": "mixtral-8x7b-32768",
