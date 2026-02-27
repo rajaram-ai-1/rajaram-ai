@@ -145,19 +145,18 @@ UNIVERSAL_FAILOVER_LIST = [
     "llama3-8b-8192", "distil-whisper-large-v3-en", "llama-3.2-1b-preview",
     "llama-3.2-3b-preview", "gemma-7b-it"
     # (Groq और Google के सभी उपलब्ध वर्जन यहाँ ऑटो-इंजेक्ट हो रहे हैं)
-# यहाँ आपका दिमागों वाला ब्रैकेट खत्म हो रहा है
-    ]
+# यहाँ आपका दिमागों वाला ब्रैकेट सही से खत्म हो रहा है
+        ] 
         
-        # ध्यान दो: ये 'if' एकदम ऊपर वाली लाइन की सीध में होना चाहिए
-    if self.GEMINI_KEY:
+        # ध्यान दो: ये 'if' एकदम self.brain_pool वाली सीध में है
+        if self.GEMINI_KEY:
             genai.configure(api_key=self.GEMINI_KEY)
         
         self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
 
-    # ये फंक्शन क्लास के अंदर है इसलिए ये 'if' से एक कदम पीछे होगा
+    # ये फंक्शन क्लास के अंदर है, इसलिए 'def' वाली लाइन 'if' से एक कदम (4 spaces) पीछे है
     def get_timestamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
-
 # इंजन चालू करें
 core = GlobalCore()
 
