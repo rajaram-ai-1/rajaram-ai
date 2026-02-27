@@ -167,11 +167,12 @@ class RajaramAgent:
         """
         instruction = f"{self.system_prompt}\n\n[CONTEXT_DATA: {web_data}]"
         
-        # टास्क की लिस्ट
+        # राजाराम भाई, ये है नया और सही टास्क लिस्ट
         tasks = [
-            self.call_llm(core.brain_pool["PRIMARY"], user_input, instruction),
-            self.call_llm(core.brain_pool["SECONDARY"], user_input, instruction)
+            self.call_llm(core.BRAIN_CATALOG["SUPREME_LOGIC"], user_input, instruction),
+            self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
         ]
+        
         
         responses = await asyncio.gather(*tasks)
         # क्वालिटी चेकिंग (जो जवाब ज्यादा बड़ा और विस्तृत है उसे चुनें)
