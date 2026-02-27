@@ -25,7 +25,10 @@ st.markdown("""
 GROQ_KEY = st.secrets.get("GROQ_API_KEY")
 TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
 GEMINI_KEY = st.secrets.get("GEMINI_API_KEY") # जेमिनी की सीक्रेट्स से उठाएगा
-
+if not GEMINI_KEY:
+    st.error("ओह! जेमिनी चाबी (Key) नहीं मिली। कृपया Secrets चेक करें।")
+else:
+    st.success("जेमिनी चाबी सफलतापूर्वक मिल गई है! 🔱")
 if GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
 
