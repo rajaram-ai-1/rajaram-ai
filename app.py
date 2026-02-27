@@ -133,19 +133,19 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
         elif any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "तस्वीर"]):
             with st.spinner("राजाराम AI (Nano Banana 2) चित्र बना रहा है..."):
                 try:
-                    # यहाँ हम सीधे Gemini 3 Flash के Nano Banana 2 मॉडल को कॉल करेंगे
+                    # सीधे Gemini 3 Flash का उपयोग
                     model = genai.GenerativeModel('gemini-3-flash') 
-                    # इमेज जनरेट करने का इंटरनल कमांड
-                    final_response = f"मैने आपके लिए '{prompt}' की एक सुंदर तस्वीर तैयार कर दी है।"
                     active_brain = "Nano-Banana-2"
                     
-                    # नोट: इमेज सीधे चैट में दिखाने के लिए हम जेमिनी का रिस्पॉन्स इस्तेमाल करेंगे
+                    # इमेज जनरेट करने के लिए प्रॉम्प्ट भेजना
                     response = model.generate_content(prompt)
+                    
+                    # जेमिनी सीधा इमेज डेटा या टेक्स्ट रिस्पॉन्स देता है
+                    final_response = f"मैने आपके लिए '{prompt}' की तस्वीर तैयार कर दी है।"
                     st.markdown(response.text)
                 except Exception as e:
                     st.error(f"इमेज बनाने में दिक्कत आई: {e}")
                     final_response = "क्षमा करें, मैं अभी तस्वीर नहीं बना पाया।"
-
             # C. फेलओवर सिस्टम (आपका असली 30 दिमागों वाला लॉजिक)
             else:
                 with st.spinner("Thinking through multiple brains..."):
