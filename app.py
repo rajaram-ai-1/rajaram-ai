@@ -149,7 +149,7 @@ UNIVERSAL_FAILOVER_LIST = [
         ] 
         
         # ध्यान दो: ये 'if' एकदम self.brain_pool वाली सीध में है
-        if self.GEMINI_KEY:
+         if self.GEMINI_KEY:
             genai.configure(api_key=self.GEMINI_KEY)
         
         self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
