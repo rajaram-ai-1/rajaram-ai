@@ -108,20 +108,18 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
                 st.image(img_url, caption="Created by Rajaram AI | Bareilly's Pride")
                 final_response = "मैने आपके लिए ऊपर एक इमेज बना दी है।"
                 active_brain = "Art-Engine"
-       else:
-             with st.spinner("Thinking through multiple brains..."):
-               for model_name in BRAINS:
-                try:
-                    llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
-                    instruction = f"{SYSTEM_PROMPT} {search_data}"
-                    response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
-                    final_response = response.content
-                    active_brain = model_name
-                    break # अगर सफल हुआ तो रुक जाओ
-                except: # इसे ठीक 'try' के नीचे होना चाहिए
-                    continue # इसे 'except' के अंदर एक Tab आगे होना चाहिए
-
-        if final_response:
+      else:
+            with st.spinner("Thinking through multiple brains..."):
+                for model_name in BRAINS:
+                    try:
+                        llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
+                        instruction = f"{SYSTEM_PROMPT} {search_data}"
+                        response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
+                        final_response = response.content
+                        active_brain = model_name
+                        break # अगर सफल हुआ तो रुक जाओ
+                    except:
+                        continue # अगर फेल हुआ तो अगले दिमाग पर जाओ
             response_placeholder.markdown(final_response)
             st.caption(f"⚡ Active Brain: {active_brain} | Self-Optimization: Active")
             
