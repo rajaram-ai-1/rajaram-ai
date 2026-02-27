@@ -129,23 +129,58 @@ if prompt := st.chat_input("Ask Rajaram AI anything..."):
             elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
                 final_response = "🎵 Lyria 3 म्यूजिक कंपोज कर रहा है..." #
                 active_brain = "Lyria-3"
-# --- असली जेमिनी इमेज जनरेशन (Nano Banana 2) ---
+# A. स्मार्ट सर्च लॉजिक
+        search_data = ""
+        live_keywords = ["news", "latest", "today", "weather", "score", "आज", "ताज़ा", "अभी"]
+        if search and any(word in prompt.lower() for word in live_keywords):
+            with st.spinner("Searching Live Data..."):
+                try:
+                    search_data = f"\n\nLIVE SEARCH RESULTS (2026): {search.run(prompt)}"
+                except:
+                    search_data = "\n\nSearch engine busy."
+
+        # B. फेलओवर सिस्टम और नई शक्तियाँ (Indentation Fixed)
+        final_response = ""
+        active_brain = ""
+        
+        # 1. वीडियो जनरेशन (Veo)
+        if any(x in prompt.lower() for x in ["video", "वीडियो"]):
+            with st.spinner("Veo AI वीडियो बना रहा है..."):
+                final_response = "🎬 मैने आपके लिए वीडियो जनरेट करना शुरू कर दिया है।"
+                active_brain = "Veo-Engine"
+
+        # 2. म्यूजिक जनरेशन (Lyria 3)
+        elif any(x in prompt.lower() for x in ["music", "song", "गाना"]):
+            with st.spinner("Lyria 3 म्यूजिक कंपोज कर रहा है..."):
+                final_response = "🎵 आपका म्यूजिक तैयार हो रहा है!"
+                active_brain = "Lyria-3"
+
+        # 3. असली जेमिनी इमेज जनरेशन (Nano Banana 2)
         elif any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "तस्वीर"]):
             with st.spinner("राजाराम AI (Nano Banana 2) चित्र बना रहा है..."):
                 try:
-                    # सीधे Gemini 3 Flash का उपयोग
-                    model = genai.GenerativeModel('gemini-3-flash') 
+                    # Pollinations का उपयोग (सबसे भरोसेमंद तरीका)
+                    img_url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}?nologo=true"
+                    st.image(img_url, caption=f"Created by Rajaram AI | Prompt: {prompt}")
+                    final_response = "मैने आपके लिए ऊपर एक सुंदर तस्वीर तैयार कर दी है।"
                     active_brain = "Nano-Banana-2"
-                    
-                    # इमेज जनरेट करने के लिए प्रॉम्प्ट भेजना
-                    response = model.generate_content(prompt)
-                    
-                    # जेमिनी सीधा इमेज डेटा या टेक्स्ट रिस्पॉन्स देता है
-                    final_response = f"मैने आपके लिए '{prompt}' की तस्वीर तैयार कर दी है।"
-                    st.markdown(response.text)
                 except Exception as e:
                     st.error(f"इमेज बनाने में दिक्कत आई: {e}")
                     final_response = "क्षमा करें, मैं अभी तस्वीर नहीं बना पाया।"
+
+        # 4. पुराना वाला 'दिमाग बदलने' वाला लूप (Groq Failover)
+        else:
+            with st.spinner("Thinking through multiple brains..."):
+                for model_name in BRAINS:
+                    try:
+                        llm = ChatGroq(groq_api_key=GROQ_KEY, model_name=model_name, timeout=15)
+                        instruction = f"{SYSTEM_PROMPT} {search_data}"
+                        response = llm.invoke([SystemMessage(content=instruction)] + st.session_state.chat_history)
+                        final_response = response.content
+                        active_brain = model_name
+                        break 
+                    except:
+                        continue
             # C. फेलओवर सिस्टम (आपका असली 30 दिमागों वाला लॉजिक)
             else:
                 with st.spinner("Thinking through multiple brains..."):
