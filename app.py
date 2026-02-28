@@ -106,7 +106,7 @@ class GlobalCore:
             "FLASH_VISION": "gemini-1.5-flash",
             "LLAMA_VISION_90B": "llama-3.2-90b-vision-preview",
             "CODE_WIZARD": "deepseek-v3",
-            "LOGIC_PRO": "deepseek-r1-distill-llama-70b-specdec",
+            "LOGIC_PRO": "Llama-3.3-70b-versatile",
             "CYBER_EXPERT": "codellama-70b-instruct",
             "MATH_GENIUS": "qwen-2.5-72b-instruct"
         }
