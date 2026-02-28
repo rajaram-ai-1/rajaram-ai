@@ -225,18 +225,21 @@ rajaram_ai = RajaramAgent(IDENTITY)
 with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJARAM AI V7")
+    
+    # --- यहाँ गलती थी, अब ये सही है ---
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
-    st.sidebar.subheader("🔱 Shield Defense Records")
-    for log in rajaram_shield.repair_logs:
-        st.sidebar.write(log)
+        st.sidebar.subheader("🔱 Shield Defense Records") # <--- 4 Space आगे
+        for log in rajaram_shield.repair_logs:           # <--- 4 Space आगे
+            st.sidebar.write(log)                        # <--- ये 'for' के अंदर है (8 Space)
+            
     st.write("**Architect:** Rajaram | **Age:** 15")
     st.divider()
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
+    
     if st.button("PURGE ALL DATA"):
         st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
-
 # मुख्य स्क्रीन
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJARAM AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
 st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
