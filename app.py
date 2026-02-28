@@ -174,20 +174,21 @@ class RajaramAgent:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
     async def execute_reasoning(self, user_input, web_data=""):
-    try: 
-        instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
-        # Fix: Using correct keys from BRAIN_CATALOG to avoid KeyErrors
-        tasks = [
-            self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], user_input, instruction),
-            self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
-        ]
-        responses = await asyncio.gather(*tasks)
-        final_choice = max(responses, key=lambda x: len(x[0]))
-        return final_choice
-     except Exception as e:
+        try: # <--- ये अब सही जगह पर है
+            instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
+            # Fix: Using correct keys from BRAIN_CATALOG to avoid KeyErrors
+            tasks = [
+                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], user_input, instruction),
+                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
+            ]
+            responses = await asyncio.gather(*tasks)
+            final_choice = max(responses, key=lambda x: len(x[0]))
+            return final_choice
+        except Exception as e: # <--- ये बिल्कुल 'try' की सीध में है
             # अगर एरर आए, तो राजाराम शील्ड को काम पर लगाओ
             rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
-            return "🔱 SHIELD ACTIVE: I'm rerouting logic due to a neural glitch. (Error bypassed)", "RECOVERY_MODE"     
+            return "🔱 SHIELD ACTIVE: I'm rerouting logic due to a neural glitch. (Error bypassed)", "RECOVERY_MODE"
+
     async def call_llm(self, model, prompt, system):
         try:
             llm = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=model, timeout=30)
@@ -204,7 +205,6 @@ class RajaramAgent:
                 b64 = base64.b64encode(f.read()).decode()
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
         except: pass
-
 # ------------------------------------------------------------------------------
 # [PHASE 5: MASTER IDENTITY]
 # ------------------------------------------------------------------------------
