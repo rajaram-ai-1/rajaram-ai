@@ -173,7 +173,7 @@ class RajaramAgent:
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
-    async def execute_reasoning(self, user_input, web_data=""):
+ async def execute_reasoning(self, user_input, web_data=""):
     try: 
         instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
         # Fix: Using correct keys from BRAIN_CATALOG to avoid KeyErrors
