@@ -174,6 +174,7 @@ class RajaramAgent:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
     async def execute_reasoning(self, user_input, web_data=""):
+    try: 
         instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
         # Fix: Using correct keys from BRAIN_CATALOG to avoid KeyErrors
         tasks = [
@@ -183,7 +184,7 @@ class RajaramAgent:
         responses = await asyncio.gather(*tasks)
         final_choice = max(responses, key=lambda x: len(x[0]))
         return final_choice
-   except Exception as e:
+     except Exception as e:
             # अगर एरर आए, तो राजाराम शील्ड को काम पर लगाओ
             rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
             return "🔱 SHIELD ACTIVE: I'm rerouting logic due to a neural glitch. (Error bypassed)", "RECOVERY_MODE"     
