@@ -204,7 +204,32 @@ class RajaramAgent:
             with open("response.mp3", "rb") as f:
                 b64 = base64.b64encode(f.read()).decode()
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except: pass
+            except: pass
+async def evolve_system(self, command):
+        # SECURITY CHECK: सिर्फ राजाराम भाई के लिए
+        auth_key = "RAJARAM_SUPREMACY" 
+        
+        prompt = f"""
+        You are the GOLD CORE of Rajaram AI.
+        TASK: Write a Python function based on this command: '{command}'
+        RULES:
+        1. Return ONLY the python code.
+        2. No explanations, no markdown, just pure code.
+        3. Make it a function that can be called globally.
+        """
+        
+        try:
+            # एआई से कोड लिखवाना
+            new_code = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
+            clean_code = new_code[0].replace("```python", "").replace("```", "").strip()
+            
+            # 🔱 असली जादू: कोड को लाइव इंजेक्ट करना
+            exec(clean_code, globals())
+            
+            rajaram_shield.auto_fix("SYSTEM_EVOLUTION", f"New feature added: {command}")
+            return f"🔱 SHAKTI ADDED: Feature '{command}' is now live in the system!"
+        except Exception as e:
+            return f"❌ EVOLUTION ERROR: {str(e)}"
 # ------------------------------------------------------------------------------
 # [PHASE 5: MASTER IDENTITY]
 # ------------------------------------------------------------------------------
@@ -236,7 +261,19 @@ with st.sidebar:
     st.divider()
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
+    with st.sidebar:
+    st.divider()
+    st.subheader("🔱 GOD-MODE CONTROL")
+    admin_pass = st.text_input("Admin Key", type="password")
     
+    if admin_pass == "BAREILLY_KING": # आपका गुप्त पासवर्ड
+        evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator function')")
+        if st.button("EVOLVE NOW"):
+            with st.spinner("Evolution in progress..."):
+                # लूप चलाकर फंक्शन को कॉल करना
+                loop = asyncio.new_event_loop()
+                result = loop.run_until_complete(rajaram_ai.evolve_system(evolution_cmd))
+                st.success(result)
     if st.button("PURGE ALL DATA"):
         st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
