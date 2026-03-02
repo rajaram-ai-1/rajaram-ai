@@ -260,14 +260,16 @@ with st.sidebar:
         for log in rajaram_shield.repair_logs:           # <--- 4 Space आगे
             st.sidebar.write(log)                        # <--- ये 'for' के अंदर है (8 Space)
             
-    st.write("**Architect:** Rajaram | **Age:** 15")
+  st.write("**Architect:** Rajaram | **Age:** 15")
     st.divider()
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
+    
     with st.sidebar:
-    st.divider()
-    st.subheader("🔱 GOD-MODE CONTROL")
-    admin_pass = st.text_input("Admin Key", type="password")
+        # इन लाइनों को 4 स्पेस आगे (TAB) कर दिया गया है
+        st.divider()
+        st.subheader("🔱 GOD-MODE CONTROL")
+        admin_pass = st.text_input("Admin Key", type="password")
     
     if admin_pass == "BAREILLY_KING": # आपका गुप्त पासवर्ड
         evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator function')")
