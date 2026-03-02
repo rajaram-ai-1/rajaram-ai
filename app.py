@@ -254,13 +254,14 @@ with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJARAM AI V7")
     
-    # --- यहाँ गलती थी, अब ये सही है ---
+  # --- यहाँ से कॉपी करें ---
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
-        st.sidebar.subheader("🔱 Shield Defense Records") # <--- 4 Space आगे
-        for log in rajaram_shield.repair_logs:           # <--- 4 Space आगे
-            st.sidebar.write(log)                        # <--- ये 'for' के अंदर है (8 Space)
+        st.sidebar.subheader("🔱 Shield Defense Records")
+        for log in rajaram_shield.repair_logs:
+            st.sidebar.write(log)
             
-  st.write("**Architect:** Rajaram | **Age:** 15")
+    # ध्यान दें: नीचे वाली लाइनें ऊपर वाले 'if' के बाहर हैं, इसलिए वो 'if' की सीध में होनी चाहिए
+    st.write("**Architect:** Rajaram | **Age:** 15")
     st.divider()
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
