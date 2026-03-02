@@ -204,10 +204,13 @@ class RajaramAgent:
             with open("response.mp3", "rb") as f:
                 b64 = base64.b64encode(f.read()).decode()
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-            except: pass
-async def evolve_system(self, command):
+        except Exception as e: 
+            st.error(f"🔱 Shield Alert: {e}") # ताकि आपको पता चले क्या खराब हुआ
+
+    async def evolve_system(self, command):
         # SECURITY CHECK: सिर्फ राजाराम भाई के लिए
-        auth_key = "RAJARAM_SUPREMACY" 
+        auth_key = "RAJARAM_SUPREMACY"
+        # बाकी का इवोल्यूशन कोड यहाँ आएगा...
         
         prompt = f"""
         You are the GOLD CORE of Rajaram AI.
