@@ -271,7 +271,11 @@ with st.sidebar:
         st.divider()
         st.subheader("🔱 GOD-MODE CONTROL")
         admin_pass = st.text_input("Admin Key", type="password")
-    
+        st.divider()
+    st.subheader("👁️ IMAGE INPUT")
+    uploaded_file = st.file_uploader("यहाँ फोटो डालें...", type=["jpg", "png", "jpeg"])
+    if uploaded_file:
+        st.image(uploaded_file, caption="Core Memory में लोड हो गई", use_container_width=True)
     if admin_pass == "BAREILLY_KING": # आपका गुप्त पासवर्ड
         evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator function')")
         if st.button("EVOLVE NOW"):
@@ -330,7 +334,26 @@ if prompt := st.chat_input("Enter Command to Core..."):
 
         # --- MODULE 1: VISION (YOUR ORIGINAL) ---
         # (यहाँ आपका ओरिजिनल विजन कोड वैसे ही रहेगा)
-
+        # --- MODULE 1: VISION (RAJARAM EYE ACTIVATED) ---
+        # अगर साइडबार में फोटो अपलोड हुई है, तो उसे प्रोसेस करो
+        if 'uploaded_file' in globals() and uploaded_file is not None:
+            with st.spinner("👁️ RAJARAM EYE IS SCANNING..."):
+                try:
+                    # फोटो को लोड करना
+                    img_data = Image.open(uploaded_file)
+                    
+                    # विजन मॉडल को कॉल करना (Gemini Flash for high speed)
+                    vision_model = genai.GenerativeModel('gemini-1.5-flash')
+                    
+                    # अगर प्रॉम्ट है तो वो, वरना डिफ़ॉल्ट सवाल
+                    v_prompt = prompt if prompt else "इस फोटो का विश्लेषण करें।"
+                    v_response = vision_model.generate_content([v_prompt, img_data])
+                    
+                    final_response = v_response.text
+                    engine_id = "EYE-OF-RA-FLASH"
+                except Exception as e:
+                    rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
+                    final_response = "🔱 राजाराम भाई, विज़न सर्वर में गड़बड़ है, पर मैं इसे खुद ठीक कर रहा हूँ!"
         # --- MODULE 2: MEDIA & VIDEO (YOUR ORIGINAL) ---
         if any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
             with st.spinner("🎨 RAJARAM ART ENGINE STARTING..."):
