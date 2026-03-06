@@ -347,41 +347,36 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-      # --- MODULE 1: VISION (RAJARAM EYE - THE SUPREME FIX) ---
+      # --- MODULE 1: VISION (RAJARAM EYE - THE FINAL KILL) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE IS SCANNING THE CORE..."):
+            with st.spinner("👁️ RAJARAM EYE IS SCANNING..."):
                 try:
                     file_bytes = uploaded_file.getvalue()
                     
                     if not core.GEMINI_KEY:
                         st.error("🔱 Shield Alert: Gemini API Key Missing!")
                     else:
-                        # 🔱 जादुई बदलाव: 'models/gemini-1.5-flash' पूरा नाम इस्तेमाल करें
-                        # यह Google को मजबूर करेगा कि वो सही मॉडल ही चुने
-                        vision_model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
+                        # 🔱 बदलाव: 'gemini-1.5-flash' का सबसे सरल नाम इस्तेमाल करें
+                        # हम इसे वर्जन स्पेसिफिक नहीं बनाएंगे ताकि लाइब्रेरी खुद ढूंढ ले
+                        vision_model = genai.GenerativeModel('gemini-1.5-flash')
                         
-                        img_parts = [
-                            {
-                                "mime_type": uploaded_file.type,
-                                "data": file_bytes
-                            }
-                        ]
+                        img_parts = [{"mime_type": uploaded_file.type, "data": file_bytes}]
                         
-                        v_prompt = prompt if prompt else "इस फोटो का विश्लेषण करें।"
-                        v_response = vision_model.generate_content([v_prompt, img_parts[0]])
-                        
-                        final_response = v_response.text
-                        engine_id = "EYE-OF-RA-V1.5-LATEST"
+                        # 🔱 प्रो-टिप: अगर फ्लैश नहीं मिलता, तो 'gemini-pro-vision' (पुराना पर पक्का) ट्राई करें
+                        try:
+                            v_response = vision_model.generate_content([prompt if prompt else "Analyze this.", img_parts[0]])
+                            final_response = v_response.text
+                            engine_id = "EYE-OF-RA-FLASH-STABLE"
+                        except:
+                            # BACKUP: पुराने वर्जन का पक्का मॉडल
+                            vision_model = genai.GenerativeModel('gemini-pro-vision')
+                            v_response = vision_model.generate_content([prompt if prompt else "Analyze this.", Image.open(uploaded_file)])
+                            final_response = v_response.text
+                            engine_id = "EYE-OF-RA-PRO-LEGACY"
+                            
                 except Exception as e:
-                    # अगर 'flash' न मिले, तो बड़े भाई 'pro' को बुलाओ (Backup Power)
-                    try:
-                        vision_model = genai.GenerativeModel('gemini-1.5-pro')
-                        v_response = vision_model.generate_content([v_prompt, img_parts[0]])
-                        final_response = v_response.text
-                        engine_id = "EYE-OF-RA-PRO-BACKUP"
-                    except:
-                        rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
-                        final_response = f"🔱 राजाराम भाई, सेंसर अब भी अटक रहा है: {str(e)}"
+                    rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
+                    final_response = f"🔱 राजाराम भाई, कोड सही है पर आपकी Library पुरानी है। ये ट्राई करें: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
