@@ -360,11 +360,20 @@ if prompt:
                     img = Image.open(uploaded_file)
                     img.thumbnail((1024, 1024))
                     
-                    # Groq के लिए Base64 बनाना
+                    # --- 🔱 RAJARAM IMAGE SHIELD (RGBA TO RGB FIX) ---
+                    img = Image.open(uploaded_file)
+                    
+                    # अगर इमेज PNG या पारदर्शी (Transparent) है, तो उसे JPEG के लायक बनाओ
+                    if img.mode != "RGB":
+                        img = img.convert("RGB")
+                    
+                    img.thumbnail((1024, 1024))
+                    
+                    # अब JPEG में सेव करने पर 'धमाका' नहीं होगा
                     buffer = io.BytesIO()
                     img.save(buffer, format="JPEG")
                     base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                    
+                    # ------------------------------------------------
                     # 2. मॉडल्स की 'Savage' लिस्ट (सिर्फ Groq और Google)
                     # जो सबसे ऊपर है उसे पहले ट्राई किया जाएगा
                     candidate_models = [
