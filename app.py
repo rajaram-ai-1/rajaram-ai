@@ -347,41 +347,42 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-       # --- MODULE 1: VISION (GROQ VISION - THE FINAL KILLER) ---
+       # --- MODULE 1: VISION (RAJARAM'S FINAL STRIKE) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: SWITCHING TO GROQ VISION SATELLITE..."):
+            with st.spinner("👁️ RAJARAM EYE: PENETRATING THE SYSTEM..."):
                 try:
                     import base64
-                    # इमेज को बाइट्स में पढ़कर Base64 में बदलो
                     image_bytes = uploaded_file.getvalue()
                     base64_image = base64.b64encode(image_bytes).decode('utf-8')
                     
-                    # Groq Vision Model को कॉल करना
                     from langchain_groq import ChatGroq
                     from langchain_core.messages import HumanMessage
                     
-                    vision_client = ChatGroq(
-                        groq_api_key=core.GROQ_KEY, 
-                        model_name="llama-3.2-90b-vision-preview"
-                    )
+                    # 🔱 जादुई बदलाव: Groq का सबसे पक्का और ताज़ा मॉडल
+                    # 'llama-3.2-11b-vision-preview' अगर 400 दे रहा है 
+                    # तो Groq ने इसे 'llama-3.2-90b-vision-preview' पर वापस भेज दिया होगा
+                    # हम यहाँ एक 'Safety Loop' लगा रहे हैं
                     
-                    msg = HumanMessage(
-                        content=[
-                            {"type": "text", "text": prompt if prompt else "इस फोटो का गहराई से विश्लेषण करें।"},
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
-                            },
-                        ]
-                    )
-                    
-                    v_response = vision_client.invoke([msg])
+                    try:
+                        v_model = "llama-3.2-11b-vision-preview"
+                        vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=v_model)
+                        msg = HumanMessage(content=[
+                            {"type": "text", "text": prompt if prompt else "Analyze this image for Rajaram."},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                        ])
+                        v_response = vision_client.invoke([msg])
+                    except:
+                        # अगर ऊपर वाला फेल हो, तो ये वाला 'अमर' मॉडल है
+                        v_model = "llama-3.2-90b-vision-preview" 
+                        vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=v_model)
+                        v_response = vision_client.invoke([msg])
+
                     final_response = v_response.content
-                    engine_id = "GROQ-VISION-90B (STABLE)"
+                    engine_id = f"GROQ-{v_model.upper()}"
                     
                 except Exception as e:
-                    rajaram_shield.auto_fix("VISION_GROQ_FAILURE", str(e))
-                    final_response = f"🔱 राजाराम भाई, किस्मत ने फिर टांग अड़ाई है: {str(e)}"
+                    rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
+                    final_response = f"🔱 राजाराम भाई, AI दुनिया में 'मॉडल वार' चल रही है! Error: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
