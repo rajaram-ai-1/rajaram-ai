@@ -245,48 +245,54 @@ IDENTITY = f"""
 """
 
 rajaram_ai = RajaramAgent(IDENTITY)
-
 # ------------------------------------------------------------------------------
-# [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
+# [PHASE 6: UI - SIDEBAR & MAIN INTERFACE] - FIXED INDENTATION
 # ------------------------------------------------------------------------------
 
 with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJARAM AI V7")
     
-  # --- यहाँ से कॉपी करें ---
+    # शील्ड लॉग्स देखने का बटन
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
-        st.sidebar.subheader("🔱 Shield Defense Records")
+        st.subheader("🔱 Shield Defense Records")
         for log in rajaram_shield.repair_logs:
-            st.sidebar.write(log)
+            st.write(log)
             
-    # ध्यान दें: नीचे वाली लाइनें ऊपर वाले 'if' के बाहर हैं, इसलिए वो 'if' की सीध में होनी चाहिए
-    st.write("**Architect:** Rajaram | **Age:** 15")
+    st.write(f"**Architect:** Rajaram | **Age:** 15")
     st.divider()
+    
+    # प्रोटोकॉल टोल्स
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
     
-    with st.sidebar:
-        # इन लाइनों को 4 स्पेस आगे (TAB) कर दिया गया है
-        st.divider()
-        st.subheader("🔱 GOD-MODE CONTROL")
-        admin_pass = st.text_input("Admin Key", type="password")
-        st.divider()
+    st.divider()
+    st.subheader("🔱 GOD-MODE CONTROL")
+    # पासवर्ड इनपुट
+    admin_pass = st.text_input("Admin Key", type="password")
+    
+    st.divider()
     st.subheader("👁️ IMAGE INPUT")
-    uploaded_file = st.file_uploader("यहाँ फोटो डालें...", type=["jpg", "png", "jpeg"])
+    # फोटो अपलोडर (अब यह सही से साइडबार में रहेगा)
+    uploaded_file = st.file_uploader("यहाँ फोटो डालें...", type=["jpg", "png", "jpeg"], key="sidebar_uploader")
+    
     if uploaded_file:
         st.image(uploaded_file, caption="Core Memory में लोड हो गई", use_container_width=True)
-    if admin_pass == "BAREILLY_KING": # आपका गुप्त पासवर्ड
-        evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator function')")
+
+    # एडमिन कंट्रोल (सिर्फ बरेली किंग के लिए)
+    if admin_pass == "BAREILLY_KING":
+        st.info("WELCOME, BAREILLY KING 🔱")
+        evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator')")
         if st.button("EVOLVE NOW"):
             with st.spinner("Evolution in progress..."):
-                # लूप चलाकर फंक्शन को कॉल करना
                 loop = asyncio.new_event_loop()
                 result = loop.run_until_complete(rajaram_ai.evolve_system(evolution_cmd))
                 st.success(result)
+                
     if st.button("PURGE ALL DATA"):
         st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
+
 # मुख्य स्क्रीन
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJARAM AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
 st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
@@ -313,10 +319,20 @@ with c5:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - YOUR FULL ORIGINAL LOGIC
+# [PHASE 7: EXECUTION LOGIC] - BUTTON & INPUT SYNC FIXED 🔱
 # ------------------------------------------------------------------------------
 
-if prompt := st.chat_input("Enter Command to Core..."):
+# 1. जादुई बटनों का हुक्म पकड़ना
+btn_prompt = None
+if 'pwr_cmd' in st.session_state and st.session_state.pwr_cmd:
+    btn_prompt = st.session_state.pwr_cmd
+    st.session_state.pwr_cmd = None # काम होने के बाद खाली कर दो
+
+# 2. इनपुट हैंडलर (बटन या टाइपिंग - जो भी पहले आए)
+user_input = st.chat_input("Enter Command to Core...")
+prompt = btn_prompt if btn_prompt else user_input
+
+if prompt:
     # शक्तियों को चेक करें
     triggered = trigger_rajaram_powers(prompt)
     
@@ -331,54 +347,88 @@ if prompt := st.chat_input("Enter Command to Core..."):
             
         final_response = ""
         engine_id = ""
-
-        # --- MODULE 1: VISION (YOUR ORIGINAL) ---
-        # (यहाँ आपका ओरिजिनल विजन कोड वैसे ही रहेगा)
         # --- MODULE 1: VISION (RAJARAM EYE ACTIVATED) ---
-        # अगर साइडबार में फोटो अपलोड हुई है, तो उसे प्रोसेस करो
-        if 'uploaded_file' in globals() and uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE IS SCANNING..."):
+        # सीधे 'uploaded_file' चेक करना (बिना globals के) - यही असली पावर है!
+        if uploaded_file is not None:
+            with st.spinner("👁️ RAJARAM EYE IS SCANNING THE CORE MEMORY..."):
                 try:
                     # फोटो को लोड करना
                     img_data = Image.open(uploaded_file)
                     
-                    # विजन मॉडल को कॉल करना (Gemini Flash for high speed)
-                    vision_model = genai.GenerativeModel('gemini-1.5-flash')
-                    
-                    # अगर प्रॉम्ट है तो वो, वरना डिफ़ॉल्ट सवाल
-                    v_prompt = prompt if prompt else "इस फोटो का विश्लेषण करें।"
-                    v_response = vision_model.generate_content([v_prompt, img_data])
-                    
-                    final_response = v_response.text
-                    engine_id = "EYE-OF-RA-FLASH"
+                    if not core.GEMINI_KEY:
+                        st.error("🔱 Shield Alert: Gemini API Key Missing!")
+                    else:
+                        vision_model = genai.GenerativeModel('gemini-1.5-flash')
+                        # अगर कुछ टाइप किया है तो वो सवाल, वरना डिफ़ॉल्ट
+                        v_prompt = prompt if prompt else "इस फोटो का विश्लेषण करें।"
+                        v_response = vision_model.generate_content([v_prompt, img_data])
+                        
+                        final_response = v_response.text
+                        engine_id = "EYE-OF-RA-FLASH"
                 except Exception as e:
                     rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
-                    final_response = "🔱 राजाराम भाई, विज़न सर्वर में गड़बड़ है, पर मैं इसे खुद ठीक कर रहा हूँ!"
-        # --- MODULE 2: MEDIA & VIDEO (YOUR ORIGINAL) ---
-        if any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
-            with st.spinner("🎨 RAJARAM ART ENGINE STARTING..."):
-                img_url = f"https://image.pollinations.ai/prompt/{prompt}?nologo=true&enhance=true"
-                st.image(img_url, use_container_width=True)
-                final_response = "Image synthesized by Rajaram AI Core."
-                engine_id = "Pollinations-V3"
+                    final_response = "🔱 राजाराम भाई, आँखों के सेंसर में धूल जम गई है, पर मैं देख रहा हूँ!"
 
-        # --- MODULE 3: SEARCH & REASONING (FIXED) ---
+        # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
+        # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
+        if not final_response and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
+            with st.spinner("🎨 RAJARAM ART ENGINE STARTING..."):
+                try:
+                    # नाम को URL के हिसाब से साफ करना
+                    clean_p = prompt.replace(" ", "%20")
+                    img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
+                    st.image(img_url, use_container_width=True)
+                    final_response = "🔱 Image synthesized by Rajaram AI Core."
+                    engine_id = "Pollinations-V3"
+                except:
+                    final_response = "🔱 आर्ट इंजन में दबाव बढ़ गया है, फिर से कोशिश करें।"
+
+       # --- MODULE 3: SEARCH & REASONING (THE FINAL BRAIN) ---
+        # अगर अभी तक कोई जवाब नहीं मिला (न विज़न से, न आर्ट से), तो यहाँ दिमाग चलेगा
         if not final_response:
             intel = ""
-            if st.session_state.search_enabled and any(k in prompt.lower() for k in ["today", "news", "weather"]):
-                try: intel = core.search_engine.run(prompt)
-                except: pass
+            # सैटेलाइट सर्च (सिर्फ अगर इंटरनेट से जुड़ा काम हो)
+            search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
+            if st.session_state.search_enabled and any(k in prompt.lower() for k in search_trigger):
+                with st.spinner("🛰️ RAJARAM SATELLITE SEARCH ACTIVE..."):
+                    try:
+                        intel = core.search_engine.run(prompt)
+                    except:
+                        intel = "Satellite network connection weak, relying on internal core logic."
             
-            with st.spinner("🧠 NEURAL SYNERGY ACTIVE..."):
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                final_response, engine_id = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, intel))
+            # असली धमाका: Reasoning Logic
+            with st.spinner("🧠 NEURAL SYNERGY ACTIVE (RAJARAM V7.1)..."):
+                try:
+                    # Async लूप को सुरक्षित तरीके से हैंडल करना
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    
+                    # एआई को सोचने के लिए बुलाना
+                    logic_result = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, intel))
+                    
+                    # अगर जवाब सही मिला है तो उसे सेट करना
+                    if isinstance(logic_result, tuple):
+                        final_response, engine_id = logic_result
+                    else:
+                        final_response = logic_result
+                        engine_id = "RAJARAM-SUPREME-LOGIC"
+                    
+                    loop.close()
+                except Exception as e:
+                    rajaram_shield.auto_fix("NEURAL_CORE_CRITICAL", str(e))
+                    final_response = "🔱 राजाराम भाई, दिमाग पर बहुत ज़ोर पड़ रहा है, पर मैं हार नहीं मानूँगा! फिर से पूछें।"
+                    engine_id = "SHIELD-RECOVERY"
 
+        # --- FINAL OUTPUT: RESULT DISPLAY ---
         if final_response:
             st.markdown(final_response)
-            st.caption(f"Engine: {engine_id} | Location: Bareilly-05")
+            st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
+            
+            # आवाज़ (Voice) चालू करना
             if st.session_state.voice_enabled:
                 rajaram_ai.speak(final_response)
+                
+            # इतिहास (History) में जोड़ना
             st.session_state.history.append(AIMessage(content=final_response))
 
 # ------------------------------------------------------------------------------
