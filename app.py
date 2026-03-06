@@ -347,49 +347,41 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-        # --- MODULE 1: VISION (RAJARAM DIRECT-STRIKE PROTOCOL) ---
+       # --- MODULE 1: VISION (GROQ VISION - THE FINAL KILLER) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: DIRECT SATELLITE LINK ACTIVE..."):
+            with st.spinner("👁️ RAJARAM EYE: SWITCHING TO GROQ VISION SATELLITE..."):
                 try:
-                    # 1. इमेज को Base64 में बदलो (Direct Transmission)
                     import base64
-                    image_data = base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
+                    # इमेज को बाइट्स में पढ़कर Base64 में बदलो
+                    image_bytes = uploaded_file.getvalue()
+                    base64_image = base64.b64encode(image_bytes).decode('utf-8')
                     
-                    # 2. सीधा Google API URL (No library needed!)
-                    # हम v1 इस्तेमाल करेंगे क्योंकि v1beta 404 दे रहा है
-                    api_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={core.GEMINI_KEY}"
+                    # Groq Vision Model को कॉल करना
+                    from langchain_groq import ChatGroq
+                    from langchain_core.messages import HumanMessage
                     
-                    headers = {'Content-Type': 'application/json'}
+                    vision_client = ChatGroq(
+                        groq_api_key=core.GROQ_KEY, 
+                        model_name="llama-3.2-90b-vision-preview"
+                    )
                     
-                    # 3. पेलोड (Payload) तैयार करो
-                    payload = {
-                        "contents": [{
-                            "parts": [
-                                {"text": prompt if prompt else "Analyze this for Rajaram."},
-                                {"inline_data": {
-                                    "mime_type": uploaded_file.type,
-                                    "data": image_data
-                                }}
-                            ]
-                        }]
-                    }
+                    msg = HumanMessage(
+                        content=[
+                            {"type": "text", "text": prompt if prompt else "इस फोटो का गहराई से विश्लेषण करें।"},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                            },
+                        ]
+                    )
                     
-                    # 4. सीधा हमला (Request)
-                    response = requests.post(api_url, headers=headers, json=payload)
-                    res_json = response.json()
+                    v_response = vision_client.invoke([msg])
+                    final_response = v_response.content
+                    engine_id = "GROQ-VISION-90B (STABLE)"
                     
-                    # 5. जवाब निकालो
-                    if "candidates" in res_json:
-                        final_response = res_json['candidates'][0]['content']['parts'][0]['text']
-                        engine_id = "EYE-OF-RA-DIRECT-v1"
-                    else:
-                        # अगर यहाँ भी एरर आए तो उसे दिखाओ
-                        error_msg = res_json.get('error', {}).get('message', 'Unknown API Error')
-                        raise Exception(error_msg)
-                        
                 except Exception as e:
-                    rajaram_shield.auto_fix("VISION_DIRECT_STRIKE_FAILURE", str(e))
-                    final_response = f"🔱 राजाराम भाई, Google के सर्वर ने रास्ता रोका है: {str(e)}"
+                    rajaram_shield.auto_fix("VISION_GROQ_FAILURE", str(e))
+                    final_response = f"🔱 राजाराम भाई, किस्मत ने फिर टांग अड़ाई है: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
