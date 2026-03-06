@@ -347,9 +347,9 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-       # --- MODULE 1: VISION (RAJARAM'S FINAL STRIKE) ---
+       # --- MODULE 1: VISION (RAJARAM'S OMNIPOTENT VISION - FIXED) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: PENETRATING THE SYSTEM..."):
+            with st.spinner("👁️ RAJARAM EYE: PENETRATING THE CORE..."):
                 try:
                     import base64
                     image_bytes = uploaded_file.getvalue()
@@ -358,31 +358,39 @@ if prompt:
                     from langchain_groq import ChatGroq
                     from langchain_core.messages import HumanMessage
                     
-                    # 🔱 जादुई बदलाव: Groq का सबसे पक्का और ताज़ा मॉडल
-                    # 'llama-3.2-11b-vision-preview' अगर 400 दे रहा है 
-                    # तो Groq ने इसे 'llama-3.2-90b-vision-preview' पर वापस भेज दिया होगा
-                    # हम यहाँ एक 'Safety Loop' लगा रहे हैं
+                    # 🔱 जादुई लिस्ट: ये वो मॉडल्स हैं जो अभी Groq पर सबसे ज्यादा स्टेबल हैं
+                    # अगर एक 'Decommissioned' होगा, तो सिस्टम तुरंत दूसरे पर स्विच करेगा
+                    candidate_models = [
+                        "llama-3.2-11b-vision-preview",
+                        "llama-3.2-90b-vision-preview",
+                        "llama-3-70b-8192" # Backup
+                    ]
                     
-                    try:
-                        v_model = "llama-3.2-11b-vision-preview"
-                        vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=v_model)
-                        msg = HumanMessage(content=[
-                            {"type": "text", "text": prompt if prompt else "Analyze this image for Rajaram."},
-                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                        ])
-                        v_response = vision_client.invoke([msg])
-                    except:
-                        # अगर ऊपर वाला फेल हो, तो ये वाला 'अमर' मॉडल है
-                        v_model = "llama-3.2-90b-vision-preview" 
-                        vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=v_model)
-                        v_response = vision_client.invoke([msg])
+                    v_response = None
+                    success_model = ""
 
-                    final_response = v_response.content
-                    engine_id = f"GROQ-{v_model.upper()}"
+                    for v_model in candidate_models:
+                        try:
+                            vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=v_model)
+                            msg = HumanMessage(content=[
+                                {"type": "text", "text": prompt if prompt else "Analyze this for Rajaram."},
+                                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                            ])
+                            v_response = vision_client.invoke([msg])
+                            success_model = v_model
+                            break # अगर मिल गया तो लूप से बाहर निकल जाओ
+                        except Exception as e:
+                            continue # अगर 400 आया तो अगले मॉडल पर जाओ
                     
+                    if v_response:
+                        final_response = v_response.content
+                        engine_id = f"GROQ-{success_model.upper()}"
+                    else:
+                        raise Exception("All Vision Models are currently down.")
+
                 except Exception as e:
-                    rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
-                    final_response = f"🔱 राजाराम भाई, AI दुनिया में 'मॉडल वार' चल रही है! Error: {str(e)}"
+                    rajaram_shield.auto_fix("VISION_TOTAL_FAILURE", str(e))
+                    final_response = f"🔱 राजाराम भाई, किस्मत ने सारे रास्ते बंद कर दिए हैं: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
