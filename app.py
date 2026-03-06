@@ -347,71 +347,97 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-        # --- MODULE 1: VISION (ULTIMATE DEBUG & RECOVERY) ---
-        if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: CALIBRATING..."):
+         # --- MODULE 1: RAJARAM SUPREME HYBRID VISION ENGINE (2026 STABLE) ---
+if uploaded_file is not None:
+    with st.spinner("👁️ RAJARAM EYE: PENETRATING THE CORE..."):
+        try:
+            import base64
+            from PIL import Image
+            import io
+            import google.generativeai as genai
+            from langchain_groq import ChatGroq
+            from langchain_core.messages import HumanMessage
+
+            # 1. 🔱 IMAGE SHIELD: RGBA to RGB (धमाका-प्रूफ फिक्स)
+            img = Image.open(uploaded_file)
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img.thumbnail((1024, 1024))
+            
+            # Base64 for Groq
+            buffer = io.BytesIO()
+            img.save(buffer, format="JPEG")
+            base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            # 2. 🔱 LATEST MODELS LIST (जो अभी Live हैं)
+            # हमने 'latest' और 'stable' वर्जन चुने हैं ताकि 400/404 न आए
+            candidate_models = [
+                {"name": "llama-3.2-90b-vision-preview", "type": "groq", "key": core.GROQ_KEY},
+                {"name": "pixtral-12b-2409", "type": "groq", "key": core.GROQ_KEY},
+                {"name": "gemini-1.5-flash-latest", "type": "google", "key": core.GEMINI_KEY},
+                {"name": "gemini-1.5-pro-latest", "type": "google", "key": core.GEMINI_KEY}
+            ]
+
+            final_response = None
+            success_engine = ""
+            error_log = []
+
+            # 3. 🔱 THE EXECUTION LOOP (The Survival Mode)
+            for model in candidate_models:
+                m_name = model["name"]
+                m_type = model["type"]
+                m_key = model["key"]
+
+                if not m_key: # अगर चाबी नहीं है तो स्किप करो
+                    continue
+
                 try:
-                    import base64
-                    from PIL import Image
-                    import io
+                    if m_type == "groq":
+                        vision_client = ChatGroq(groq_api_key=m_key, model_name=m_name)
+                        msg = HumanMessage(content=[
+                            {"type": "text", "text": prompt if prompt else "Analyze this image for Rajaram Bhai."},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                        ])
+                        response = vision_client.invoke([msg])
+                        final_response = response.content
                     
-                    # 1. Image Mode Fix
-                    img = Image.open(uploaded_file)
-                    if img.mode != "RGB":
-                        img = img.convert("RGB")
-                    img.thumbnail((1024, 1024))
-                    
-                    buffer = io.BytesIO()
-                    img.save(buffer, format="JPEG")
-                    base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                    
-                    from langchain_groq import ChatGroq
-                    from langchain_core.messages import HumanMessage
-                    import google.generativeai as genai
+                    elif m_type == "google":
+                        genai.configure(api_key=m_key)
+                        g_model = genai.GenerativeModel(m_name)
+                        # विजन के लिए Google को सीधी Image फाइल चाहिए होती है
+                        response = g_model.generate_content([prompt if prompt else "इसके बारे में विस्तार से बताएं।", img])
+                        final_response = response.text
 
-                    # 2. राजाराम भाई की ताज़ा मॉडल लिस्ट
-                    # नोट: हमने यहाँ सबसे पक्के मॉडल रखे हैं
-                    models_to_test = [
-                        {"name": "llama-3.2-11b-vision-preview", "provider": "groq", "key": core.GROQ_KEY},
-                        {"name": "gemini-1.5-flash", "provider": "google", "key": core.GEMINI_KEY}
-                    ]
-
-                    final_response = None
-                    detailed_log = ""
-
-                    # 3. एक-एक करके इंजन स्टार्ट करो
-                    for m in models_to_test:
-                        try:
-                            if m["provider"] == "groq" and m["key"]:
-                                client = ChatGroq(groq_api_key=m["key"], model_name=m["name"])
-                                msg = HumanMessage(content=[
-                                    {"type": "text", "text": prompt if prompt else "Analyze this for Rajaram Bhai."},
-                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                                ])
-                                res = client.invoke([msg])
-                                final_response = res.content
-                                break
-                            
-                            elif m["provider"] == "google" and m["key"]:
-                                genai.configure(api_key=m["key"])
-                                g_model = genai.GenerativeModel(m["name"])
-                                res = g_model.generate_content([prompt if prompt else "Analyze this.", img])
-                                final_response = res.text
-                                break
-                        except Exception as e:
-                            detailed_log += f"\n❌ {m['name']} Error: {str(e)}"
-                            continue
-
-                    # 4. Final Output Logic
                     if final_response:
-                        st.success(f"🔱 राजाराम भाई, सिस्टम ज़िंदा हो गया!")
-                        # यहाँ अपना रिस्पॉन्स दिखाओ
-                    else:
-                        st.error(f"🔱 राजाराम भाई, दोनों चाबियाँ फेल हैं! असली एरर ये है: {detailed_log}")
-                        # यहाँ Tavily वाला Plan-B चलेगा
+                        success_engine = m_name
+                        break # सफलता मिलते ही लूप खत्म!
+                
+                except Exception as e:
+                    error_log.append(f"{m_name}: {str(e)}")
+                    continue
 
-                except Exception as ex:
-                    st.error(f"🔱 कोडिंग ब्लास्ट: {str(ex)}")
+            # 4. 🔱 RESULT OR TAVILY BACKUP
+            if final_response:
+                st.success(f"🔱 राजाराम पावर एक्टिवेटेड! (Engine: {success_engine.upper()})")
+                st.markdown(final_response)
+                engine_id = f"RAJARAM-{success_engine.upper()}"
+            else:
+                # अगर सब फेल हो जाए तो Tavily (Plan-B)
+                if core.TAVILY_KEY:
+                    st.warning("⚠️ AI Vision failed, launching Rajaram Satellite (Tavily)...")
+                    from langchain_community.tools.tavily_search import TavilySearchResults
+                    search = TavilySearchResults(api_key=core.TAVILY_KEY)
+                    query = prompt if prompt else "Latest information about the visual content uploaded"
+                    search_res = search.invoke({"query": query})
+                    final_response = f"🔱 राजाराम भाई, AI सर्वर नखरे कर रहे थे, तो मैंने सीधे इंटरनेट से ढूँढा: {search_res}"
+                    st.markdown(final_response)
+                else:
+                    st.error("❌ राजाराम भाई, किस्मत ने सारे दरवाजे बंद कर दिए हैं। एरर लॉग चेक करें।")
+                    for err in error_log:
+                        st.write(f"👉 {err}")
+
+        except Exception as system_ex:
+            st.error(f"🔱 विजन कोर में धमाका हुआ: {str(system_ex)}")
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
