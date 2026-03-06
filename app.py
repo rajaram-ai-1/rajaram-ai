@@ -347,36 +347,49 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-      # --- MODULE 1: VISION (RAJARAM EYE - THE FINAL KILL) ---
+        # --- MODULE 1: VISION (RAJARAM DIRECT-STRIKE PROTOCOL) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE IS SCANNING..."):
+            with st.spinner("👁️ RAJARAM EYE: DIRECT SATELLITE LINK ACTIVE..."):
                 try:
-                    file_bytes = uploaded_file.getvalue()
+                    # 1. इमेज को Base64 में बदलो (Direct Transmission)
+                    import base64
+                    image_data = base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
                     
-                    if not core.GEMINI_KEY:
-                        st.error("🔱 Shield Alert: Gemini API Key Missing!")
+                    # 2. सीधा Google API URL (No library needed!)
+                    # हम v1 इस्तेमाल करेंगे क्योंकि v1beta 404 दे रहा है
+                    api_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={core.GEMINI_KEY}"
+                    
+                    headers = {'Content-Type': 'application/json'}
+                    
+                    # 3. पेलोड (Payload) तैयार करो
+                    payload = {
+                        "contents": [{
+                            "parts": [
+                                {"text": prompt if prompt else "Analyze this for Rajaram."},
+                                {"inline_data": {
+                                    "mime_type": uploaded_file.type,
+                                    "data": image_data
+                                }}
+                            ]
+                        }]
+                    }
+                    
+                    # 4. सीधा हमला (Request)
+                    response = requests.post(api_url, headers=headers, json=payload)
+                    res_json = response.json()
+                    
+                    # 5. जवाब निकालो
+                    if "candidates" in res_json:
+                        final_response = res_json['candidates'][0]['content']['parts'][0]['text']
+                        engine_id = "EYE-OF-RA-DIRECT-v1"
                     else:
-                        # 🔱 बदलाव: 'gemini-1.5-flash' का सबसे सरल नाम इस्तेमाल करें
-                        # हम इसे वर्जन स्पेसिफिक नहीं बनाएंगे ताकि लाइब्रेरी खुद ढूंढ ले
-                        vision_model = genai.GenerativeModel('gemini-1.5-flash')
+                        # अगर यहाँ भी एरर आए तो उसे दिखाओ
+                        error_msg = res_json.get('error', {}).get('message', 'Unknown API Error')
+                        raise Exception(error_msg)
                         
-                        img_parts = [{"mime_type": uploaded_file.type, "data": file_bytes}]
-                        
-                        # 🔱 प्रो-टिप: अगर फ्लैश नहीं मिलता, तो 'gemini-pro-vision' (पुराना पर पक्का) ट्राई करें
-                        try:
-                            v_response = vision_model.generate_content([prompt if prompt else "Analyze this.", img_parts[0]])
-                            final_response = v_response.text
-                            engine_id = "EYE-OF-RA-FLASH-STABLE"
-                        except:
-                            # BACKUP: पुराने वर्जन का पक्का मॉडल
-                            vision_model = genai.GenerativeModel('gemini-pro-vision')
-                            v_response = vision_model.generate_content([prompt if prompt else "Analyze this.", Image.open(uploaded_file)])
-                            final_response = v_response.text
-                            engine_id = "EYE-OF-RA-PRO-LEGACY"
-                            
                 except Exception as e:
-                    rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
-                    final_response = f"🔱 राजाराम भाई, कोड सही है पर आपकी Library पुरानी है। ये ट्राई करें: {str(e)}"
+                    rajaram_shield.auto_fix("VISION_DIRECT_STRIKE_FAILURE", str(e))
+                    final_response = f"🔱 राजाराम भाई, Google के सर्वर ने रास्ता रोका है: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
