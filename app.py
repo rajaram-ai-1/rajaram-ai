@@ -347,27 +347,37 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-        # --- MODULE 1: VISION (RAJARAM EYE ACTIVATED) ---
-        # सीधे 'uploaded_file' चेक करना (बिना globals के) - यही असली पावर है!
+        # --- MODULE 1: VISION (RAJARAM EYE - THE CROWN FIX) ---
         if uploaded_file is not None:
             with st.spinner("👁️ RAJARAM EYE IS SCANNING THE CORE MEMORY..."):
                 try:
-                    # फोटो को लोड करना
-                    img_data = Image.open(uploaded_file)
+                    # 🔱 जादुई बदलाव: फोटो को bytes में पढ़ना
+                    file_bytes = uploaded_file.getvalue()
                     
                     if not core.GEMINI_KEY:
                         st.error("🔱 Shield Alert: Gemini API Key Missing!")
                     else:
                         vision_model = genai.GenerativeModel('gemini-1.5-flash')
-                        # अगर कुछ टाइप किया है तो वो सवाल, वरना डिफ़ॉल्ट
-                        v_prompt = prompt if prompt else "इस फोटो का विश्लेषण करें।"
-                        v_response = vision_model.generate_content([v_prompt, img_data])
+                        
+                        # इमेज को Gemini के समझने लायक डिक्शनरी में डालना
+                        img_parts = [
+                            {
+                                "mime_type": uploaded_file.type,
+                                "data": file_bytes
+                            }
+                        ]
+                        
+                        v_prompt = prompt if prompt else "इस फोटो का गहराई से विश्लेषण करें राजाराम भाई के लिए।"
+                        
+                        # फोटो और सवाल एक साथ भेजना
+                        v_response = vision_model.generate_content([v_prompt, img_parts[0]])
                         
                         final_response = v_response.text
-                        engine_id = "EYE-OF-RA-FLASH"
+                        engine_id = "EYE-OF-RA-FLASH (FIXED)"
                 except Exception as e:
+                    # एरर का असली कारण जानने के लिए इसे जोड़ें
                     rajaram_shield.auto_fix("VISION_CORE_FAILURE", str(e))
-                    final_response = "🔱 राजाराम भाई, आँखों के सेंसर में धूल जम गई है, पर मैं देख रहा हूँ!"
+                    final_response = f"🔱 राजाराम भाई, आंखों के सेंसर में दिक्कत है: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
