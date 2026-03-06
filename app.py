@@ -440,20 +440,21 @@ if uploaded_file is not None:
 
 # --- 🔱 यह लाइन हमेशा चलेगी क्योंकि engine_id अब ग्लोबल है ---
 st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
-        # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
-        # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
-        if not final_response and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
-            with st.spinner("🎨 RAJARAM ART ENGINE STARTING..."):
-                try:
-                    # नाम को URL के हिसाब से साफ करना
-                    clean_p = prompt.replace(" ", "%20")
-                    img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
-                    st.image(img_url, use_container_width=True)
-                    final_response = "🔱 Image synthesized by Rajaram AI Core."
-                    engine_id = "Pollinations-V3"
-                except:
-                    final_response = "🔱 आर्ट इंजन में दबाव बढ़ गया है, फिर से कोशिश करें।"
 
+           # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
+# अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
+if not final_response and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
+    with st.spinner("🎨 RAJARAM ART ENGINE STARTING..."):
+        try:
+            # नाम को URL के हिसाब से साफ करना
+            clean_p = prompt.replace(" ", "%20")
+            img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
+            st.image(img_url, use_container_width=True)
+            final_response = "🔱 Image synthesized by Rajaram AI Core."
+            engine_id = "Pollinations-V3"
+        except:
+            final_response = "🔱 आर्ट इंजन में दबाव बढ़ गया है, फिर से कोशिश करें।"
+            
        # --- MODULE 3: SEARCH & REASONING (THE FINAL BRAIN) ---
         # अगर अभी तक कोई जवाब नहीं मिला (न विज़न से, न आर्ट से), तो यहाँ दिमाग चलेगा
         if not final_response:
