@@ -347,57 +347,72 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-       # --- MODULE 1: VISION (RAJARAM'S OMNIPOTENT VISION - FIXED) ---
+      # --- MODULE 1: VISION (HYBRID RAJARAM ENGINE - GROQ & GOOGLE) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: PENETRATING THE CORE..."):
+            with st.spinner("👁️ RAJARAM EYE: SCANNING WITH HYBRID POWER..."):
                 try:
                     import base64
-                    image_bytes = uploaded_file.getvalue()
-                    base64_image = base64.b64encode(image_bytes).decode('utf-8')
-                    
-                    from langchain_groq import ChatGroq
-                    from langchain_core.messages import HumanMessage
-                    
-                    # 🔱 जादुई लिस्ट: ये वो मॉडल्स हैं जो अभी Groq पर सबसे ज्यादा स्टेबल हैं
-                    # अगर एक 'Decommissioned' होगा, तो सिस्टम तुरंत दूसरे पर स्विच करेगा
-                    candidate_models = [
-                        "llama-3.2-11b-vision-preview",   # Groq: Latest Stable
-                        "llama-3.2-90b-vision-preview",   # Groq: High Intel (Back online)
-                        "pixtral-12b-2409",               # Groq/Mistral: Very Reliable
-                        "llama-3.1-70b-versatile",        # Groq: Backup Core
-                        "llama-3.1-8b-instant",           # Groq: Lightning Fast
-                        "gemini-1.5-flash",               # Google: High Speed (If API works)
-                        "gemini-1.5-pro",                # Google: Ultra Intel
-                        "claude-3-5-sonnet-20240620",     # Anthropic: King of Vision
-                        "gpt-4o-mini",                    # OpenAI: Efficient Stable
-                        "gpt-4o"                          # OpenAI: The Beast
-                    ]
-                    
-                    v_response = None
-                    success_model = ""
+                    from PIL import Image
+                    import io
+                    import google.generativeai as genai
 
-                    for v_model in candidate_models:
-                        try:
-                            vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=v_model)
-                            msg = HumanMessage(content=[
-                                {"type": "text", "text": prompt if prompt else "Analyze this for Rajaram."},
-                                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                            ])
-                            v_response = vision_client.invoke([msg])
-                            success_model = v_model
-                            break # अगर मिल गया तो लूप से बाहर निकल जाओ
-                        except Exception as e:
-                            continue # अगर 400 आया तो अगले मॉडल पर जाओ
+                    # 1. फोटो को ऑप्टिमाइज़ करना
+                    img = Image.open(uploaded_file)
+                    img.thumbnail((1024, 1024))
                     
-                    if v_response:
-                        final_response = v_response.content
-                        engine_id = f"GROQ-{success_model.upper()}"
+                    # Groq के लिए Base64 बनाना
+                    buffer = io.BytesIO()
+                    img.save(buffer, format="JPEG")
+                    base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                    
+                    # 2. मॉडल्स की 'Savage' लिस्ट (सिर्फ Groq और Google)
+                    # जो सबसे ऊपर है उसे पहले ट्राई किया जाएगा
+                    candidate_models = [
+                        {"name": "llama-3.2-11b-vision-preview", "type": "groq"},
+                        {"name": "llama-3.2-90b-vision-preview", "type": "groq"},
+                        {"name": "pixtral-12b-2409", "type": "groq"},
+                        {"name": "gemini-1.5-flash", "type": "google"},
+                        {"name": "gemini-1.5-pro", "type": "google"},
+                        {"name": "gemini-1.5-flash-8b", "type": "google"}
+                    ]
+
+                    final_response = None
+                    success_engine = ""
+
+                    # 3. महा-लूप: जो जवाब देगा वही सिकंदर!
+                    for model in candidate_models:
+                        try:
+                            m_name = model["name"]
+                            m_type = model["type"]
+
+                            if m_type == "groq":
+                                vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=m_name)
+                                msg = HumanMessage(content=[
+                                    {"type": "text", "text": prompt if prompt else "Analyze this for Rajaram Bhai."},
+                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                                ])
+                                response = vision_client.invoke([msg])
+                                final_response = response.content
+                            
+                            elif m_type == "google":
+                                genai.configure(api_key=core.GEMINI_KEY)
+                                g_model = genai.GenerativeModel(m_name)
+                                response = g_model.generate_content([prompt if prompt else "Analyze this.", img])
+                                final_response = response.text
+
+                            if final_response:
+                                success_engine = m_name
+                                break # जवाब मिल गया, अब रुक जाओ
+                        except:
+                            continue # अगला ट्राई करो
+
+                    if not final_response:
+                        final_response = "🔱 राजाराम भाई, Google और Groq दोनों के सारे मॉडल्स फेल हो गए! एक बार अपनी API Keys चेक करें।"
                     else:
-                        raise Exception("All Vision Models are currently down.")
+                        engine_id = f"RAJARAM-POWER-{success_engine.upper()}"
 
                 except Exception as e:
-                    rajaram_shield.auto_fix("VISION_TOTAL_FAILURE", str(e))
-                    final_response = f"🔱 राजाराम भाई, किस्मत ने सारे रास्ते बंद कर दिए हैं: {str(e)}"
+                    final_response = f"🔱 राजाराम भाई, विज़न कोर में धमाका हुआ: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
