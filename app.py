@@ -347,81 +347,77 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-      # --- MODULE 1: VISION (HYBRID RAJARAM ENGINE - GROQ & GOOGLE) ---
+        # --- MODULE 1: SUPREME VISION (GROQ + GOOGLE + TAVILY) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: SCANNING WITH HYBRID POWER..."):
+            with st.spinner("👁️ RAJARAM EYE: ALL SYSTEMS GO..."):
                 try:
                     import base64
                     from PIL import Image
                     import io
                     import google.generativeai as genai
 
-                    # 1. फोटो को ऑप्टिमाइज़ करना
+                    # 1. Image Processing (RGBA to RGB Fix)
                     img = Image.open(uploaded_file)
-                    img.thumbnail((1024, 1024))
-                    
-                    # --- 🔱 RAJARAM IMAGE SHIELD (RGBA TO RGB FIX) ---
-                    img = Image.open(uploaded_file)
-                    
-                    # अगर इमेज PNG या पारदर्शी (Transparent) है, तो उसे JPEG के लायक बनाओ
                     if img.mode != "RGB":
                         img = img.convert("RGB")
-                    
                     img.thumbnail((1024, 1024))
                     
-                    # अब JPEG में सेव करने पर 'धमाका' नहीं होगा
                     buffer = io.BytesIO()
                     img.save(buffer, format="JPEG")
                     base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                    # ------------------------------------------------
-                    # 2. मॉडल्स की 'Savage' लिस्ट (सिर्फ Groq और Google)
-                    # जो सबसे ऊपर है उसे पहले ट्राई किया जाएगा
+                    
+                    # 2. Modern Model Catalog (Groq & Google)
                     candidate_models = [
                         {"name": "llama-3.2-11b-vision-preview", "type": "groq"},
                         {"name": "llama-3.2-90b-vision-preview", "type": "groq"},
-                        {"name": "pixtral-12b-2409", "type": "groq"},
                         {"name": "gemini-1.5-flash", "type": "google"},
-                        {"name": "gemini-1.5-pro", "type": "google"},
-                        {"name": "gemini-1.5-flash-8b", "type": "google"}
+                        {"name": "gemini-1.5-pro", "type": "google"}
                     ]
 
                     final_response = None
-                    success_engine = ""
+                    detailed_errors = []
 
-                    # 3. महा-लूप: जो जवाब देगा वही सिकंदर!
+                    # 3. Execution Loop
                     for model in candidate_models:
                         try:
                             m_name = model["name"]
-                            m_type = model["type"]
-
-                            if m_type == "groq":
+                            if model["type"] == "groq":
                                 vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=m_name)
                                 msg = HumanMessage(content=[
-                                    {"type": "text", "text": prompt if prompt else "Analyze this for Rajaram Bhai."},
+                                    {"type": "text", "text": prompt if prompt else "Analyze this image for Rajaram Bhai."},
                                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                                 ])
                                 response = vision_client.invoke([msg])
                                 final_response = response.content
                             
-                            elif m_type == "google":
+                            elif model["type"] == "google":
                                 genai.configure(api_key=core.GEMINI_KEY)
                                 g_model = genai.GenerativeModel(m_name)
                                 response = g_model.generate_content([prompt if prompt else "Analyze this.", img])
                                 final_response = response.text
 
                             if final_response:
-                                success_engine = m_name
-                                break # जवाब मिल गया, अब रुक जाओ
-                        except:
-                            continue # अगला ट्राई करो
+                                engine_id = f"RAJARAM-{m_name.upper()}"
+                                break
+                        except Exception as e:
+                            detailed_errors.append(f"{m_name}: {str(e)}")
+                            continue
+
+                    # 4. If AI Fails, use Tavily Search (Plan-B)
+                    if not final_response and core.TAVILY_KEY:
+                        st.warning("⚠️ AI Vision failed, launching Rajaram Satellite (Tavily)...")
+                        from langchain_community.tools.tavily_search import TavilySearchResults
+                        search = TavilySearchResults(api_key=core.TAVILY_KEY)
+                        search_res = search.invoke({"query": prompt if prompt else "Latest info about this item"})
+                        final_response = f"🔱 राजाराम भाई, AI सर्वर नखरे कर रहे थे, तो मैंने सीधे इंटरनेट से ढूँढा: {search_res}"
 
                     if not final_response:
-                        final_response = "🔱 राजाराम भाई, Google और Groq दोनों के सारे मॉडल्स फेल हो गए! एक बार अपनी API Keys चेक करें।"
-                    else:
-                        engine_id = f"RAJARAM-POWER-{success_engine.upper()}"
+                        st.error("❌ राजाराम भाई, तीनों चाबियाँ काम नहीं कर रहीं!")
+                        for err in detailed_errors:
+                            st.write(f"👉 {err}")
 
                 except Exception as e:
-                    final_response = f"🔱 राजाराम भाई, विज़न कोर में धमाका हुआ: {str(e)}"
+                    final_response = f"🔱 राजाराम भाई, सिस्टम में आग लगी है: {str(e)}"
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
