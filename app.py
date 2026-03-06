@@ -347,21 +347,14 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-         # --- MODULE 1: RAJARAM SUPREME HYBRID VISION ENGINE (2026 STABLE) ---
-         # --- 🔱 MODULE 1: विजन के शुरू में ये लाइन जोड़ें ---
-        engine_id = "RAJARAM-SATELLITE" # पहले से ही एक नाम दे दिया ताकि एरर न आए
-        
-        if uploaded_file is not None:
-            # ... बाकी का विजन कोड ...
-            
-            if final_response:
-                # अगर विजन सफल रहा तो ये नाम बदल जाएगा
-                # success_engine वाली लाइन के पास engine_id अपडेट करें
-                engine_id = f"RAJARAM-{success_engine.upper()}"
-            else:
-                # अगर Tavily चला, तो engine_id ये रहेगा
-                engine_id = "TAVILY-WEB-SEARCH"
+         # --- 🔱 GLOBAL INITIALIZATION (इसे IF के बाहर सबसे ऊपर रखें) ---
+engine_id = "RAJARAM-READY" 
+
+# --- MODULE 1: RAJARAM SUPREME HYBRID VISION ENGINE (2026 STABLE) ---
 if uploaded_file is not None:
+    # विजन शुरू होते ही एक डिफॉल्ट नाम दे दो
+    engine_id = "RAJARAM-SATELLITE" 
+    
     with st.spinner("👁️ RAJARAM EYE: PENETRATING THE CORE..."):
         try:
             import base64
@@ -371,19 +364,17 @@ if uploaded_file is not None:
             from langchain_groq import ChatGroq
             from langchain_core.messages import HumanMessage
 
-            # 1. 🔱 IMAGE SHIELD: RGBA to RGB (धमाका-प्रूफ फिक्स)
+            # 1. 🔱 IMAGE SHIELD: RGBA to RGB
             img = Image.open(uploaded_file)
             if img.mode != "RGB":
                 img = img.convert("RGB")
             img.thumbnail((1024, 1024))
             
-            # Base64 for Groq
             buffer = io.BytesIO()
             img.save(buffer, format="JPEG")
             base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
             
-            # 2. 🔱 LATEST MODELS LIST (जो अभी Live हैं)
-            # हमने 'latest' और 'stable' वर्जन चुने हैं ताकि 400/404 न आए
+            # 2. 🔱 LATEST MODELS LIST
             candidate_models = [
                 {"name": "llama-3.2-90b-vision-preview", "type": "groq", "key": core.GROQ_KEY},
                 {"name": "pixtral-12b-2409", "type": "groq", "key": core.GROQ_KEY},
@@ -395,14 +386,12 @@ if uploaded_file is not None:
             success_engine = ""
             error_log = []
 
-            # 3. 🔱 THE EXECUTION LOOP (The Survival Mode)
+            # 3. 🔱 THE EXECUTION LOOP
             for model in candidate_models:
                 m_name = model["name"]
                 m_type = model["type"]
                 m_key = model["key"]
-
-                if not m_key: # अगर चाबी नहीं है तो स्किप करो
-                    continue
+                if not m_key: continue
 
                 try:
                     if m_type == "groq":
@@ -417,13 +406,13 @@ if uploaded_file is not None:
                     elif m_type == "google":
                         genai.configure(api_key=m_key)
                         g_model = genai.GenerativeModel(m_name)
-                        # विजन के लिए Google को सीधी Image फाइल चाहिए होती है
-                        response = g_model.generate_content([prompt if prompt else "इसके बारे में विस्तार से बताएं।", img])
+                        response = g_model.generate_content([prompt if prompt else "इसके बारे में बताएं।", img])
                         final_response = response.text
 
                     if final_response:
                         success_engine = m_name
-                        break # सफलता मिलते ही लूप खत्म!
+                        engine_id = f"RAJARAM-{success_engine.upper()}"
+                        break 
                 
                 except Exception as e:
                     error_log.append(f"{m_name}: {str(e)}")
@@ -433,25 +422,24 @@ if uploaded_file is not None:
             if final_response:
                 st.success(f"🔱 राजाराम पावर एक्टिवेटेड! (Engine: {success_engine.upper()})")
                 st.markdown(final_response)
-                engine_id = f"RAJARAM-{success_engine.upper()}"
             else:
-                # अगर सब फेल हो जाए तो Tavily (Plan-B)
                 if core.TAVILY_KEY:
                     st.warning("⚠️ AI Vision failed, launching Rajaram Satellite (Tavily)...")
+                    engine_id = "TAVILY-WEB-SEARCH"
                     from langchain_community.tools.tavily_search import TavilySearchResults
                     search = TavilySearchResults(api_key=core.TAVILY_KEY)
-                    query = prompt if prompt else "Latest information about the visual content uploaded"
+                    query = prompt if prompt else "Visual content analysis"
                     search_res = search.invoke({"query": query})
-                    final_response = f"🔱 राजाराम भाई, AI सर्वर नखरे कर रहे थे, तो मैंने सीधे इंटरनेट से ढूँढा: {search_res}"
-                    st.markdown(final_response)
+                    st.markdown(f"🔱 राजाराम भाई, इंटरनेट रिपोर्ट: {search_res}")
                 else:
-                    st.error("❌ राजाराम भाई, किस्मत ने सारे दरवाजे बंद कर दिए हैं। एरर लॉग चेक करें।")
-                    for err in error_log:
-                        st.write(f"👉 {err}")
+                    st.error("❌ सारे विजन मॉडल्स फेल हो गए!")
 
         except Exception as system_ex:
-            st.error(f"🔱 विजन कोर में धमाका हुआ: {str(system_ex)}")
+            st.error(f"🔱 विजन कोर में धमाका: {str(system_ex)}")
+            engine_id = "RAJARAM-ERROR"
 
+# --- 🔱 यह लाइन हमेशा चलेगी क्योंकि engine_id अब ग्लोबल है ---
+st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
         if not final_response and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
