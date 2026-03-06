@@ -347,16 +347,15 @@ if prompt:
             
         final_response = ""
         engine_id = ""
-        # --- MODULE 1: SUPREME VISION (GROQ + GOOGLE + TAVILY) ---
+        # --- MODULE 1: VISION (ULTIMATE DEBUG & RECOVERY) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJARAM EYE: ALL SYSTEMS GO..."):
+            with st.spinner("👁️ RAJARAM EYE: CALIBRATING..."):
                 try:
                     import base64
                     from PIL import Image
                     import io
-                    import google.generativeai as genai
-
-                    # 1. Image Processing (RGBA to RGB Fix)
+                    
+                    # 1. Image Mode Fix
                     img = Image.open(uploaded_file)
                     if img.mode != "RGB":
                         img = img.convert("RGB")
@@ -366,58 +365,53 @@ if prompt:
                     img.save(buffer, format="JPEG")
                     base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
                     
-                    # 2. Modern Model Catalog (Groq & Google)
-                    candidate_models = [
-                        {"name": "llama-3.2-11b-vision-preview", "type": "groq"},
-                        {"name": "llama-3.2-90b-vision-preview", "type": "groq"},
-                        {"name": "gemini-1.5-flash", "type": "google"},
-                        {"name": "gemini-1.5-pro", "type": "google"}
+                    from langchain_groq import ChatGroq
+                    from langchain_core.messages import HumanMessage
+                    import google.generativeai as genai
+
+                    # 2. राजाराम भाई की ताज़ा मॉडल लिस्ट
+                    # नोट: हमने यहाँ सबसे पक्के मॉडल रखे हैं
+                    models_to_test = [
+                        {"name": "llama-3.2-11b-vision-preview", "provider": "groq", "key": core.GROQ_KEY},
+                        {"name": "gemini-1.5-flash", "provider": "google", "key": core.GEMINI_KEY}
                     ]
 
                     final_response = None
-                    detailed_errors = []
+                    detailed_log = ""
 
-                    # 3. Execution Loop
-                    for model in candidate_models:
+                    # 3. एक-एक करके इंजन स्टार्ट करो
+                    for m in models_to_test:
                         try:
-                            m_name = model["name"]
-                            if model["type"] == "groq":
-                                vision_client = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=m_name)
+                            if m["provider"] == "groq" and m["key"]:
+                                client = ChatGroq(groq_api_key=m["key"], model_name=m["name"])
                                 msg = HumanMessage(content=[
-                                    {"type": "text", "text": prompt if prompt else "Analyze this image for Rajaram Bhai."},
+                                    {"type": "text", "text": prompt if prompt else "Analyze this for Rajaram Bhai."},
                                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                                 ])
-                                response = vision_client.invoke([msg])
-                                final_response = response.content
+                                res = client.invoke([msg])
+                                final_response = res.content
+                                break
                             
-                            elif model["type"] == "google":
-                                genai.configure(api_key=core.GEMINI_KEY)
-                                g_model = genai.GenerativeModel(m_name)
-                                response = g_model.generate_content([prompt if prompt else "Analyze this.", img])
-                                final_response = response.text
-
-                            if final_response:
-                                engine_id = f"RAJARAM-{m_name.upper()}"
+                            elif m["provider"] == "google" and m["key"]:
+                                genai.configure(api_key=m["key"])
+                                g_model = genai.GenerativeModel(m["name"])
+                                res = g_model.generate_content([prompt if prompt else "Analyze this.", img])
+                                final_response = res.text
                                 break
                         except Exception as e:
-                            detailed_errors.append(f"{m_name}: {str(e)}")
+                            detailed_log += f"\n❌ {m['name']} Error: {str(e)}"
                             continue
 
-                    # 4. If AI Fails, use Tavily Search (Plan-B)
-                    if not final_response and core.TAVILY_KEY:
-                        st.warning("⚠️ AI Vision failed, launching Rajaram Satellite (Tavily)...")
-                        from langchain_community.tools.tavily_search import TavilySearchResults
-                        search = TavilySearchResults(api_key=core.TAVILY_KEY)
-                        search_res = search.invoke({"query": prompt if prompt else "Latest info about this item"})
-                        final_response = f"🔱 राजाराम भाई, AI सर्वर नखरे कर रहे थे, तो मैंने सीधे इंटरनेट से ढूँढा: {search_res}"
+                    # 4. Final Output Logic
+                    if final_response:
+                        st.success(f"🔱 राजाराम भाई, सिस्टम ज़िंदा हो गया!")
+                        # यहाँ अपना रिस्पॉन्स दिखाओ
+                    else:
+                        st.error(f"🔱 राजाराम भाई, दोनों चाबियाँ फेल हैं! असली एरर ये है: {detailed_log}")
+                        # यहाँ Tavily वाला Plan-B चलेगा
 
-                    if not final_response:
-                        st.error("❌ राजाराम भाई, तीनों चाबियाँ काम नहीं कर रहीं!")
-                        for err in detailed_errors:
-                            st.write(f"👉 {err}")
-
-                except Exception as e:
-                    final_response = f"🔱 राजाराम भाई, सिस्टम में आग लगी है: {str(e)}"
+                except Exception as ex:
+                    st.error(f"🔱 कोडिंग ब्लास्ट: {str(ex)}")
 
         # --- MODULE 2: MEDIA & ART (IF NO IMAGE UPLOADED) ---
         # अगर कोई फोटो अपलोड नहीं है और आप 'बनाने' को कह रहे हैं, तभी ये चलेगा
