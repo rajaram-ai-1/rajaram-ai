@@ -362,7 +362,7 @@ if prompt:
                     
                     vision_client = ChatGroq(
                         groq_api_key=core.GROQ_KEY, 
-                        model_name="llama-3.2-11b-vision-preview"
+                        model_name="llama-3.2-90b-vision-preview"
                     )
                     
                     msg = HumanMessage(
