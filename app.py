@@ -349,7 +349,7 @@ if prompt:
         engine_id = ""
          # --- 🔱 GLOBAL INITIALIZATION (इसे IF के बाहर सबसे ऊपर रखें) ---
 engine_id = "RAJARAM-READY" 
-
+final_response = None  # <--- यह लाइन जोड़ना सबसे जरूरी है!
 # --- MODULE 1: RAJARAM SUPREME HYBRID VISION ENGINE (2026 STABLE) ---
 if uploaded_file is not None:
     # विजन शुरू होते ही एक डिफॉल्ट नाम दे दो
