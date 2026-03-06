@@ -348,6 +348,19 @@ if prompt:
         final_response = ""
         engine_id = ""
          # --- MODULE 1: RAJARAM SUPREME HYBRID VISION ENGINE (2026 STABLE) ---
+         # --- 🔱 MODULE 1: विजन के शुरू में ये लाइन जोड़ें ---
+        engine_id = "RAJARAM-SATELLITE" # पहले से ही एक नाम दे दिया ताकि एरर न आए
+        
+        if uploaded_file is not None:
+            # ... बाकी का विजन कोड ...
+            
+            if final_response:
+                # अगर विजन सफल रहा तो ये नाम बदल जाएगा
+                # success_engine वाली लाइन के पास engine_id अपडेट करें
+                engine_id = f"RAJARAM-{success_engine.upper()}"
+            else:
+                # अगर Tavily चला, तो engine_id ये रहेगा
+                engine_id = "TAVILY-WEB-SEARCH"
 if uploaded_file is not None:
     with st.spinner("👁️ RAJARAM EYE: PENETRATING THE CORE..."):
         try:
