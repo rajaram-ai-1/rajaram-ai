@@ -455,52 +455,65 @@ if not final_response and prompt and any(x in prompt.lower() for x in ["photo", 
             final_response = "🔱 आर्ट इंजन में दबाव बढ़ गया है।"
             
        # --- MODULE 3: SEARCH & REASONING (THE FINAL BRAIN) ---
-        # अगर अभी तक कोई जवाब नहीं मिला (न विज़न से, न आर्ट से), तो यहाँ दिमाग चलेगा
-        if not final_response:
-            intel = ""
-            # सैटेलाइट सर्च (सिर्फ अगर इंटरनेट से जुड़ा काम हो)
-            search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
-            if st.session_state.search_enabled and any(k in prompt.lower() for k in search_trigger):
-                with st.spinner("🛰️ RAJARAM SATELLITE SEARCH ACTIVE..."):
-                    try:
-                        intel = core.search_engine.run(prompt)
-                    except:
-                        intel = "Satellite network connection weak, relying on internal core logic."
-            
-            # असली धमाका: Reasoning Logic
-            with st.spinner("🧠 NEURAL SYNERGY ACTIVE (RAJARAM V7.1)..."):
-                try:
-                    # Async लूप को सुरक्षित तरीके से हैंडल करना
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    
-                    # एआई को सोचने के लिए बुलाना
-                    logic_result = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, intel))
-                    
-                    # अगर जवाब सही मिला है तो उसे सेट करना
-                    if isinstance(logic_result, tuple):
-                        final_response, engine_id = logic_result
-                    else:
-                        final_response = logic_result
-                        engine_id = "RAJARAM-SUPREME-LOGIC"
-                    
-                    loop.close()
-                except Exception as e:
-                    rajaram_shield.auto_fix("NEURAL_CORE_CRITICAL", str(e))
-                    final_response = "🔱 राजाराम भाई, दिमाग पर बहुत ज़ोर पड़ रहा है, पर मैं हार नहीं मानूँगा! फिर से पूछें।"
-                    engine_id = "SHIELD-RECOVERY"
+if not final_response and prompt: # हमने 'prompt' चेक जोड़ दिया ताकि एरर न आए
+    intel = ""
+    # 1. सैटेलाइट सर्च (सिर्फ अगर इंटरनेट से जुड़ा काम हो)
+    search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
+    
+    # prompt.lower() से पहले चेक करें कि prompt खाली तो नहीं
+    if st.session_state.get('search_enabled', False) and any(k in prompt.lower() for k in search_trigger):
+        with st.spinner("🛰️ RAJARAM SATELLITE SEARCH ACTIVE..."):
+            try:
+                intel = core.search_engine.run(prompt)
+            except:
+                intel = "Satellite network connection weak, relying on internal core logic."
 
-        # --- FINAL OUTPUT: RESULT DISPLAY ---
-        if final_response:
-            st.markdown(final_response)
-            st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
-            
-            # आवाज़ (Voice) चालू करना
-            if st.session_state.voice_enabled:
-                rajaram_ai.speak(final_response)
-                
-            # इतिहास (History) में जोड़ना
-            st.session_state.history.append(AIMessage(content=final_response))
+    # 2. असली धमाका: Reasoning Logic (सरल और सीधा)
+    with st.spinner("🧠 NEURAL SYNERGY ACTIVE (RAJARAM V7.1)..."):
+        try:
+            # Async झंझट हटाकर सीधा कॉल करने की कोशिश (अगर आपका function async है)
+            import asyncio
+            try:
+                # पहले से चल रहे लूप को चेक करना
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            # Reasoning को रन करना
+            logic_result = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, intel))
+
+            # जवाब को सेट करना
+            if isinstance(logic_result, tuple):
+                final_response, engine_id = logic_result
+            else:
+                final_response = logic_result
+                engine_id = "RAJARAM-SUPREME-LOGIC"
+
+        except Exception as e:
+            # अगर सब फेल हो जाए तो 'Immortal' बैकअप
+            final_response = "🔱 राजाराम भाई, दिमाग पर बहुत ज़ोर पड़ रहा है, पर मैं हार नहीं मानूँगा! फिर से पूछें।"
+            engine_id = "SHIELD-RECOVERY"
+            st.error(f"Logic Error: {str(e)}")
+
+# --- FINAL OUTPUT: RESULT DISPLAY ---
+if final_response:
+    st.markdown(final_response)
+    # इंजन आईडी यहाँ अपडेट होगी
+    st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
+    
+    # आवाज़ (Voice)
+    if st.session_state.get('voice_enabled', False):
+        try:
+            rajaram_ai.speak(final_response)
+        except: pass
+        
+    # इतिहास (History) - सुनिश्चित करें कि AIMessage इम्पोर्टेड है
+    try:
+        from langchain_core.messages import AIMessage
+        st.session_state.history.append(AIMessage(content=final_response))
+    except:
+        pass
 
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
