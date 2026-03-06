@@ -361,9 +361,16 @@ if prompt:
                     # 🔱 जादुई लिस्ट: ये वो मॉडल्स हैं जो अभी Groq पर सबसे ज्यादा स्टेबल हैं
                     # अगर एक 'Decommissioned' होगा, तो सिस्टम तुरंत दूसरे पर स्विच करेगा
                     candidate_models = [
-                        "llama-3.2-11b-vision-preview",
-                        "llama-3.2-90b-vision-preview",
-                        "llama-3-70b-8192" # Backup
+                        "llama-3.2-11b-vision-preview",   # Groq: Latest Stable
+                        "llama-3.2-90b-vision-preview",   # Groq: High Intel (Back online)
+                        "pixtral-12b-2409",               # Groq/Mistral: Very Reliable
+                        "llama-3.1-70b-versatile",        # Groq: Backup Core
+                        "llama-3.1-8b-instant",           # Groq: Lightning Fast
+                        "gemini-1.5-flash",               # Google: High Speed (If API works)
+                        "gemini-1.5-pro",                # Google: Ultra Intel
+                        "claude-3-5-sonnet-20240620",     # Anthropic: King of Vision
+                        "gpt-4o-mini",                    # OpenAI: Efficient Stable
+                        "gpt-4o"                          # OpenAI: The Beast
                     ]
                     
                     v_response = None
