@@ -22,6 +22,7 @@ from io import BytesIO
 import ast       # कोड को स्कैन करने के लिए (दिमाग)
 import logging   # गलतियों का रिकॉर्ड रखने के लिए (डायरी)
 import requests  # इंटरनेट से डेटा खींचने के लिए (हाथ-पैर)
+from memory_engine import save_to_memory, get_past_context
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
