@@ -353,7 +353,23 @@ if 'pwr_cmd' in st.session_state and st.session_state.pwr_cmd:
 # 2. इनपुट हैंडलर (बटन या टाइपिंग - जो भी पहले आए)
 user_input = st.chat_input("Enter Command to Core...")
 prompt = btn_prompt if btn_prompt else user_input
+# मान लो यहाँ आपका चैट इनपुट है
 
+if user_input:
+    # 1. पहले अपनी एआई से जवाब लो (Gemini/AI Logic)
+    ai_response = f"जी राजाराम भाई, आपके सवाल '{user_input}' का जवाब प्रोसेस हो रहा है..." 
+
+    # 2. स्क्रीन पर दिखाओ (ये तो आपके में चल रहा है)
+    st.chat_message("user").write(user_input)
+    st.chat_message("assistant").write(ai_response)
+
+    # 3. 🔱 सबसे ज़रूरी कदम: यहाँ डालो सेव करने वाला कोड
+    try:
+        from memory_engine import save_to_memory
+        save_to_memory("RAJARAM_05", user_input, ai_response)
+        # st.success("याददाश्त में सुरक्षित!") # टेस्टिंग के लिए इसे अन-कमेंट कर सकते हैं
+    except Exception as e:
+        st.error(f"Memory Error: {e}")
 if prompt:
     # शक्तियों को चेक करें
     triggered = trigger_rajaram_powers(prompt)
