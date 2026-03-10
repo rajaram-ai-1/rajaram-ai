@@ -22,61 +22,62 @@ from io import BytesIO
 import ast       # कोड को स्कैन करने के लिए (दिमाग)
 import logging   # गलतियों का रिकॉर्ड रखने के लिए (डायरी)
 import requests  # इंटरनेट से डेटा खींचने के लिए (हाथ-पैर)
-from memory_engine import save_to_memory, get_past_context
 import streamlit as st
 from memory_engine import save_to_memory, get_past_context, load_full_chat_history
 
-# --- 🔱 १. आपका SIDEBAR वाला हिस्सा (यहीं डालिए) ---
+# --- 🔱 १. SIDEBAR (इतिहास की पट्टी) ---
 with st.sidebar:
     st.title("📜 पुरानी यादें (History)")
     st.write("---")
+    
+    # डेटाबेस से हिस्ट्री निकालो
     history = get_past_context("RAJARAM_05", limit=10)
     
     if history:
         for i, (msg, res) in enumerate(history):
-            if st.button(f"चैट {i+1}: {msg[:15]}...", key=f"hist_{i}"):
-                st.info(f"आपने कहा था: {msg}\n\nएआई ने कहा: {res}")
+            # 🔱 यहाँ key को 'side_' नाम दिया है ताकि एरर न आए
+            if st.button(f"💬 {msg[:15]}...", key=f"side_{i}"):
+                st.info(f"आपने कहा: {msg}\n\nAI: {res}")
     else:
         st.write("अभी कोई पुरानी याद नहीं है भाई!")
 
     st.write("---")
-    if st.button("🗑️ यादें साफ़ करें"):
-        st.warning("सावधानी! यादें मिटाने का काम अभी पेंडिंग है।")
+    if st.button("🗑️ यादें साफ़ करें", key="clear_all"):
+        st.warning("सावधानी! यह फीचर अगली अपडेट में चालू होगा।")
 
-# --- 🔱 २. अब इसके नीचे आपका मुख्य स्क्रीन (Main Chat) वाला हिस्सा ---
+# --- 🔱 २. MAIN SCREEN (असली चैट) ---
 st.title("🔱 RAJARAM SUPREME AI")
 
+# याददाश्त लोड करो अगर पहली बार ऐप खुला है
 if "messages" not in st.session_state:
     st.session_state.messages = load_full_chat_history("RAJARAM_05")
 
-# पुरानी चैट स्क्रीन पर दिखाना
+# जो भी बातचीत हुई है उसे स्क्रीन पर दिखाओ
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# नया इनपुट
+# --- 🔱 ३. USER INPUT & RESPONSE ---
 user_input = st.chat_input("हुक्म करो, राजाराम भाई...")
-# ... बाकी का लॉजिक (जो हमने पिछले मैसेज में डिस्कस किया)
-# --- 🔱 SIDEBAR SETTINGS (साइड वाली याददाश्त) ---
-with st.sidebar:
-    st.title("📜 पुरानी यादें (History)")
-    st.write("---")
-    
-    # डेटाबेस से पिछली 10 बातें निकालो
-    history = get_past_context("RAJARAM_05", limit=10)
-    
-    if history:
-        for i, (msg, res) in enumerate(history):
-            # हर पुरानी चैट के लिए एक बटन या टेक्स्ट
-            if st.button(f"चैट {i+1}: {msg[:20]}...", key=f"hist_{i}"):
-                st.info(f"आपने कहा था: {msg}\n\nएआई ने कहा: {res}")
-    else:
-        st.write("अभी कोई पुरानी याद नहीं है भाई!")
 
-    st.write("---")
-    if st.button("🗑️ यादें साफ़ करें"):
-        # यहाँ आप डिलीट करने का लॉजिक डाल सकते हैं
-        st.warning("सावधानी! यादें मिटाने का काम अभी पेंडिंग है।")
+if user_input:
+    # यूजर का मैसेज स्क्रीन पर
+    st.chat_message("user").markdown(user_input)
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
+    # एआई का जवाब (आपका असली एआई लॉजिक यहाँ आएगा)
+    ai_res = f"जी राजाराम भाई, मैंने आपकी बात '{user_input}' पर ध्यान दिया।"
+
+    # एआई का जवाब स्क्रीन पर
+    with st.chat_message("assistant"):
+        st.markdown(ai_res)
+    st.session_state.messages.append({"role": "assistant", "content": ai_res})
+
+    # 🔱 तिजोरी (Memory) में हमेशा के लिए सुरक्षित करें
+    save_to_memory("RAJARAM_05", user_input, ai_res)
+    
+    # साइडबार को अपडेट करने के लिए तुरंत रिफ्रेश
+    st.rerun()
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
