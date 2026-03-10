@@ -25,58 +25,41 @@ import requests  # इंटरनेट से डेटा खींचने 
 import streamlit as st
 from memory_engine import save_to_memory, get_past_context, load_full_chat_history
 
-# --- 🔱 १. SIDEBAR (इतिहास की पट्टी) ---
+# --- 🔱 SIDEBAR (केवल एक बार) ---
 with st.sidebar:
-    st.title("📜 पुरानी यादें (History)")
-    st.write("---")
-    
-    # डेटाबेस से हिस्ट्री निकालो
+    st.title("📜 पुरानी यादें")
     history = get_past_context("RAJARAM_05", limit=10)
-    
     if history:
         for i, (msg, res) in enumerate(history):
-            # 🔱 यहाँ key को 'side_' नाम दिया है ताकि एरर न आए
             if st.button(f"💬 {msg[:15]}...", key=f"side_{i}"):
                 st.info(f"आपने कहा: {msg}\n\nAI: {res}")
-    else:
-        st.write("अभी कोई पुरानी याद नहीं है भाई!")
 
-    st.write("---")
-    if st.button("🗑️ यादें साफ़ करें", key="clear_all"):
-        st.warning("सावधानी! यह फीचर अगली अपडेट में चालू होगा।")
+# --- 🔱 MAIN SCREEN TITLE ---
+st.title("🔱 RAJARAM SUPREME AI V7") # अब ये सिर्फ एक बार दिखेगा
 
-# --- 🔱 २. MAIN SCREEN (असली चैट) ---
-st.title("🔱 RAJARAM SUPREME AI")
-
-# याददाश्त लोड करो अगर पहली बार ऐप खुला है
+# --- 🔱 LOAD & SHOW CHAT ---
 if "messages" not in st.session_state:
     st.session_state.messages = load_full_chat_history("RAJARAM_05")
 
-# जो भी बातचीत हुई है उसे स्क्रीन पर दिखाओ
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- 🔱 ३. USER INPUT & RESPONSE ---
+# --- 🔱 SINGLE CHAT INPUT ---
 user_input = st.chat_input("हुक्म करो, राजाराम भाई...")
 
 if user_input:
-    # यूजर का मैसेज स्क्रीन पर
     st.chat_message("user").markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # एआई का जवाब (आपका असली एआई लॉजिक यहाँ आएगा)
-    ai_res = f"जी राजाराम भाई, मैंने आपकी बात '{user_input}' पर ध्यान दिया।"
+    # यहाँ आपका Gemini Response Logic (जैसे model.generate_content)
+    ai_res = "जी भाई, आदेश स्वीकार है!" 
 
-    # एआई का जवाब स्क्रीन पर
     with st.chat_message("assistant"):
         st.markdown(ai_res)
     st.session_state.messages.append({"role": "assistant", "content": ai_res})
 
-    # 🔱 तिजोरी (Memory) में हमेशा के लिए सुरक्षित करें
     save_to_memory("RAJARAM_05", user_input, ai_res)
-    
-    # साइडबार को अपडेट करने के लिए तुरंत रिफ्रेश
     st.rerun()
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
