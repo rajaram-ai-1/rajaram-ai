@@ -25,38 +25,69 @@ import requests  # इंटरनेट से डेटा खींचने 
 import streamlit as st
 from memory_engine import save_to_memory, get_past_context, load_full_chat_history
 
-# --- 🔱 SIDEBAR (केवल एक बार) ---
+# --- 🔱 १. ऐप कॉन्फ़िगरेशन (Theme & Layout) ---
+st.set_page_config(page_title="RAJARAM AI V7", layout="wide")
+
+# --- 🔱 २. SIDEBAR (इतिहास और सेटिंग्स) ---
 with st.sidebar:
     st.title("📜 पुरानी यादें")
-    history = get_past_context("RAJARAM_05", limit=10)
-    if history:
-        for i, (msg, res) in enumerate(history):
-            if st.button(f"💬 {msg[:15]}...", key=f"side_{i}"):
-                st.info(f"आपने कहा: {msg}\n\nAI: {res}")
+    st.write("---")
+    
+    # डेटाबेस से पिछली १० बातें लोड करना
+    try:
+        history = get_past_context("RAJARAM_05", limit=10)
+        if history:
+            for i, (msg, res) in enumerate(history):
+                # यूनिक की (side_) ताकि एरर न आए
+                if st.button(f"💬 {msg[:15]}...", key=f"side_{i}"):
+                    st.info(f"आपने कहा: {msg}\n\nAI: {res}")
+        else:
+            st.write("अभी कोई याददाश्त मौजूद नहीं है।")
+    except:
+        st.error("Memory Engine कनेक्ट नहीं हो पा रहा है!")
 
+    st.write("---")
+    if st.button("🗑️ यादें साफ़ करें", key="clear_all"):
+        st.warning("सावधानी! यह फीचर अगली अपडेट में चालू होगा।")
 
-# --- 🔱 LOAD & SHOW CHAT ---
+# --- 🔱 ३. MAIN PAGE HEADER ---
+st.title("🔱 RAJARAM SUPREME AI V7")
+st.write("अमर, सुरक्षित और तेज़ - बरेली का गौरव")
+st.write("---")
+
+# --- 🔱 ४. CHAT MEMORY (SESSION STATE) ---
+# ऐप खुलते ही डेटाबेस से सारी पुरानी बातचीत लोड करना
 if "messages" not in st.session_state:
     st.session_state.messages = load_full_chat_history("RAJARAM_05")
 
+# जो भी बातचीत हुई है उसे स्क्रीन पर दिखाना (Gemini Style)
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- 🔱 SINGLE CHAT INPUT ---
+# --- 🔱 ५. SINGLE CHAT INPUT & LOGIC ---
+# यहाँ हम user_input को जन्म दे रहे हैं
+user_input = st.chat_input("हुक्म करो, राजाराम भाई...")
 
 if user_input:
-    st.chat_message("user").markdown(user_input)
+    # १. यूजर का मैसेज स्क्रीन पर और लिस्ट में जोड़ना
+    with st.chat_message("user"):
+        st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # यहाँ आपका Gemini Response Logic (जैसे model.generate_content)
-    ai_res = "जी भाई, आदेश स्वीकार है!" 
+    # २. एआई का जवाब (Gemini Response Logic)
+    # यहाँ आप अपना model.generate_content वाला असली कोड जोड़ सकते हैं
+    ai_res = f"जी राजाराम भाई, मैंने आपकी बात '{user_input}' को अपनी अमर याददाश्त में दर्ज कर लिया है।"
 
+    # ३. एआई का जवाब स्क्रीन पर और लिस्ट में जोड़ना
     with st.chat_message("assistant"):
         st.markdown(ai_res)
     st.session_state.messages.append({"role": "assistant", "content": ai_res})
 
+    # ४. डेटाबेस (Permanent Memory) में लॉक करना
     save_to_memory("RAJARAM_05", user_input, ai_res)
+    
+    # ५. पेज रिफ्रेश ताकि साइडबार भी तुरंत अपडेट हो जाए
     st.rerun()
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
