@@ -333,18 +333,25 @@ if 'pwr_cmd' in st.session_state and st.session_state.pwr_cmd:
     st.session_state.pwr_cmd = None # काम होने के बाद खाली कर दो
 
 # 2. इनपुट हैंडलर (बटन या टाइपिंग - जो भी पहले आए)
-user_input = st.chat_input("Enter Command to Core...")
+user_input = st.chat_input("Ask Rajaram AI anything.")
 prompt = btn_prompt if btn_prompt else user_input
 # मान लो यहाँ आपका चैट इनपुट है
-
 if user_input:
-    # 1. पहले अपनी एआई से जवाब लो (Gemini/AI Logic)
-    ai_response = f"जी राजाराम भाई, आपके सवाल '{user_input}' का जवाब प्रोसेस हो रहा है..." 
+    # 🔱 १. सिर्फ लिस्ट में जोड़ो (स्क्रीन पर यहाँ मत लिखो)
+    st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # 2. स्क्रीन पर दिखाओ (ये तो आपके में चल रहा है)
-    st.chat_message("user").write(user_input)
-    st.chat_message("assistant").write(ai_response)
+    # 🔱 २. एआई का जवाब लो
+    # यहाँ आपका असली Gemini Logic आएगा
+    ai_response = f"जी राजाराम भाई, आदेश स्वीकार है!" 
 
+    # 🔱 ३. जवाब को भी लिस्ट में जोड़ो
+    st.session_state.messages.append({"role": "assistant", "content": ai_response})
+
+    # 🔱 ४. डेटाबेस में हमेशा के लिए लॉक करो
+    save_to_memory("RAJARAM_05", user_input, ai_response)
+    
+    # 🔱 ५. सबसे जरूरी: रिफ्रेश मारो (ताकि डबल न दिखे)
+    st.rerun()
     # 3. 🔱 सबसे ज़रूरी कदम: यहाँ डालो सेव करने वाला कोड
     try:
         from memory_engine import save_to_memory
