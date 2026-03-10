@@ -60,9 +60,6 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- 🔱 ५. SINGLE CHAT INPUT & LOGIC ---
-# यहाँ हम user_input को जन्म दे रहे हैं
-user_input = st.chat_input("हुक्म करो, राजाराम भाई...")
 
 if user_input:
     # १. यूजर का मैसेज स्क्रीन पर और लिस्ट में जोड़ना
