@@ -50,11 +50,6 @@ with st.sidebar:
     if st.button("🗑️ यादें साफ़ करें", key="clear_all"):
         st.warning("सावधानी! यह फीचर अगली अपडेट में चालू होगा।")
 
-# --- 🔱 ३. MAIN PAGE HEADER ---
-st.title("🔱 RAJARAM SUPREME AI V7")
-st.write("अमर, सुरक्षित और तेज़ - बरेली का गौरव")
-st.write("---")
-
 # --- 🔱 ४. CHAT MEMORY (SESSION STATE) ---
 # ऐप खुलते ही डेटाबेस से सारी पुरानी बातचीत लोड करना
 if "messages" not in st.session_state:
