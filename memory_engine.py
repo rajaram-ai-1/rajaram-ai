@@ -28,7 +28,27 @@ def save_to_memory(user_id, message, response, current_mood="Neutral"):
     """, (user_id, message, response, current_mood, datetime.now()))
     conn.commit()
     conn.close()
+# --- 🔱 memory_engine.py में नीचे जोड़ें ---
 
+def load_full_chat_history(user_id, limit=20):
+    """डेटाबेस से पुरानी चैट उठाकर सही फॉर्मेट में देना"""
+    conn = sqlite3.connect("rajaram_ai_memory.db")
+    cursor = conn.cursor()
+    # पुरानी बातें निकालो (पुरानी से नई की तरफ)
+    cursor.execute("""
+        SELECT user_say, ai_reply FROM brain_vault 
+        WHERE user_id = ? 
+        ORDER BY timestamp ASC LIMIT ?
+    """, (user_id, limit))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # इसे Streamlit के समझने लायक लिस्ट में बदलो
+    formatted_history = []
+    for user_msg, ai_res in rows:
+        formatted_history.append({"role": "user", "content": user_msg})
+        formatted_history.append({"role": "assistant", "content": ai_res})
+    return formatted_history
 # --- 🔱 RECALL LOGIC (पुरानी बातें याद करना) ---
 def get_past_context(user_id, limit=5):
     conn = sqlite3.connect("rajaram_ai_memory.db")
