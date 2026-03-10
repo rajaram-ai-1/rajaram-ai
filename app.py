@@ -34,8 +34,6 @@ with st.sidebar:
             if st.button(f"💬 {msg[:15]}...", key=f"side_{i}"):
                 st.info(f"आपने कहा: {msg}\n\nAI: {res}")
 
-# --- 🔱 MAIN SCREEN TITLE ---
-st.title("🔱 RAJARAM SUPREME AI V7") # अब ये सिर्फ एक बार दिखेगा
 
 # --- 🔱 LOAD & SHOW CHAT ---
 if "messages" not in st.session_state:
@@ -46,7 +44,6 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # --- 🔱 SINGLE CHAT INPUT ---
-user_input = st.chat_input("हुक्म करो, राजाराम भाई...")
 
 if user_input:
     st.chat_message("user").markdown(user_input)
