@@ -230,6 +230,8 @@ class RajaramAgent:
         """🔱 RAJARAM GHOST ENGINE: FINAL PERFECT INDENTATION"""
         prompt = f"Write a pure Python function for: '{command}'. Return ONLY code, NO markdown."
         def speak(self, text):
+       def speak(self, text):
+        """🔱 RAJARAM VOICE ENGINE: FIXED CLOSURE"""
         try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
@@ -237,26 +239,28 @@ class RajaramAgent:
                 b64 = base64.b64encode(f.read()).decode()
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
         except Exception as e: 
-            st.error(f"🔱 Shield Alert: {e}") 
+            st.error(f"🔱 Shield Alert (Voice): {e}")
 
-    # 🔱 यहाँ से नया फंक्शन शुरू हो रहा है, अब कोई एरर नहीं आएगी
     async def evolve_system(self, command):
-        """🔱 RAJARAM GHOST ENGINE: WRITES TO SHAKTI_VAULT.PY"""
+        """🔱 RAJARAM GHOST ENGINE: CLEAN INDENTATION"""
         prompt = f"Write a pure Python function for: '{command}'. Return ONLY code, NO markdown."
         
         try:
+            # १. एआई से कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
             
+            # २. तिजोरी (Vault) को बुलाना
             import shakti_vault
             success = shakti_vault.inject_new_shakti(command, clean_code)
             
+            # ३. चेक करना और लाइव इंजेक्ट करना
             if success:
                 exec(clean_code, globals())
                 st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥")
-                return f"🔱 SHAKTI STORED: '{command}' अब तिजोरी में सुरक्षित है!"
+                return f"🔱 SHAKTI STORED: '{command}' अब तिजोरी में सुरक्षित है और लाइव है!"
             else:
-                return "❌ VAULT WRITE FAILURE"
+                return "❌ VAULT WRITE FAILURE: तिजोरी का दरवाजा नहीं खुला।"
 
         except Exception as e:
             return f"❌ EVOLUTION ERROR: {str(e)}"
