@@ -1,27 +1,27 @@
-# ==============================================================================
-# 🔱 RAJARAM SHAKTI VAULT - THE AUTONOMOUS GHOST ENGINE
-# DEVELOPER: RAJARAM (BAREILLY, INDIA)
-# ==============================================================================
 import os
 import datetime
 
-# 🔱 यह फंक्शन खुद को (shakti_vault.py) अपडेट करने की शक्ति रखता है
 def inject_new_shakti(command, clean_code):
+    """🔱 यह फंक्शन हर आदेश के लिए एक अलग 'feature_xxx.py' फाइल बनाएगा"""
     try:
+        # फाइल का नाम आदेश के अनुसार छोटा और साफ (e.g., feature_voice_mode.py)
+        clean_name = command.lower().replace(" ", "_")[:15]
+        file_name = f"feature_{clean_name}.py"
+        
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # 🔱 फाइल को खोलकर उसमें नया कोड 'Append' करना
-        with open("shakti_vault.py", "a", encoding="utf-8") as vault:
-            vault.write(f"\n\n# --- 👻 GHOST POWER: {command} (Added: {timestamp}) ---\n")
-            vault.write(f"{clean_code}\n")
+        # नई फाइल लिखना
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write(f"# 🔱 GHOST POWER: {command}\n")
+            f.write(f"# Created: {timestamp}\n\n")
+            f.write("import streamlit as st\n")
+            f.write("from streamlit_mic_recorder import mic_recorder\n\n")
+            f.write("def run_feature():\n")
+            # कोड को थोडा अंदर (Indent) धकेलना ताकि 'def' के नीचे आए
+            indented_code = "\n".join(["    " + line for line in clean_code.split("\n")])
+            f.write(indented_code)
         
         return True
     except Exception as e:
         print(f"Vault Injection Error: {e}")
         return False
-
-# 🔱 आपकी पहली ऑटोमैटिक शक्ति (सैंपल)
-def check_vault_health():
-    return "🔱 SHAKTI VAULT IS LIVE. ALL GHOST PROTOCOLS ACTIVE."
-
-# इसके नीचे एआई खुद कोड लिखती जाएगी...
