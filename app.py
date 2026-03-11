@@ -222,8 +222,8 @@ class RajaramAgent:
         3. Make the function name unique.
         """
         
-       def speak(self, text):
-        """🔱 RAJARAM VOICE ENGINE: FIXED CLOSURE"""
+      def speak(self, text):
+        """🔱 RAJARAM VOICE ENGINE: PERFECT ALIGNMENT"""
         try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
@@ -235,19 +235,18 @@ class RajaramAgent:
 
     async def evolve_system(self, command):
         """🔱 RAJARAM GHOST ENGINE: CLEAN INDENTATION"""
-        # १. एआई को हुक्म
         prompt = f"Write a pure Python function for: '{command}'. Return ONLY code, NO markdown."
         
         try:
-            # २. एआई से कोड लेना
+            # १. एआई से कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
             
-            # ३. तिजोरी (Vault) को बुलाना
+            # २. तिजोरी (Vault) को बुलाना
             import shakti_vault
             success = shakti_vault.inject_new_shakti(command, clean_code)
             
-            # ४. चेक करना और लाइव इंजेक्ट करना
+            # ३. चेक करना और लाइव इंजेक्ट करना
             if success:
                 exec(clean_code, globals())
                 st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥")
