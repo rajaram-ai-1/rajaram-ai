@@ -203,27 +203,7 @@ class RajaramAgent:
             return f"Neural Error in {model}: {str(e)}", model
 
     def speak(self, text):
-        try:
-            tts = gTTS(text=text[:300], lang='hi')
-            tts.save("response.mp3")
-            with open("response.mp3", "rb") as f:
-                b64 = base64.b64encode(f.read()).decode()
-            st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except Exception as e: 
-            st.error(f"🔱 Shield Alert: {e}")
-
-    async def evolve_system(self, command):
-        """🔱 RAJARAM GHOST ENGINE: WRITES TO SHAKTI_VAULT.PY"""
-        prompt = f"""
-        TASK: Write a pure Python function for: '{command}'.
-        RULES:
-        1. Return ONLY code. NO markdown like ```python.
-        2. NO explanations. NO text.
-        3. Make the function name unique.
-        """
-        
-      def speak(self, text):
-        """🔱 RAJARAM VOICE ENGINE: PERFECT ALIGNMENT"""
+        """🔱 RAJARAM VOICE ENGINE"""
         try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
@@ -234,9 +214,8 @@ class RajaramAgent:
             st.error(f"🔱 Shield Alert (Voice): {e}")
 
     async def evolve_system(self, command):
-        """🔱 RAJARAM GHOST ENGINE: CLEAN INDENTATION"""
+        """🔱 RAJARAM GHOST ENGINE: WRITES TO SHAKTI_VAULT.PY"""
         prompt = f"Write a pure Python function for: '{command}'. Return ONLY code, NO markdown."
-        
         try:
             # १. एआई से कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
@@ -250,10 +229,9 @@ class RajaramAgent:
             if success:
                 exec(clean_code, globals())
                 st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥")
-                return f"🔱 SHAKTI STORED: '{command}' अब तिजोरी में सुरक्षित है और लाइव है!"
+                return f"🔱 SHAKTI STORED: '{command}' अब तिजोरी में सुरक्षित है!"
             else:
                 return "❌ VAULT WRITE FAILURE: तिजोरी का दरवाजा नहीं खुला।"
-
         except Exception as e:
             return f"❌ EVOLUTION ERROR: {str(e)}"
 # ------------------------------------------------------------------------------
