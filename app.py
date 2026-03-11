@@ -29,6 +29,26 @@ try:
     from shakti_vault import *
 except:
     pass
+import importlib.util
+
+def load_rajaram_features():
+    """🔱 बाहर की सभी 'feature_*.py' फाइलों को लाइव करना"""
+    for file in os.listdir():
+        if file.startswith("feature_") and file.endswith(".py"):
+            try:
+                feature_name = file[:-3]
+                spec = importlib.util.spec_from_file_location(feature_name, file)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                
+                # अगर फाइल में 'run_feature' फंक्शन है, तो उसे चलाओ
+                if hasattr(module, 'run_feature'):
+                    module.run_feature()
+            except Exception as e:
+                st.error(f"Error loading {file}: {e}")
+
+# --- इसे अपने UI के आखिर में या जहाँ आप बटन चाहते हैं वहां कॉल करें ---
+load_rajaram_features()
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
@@ -214,24 +234,25 @@ class RajaramAgent:
             st.error(f"🔱 Shield Alert (Voice): {e}")
 
     async def evolve_system(self, command):
-        """🔱 RAJARAM GHOST ENGINE: WRITES TO SHAKTI_VAULT.PY"""
-        prompt = f"Write a pure Python function for: '{command}'. Return ONLY code, NO markdown."
+        """🔱 RAJARAM GHOST ENGINE: CREATES INDEPENDENT FEATURE FILES"""
+        # AI को सख्त हिदायत कि सिर्फ लॉजिक दे, फालतू बातें नहीं
+        prompt = (f"Write ONLY the logic for: '{command}'. "
+                 "Do NOT write function definitions. Use 'st' for Streamlit. "
+                 "Return ONLY pure Python code, no markdown.")
         try:
-            # १. एआई से कोड लेना
+            # १. एआई से शुद्ध कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
             
-            # २. तिजोरी (Vault) को बुलाना
+            # २. तिजोरी (Vault) के जरिए नई फाइल बनवाना
             import shakti_vault
             success = shakti_vault.inject_new_shakti(command, clean_code)
             
-            # ३. चेक करना और लाइव इंजेक्ट करना
             if success:
-                exec(clean_code, globals())
-                st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥")
-                return f"🔱 SHAKTI STORED: '{command}' अब तिजोरी में सुरक्षित है!"
+                st.toast(f"🔱 NEW FEATURE GENERATED: {command}", icon="🔥")
+                return f"🔱 SHAKTI STORED: '{command}' के लिए नई फाइल बन गई है। GitHub Refresh करें और Reboot करें!"
             else:
-                return "❌ VAULT WRITE FAILURE: तिजोरी का दरवाजा नहीं खुला।"
+                return "❌ VAULT WRITE FAILURE: फाइल नहीं बन पाई।"
         except Exception as e:
             return f"❌ EVOLUTION ERROR: {str(e)}"
 # ------------------------------------------------------------------------------
