@@ -226,25 +226,23 @@ class RajaramAgent:
             # १. एआई से नया कोड जेनरेट करवाना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
-            
-          try:
-            # १. एआई से नया कोड जेनरेट करवाना
+        async def evolve_system(self, command):
+        """🔱 RAJARAM GHOST ENGINE: FINAL PERFECT INDENTATION"""
+        prompt = f"Write a pure Python function for: '{command}'. Return ONLY code, NO markdown."
+        
+        try:
+            # १. एआई से कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
             
-            # २. 🔱 तिजोरी (shakti_vault.py) में सेव करना
-            try:
-                import shakti_vault
-                success = shakti_vault.inject_new_shakti(command, clean_code)
-            except Exception as vault_err:
-                return f"❌ VAULT ERROR: Ensure shakti_vault.py exists! ({str(vault_err)})"
+            # २. 🔱 तिजोरी (Vault) को बुलाना
+            import shakti_vault
+            success = shakti_vault.inject_new_shakti(command, clean_code)
             
-            # ३. 🔱 लाइव इंजेक्शन और रिस्पॉन्स
+            # ३. चेक करना और लाइव इंजेक्ट करना
             if success:
                 exec(clean_code, globals())
-                # शील्ड और टोस्ट को एक ही जगह सेट कर दिया
-                rajaram_shield.auto_fix("VAULT_INJECTION", f"Power '{command}' locked in vault.")
-                st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥") 
+                st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥")
                 return f"🔱 SHAKTI STORED: '{command}' अब तिजोरी में सुरक्षित है और लाइव है!"
             else:
                 return "❌ VAULT WRITE FAILURE: तिजोरी का दरवाजा नहीं खुला।"
