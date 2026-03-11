@@ -9,4 +9,4 @@ gtts
 google-generativeai>=0.8.3
 Pillow
 requests
-from streamlit_mic_recorder import mic_recorder  # ✅ ये सही है
+streamlit-mic-recorder
