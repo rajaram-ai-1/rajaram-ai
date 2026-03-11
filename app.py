@@ -245,10 +245,9 @@ class RajaramAgent:
 
         except Exception as e:
             return f"❌ EVOLUTION ERROR: {str(e)}"
-if success:
-                # लाइव इंजेक्शन
+      if success:
+                # ये तीनों लाइनें 'if' के अंदर एक ही सीध में होनी चाहिए
                 exec(clean_code, globals())
-                # 🔱 यह लाइन स्क्रीन पर कन्फर्म करेगी कि कोड जुड़ गया
                 st.toast(f"🔱 GHOST POWER ACTIVATED: {command}", icon="🔥") 
                 return f"🔱 SHAKTI STORED: '{command}' लाइव है!"
 # ------------------------------------------------------------------------------
