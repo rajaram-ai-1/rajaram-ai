@@ -12,7 +12,7 @@ import os
 def inject_new_shakti(api_key, user_command, power_name):
     """मालिक के हुक्म पर नई फाइल (शक्ति) पैदा करना"""
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('models/gemini-1.5-flash')
     
     try:
         # १. एआई से कोड लिखवाना
@@ -42,7 +42,7 @@ tavily_key = st.secrets.get("TAVILY_KEY")
 
 if api_key:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('models/gemini-1.5-flash')
 else:
     st.error("❌ बिना चाबी के साम्राज्य नहीं चलता, राजाराम भाई!")
     st.stop()
