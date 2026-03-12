@@ -8,7 +8,7 @@ import datetime
 import time
 
 # --- १. महा-शून्य की चाबी (Secrets) ---
-api_key = st.secrets.get("GEMINI_KEY_KEY") or st.secrets.get("gemini_key")
+api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_API_key")
 tavily_key = st.secrets.get("TAVILY_KEY")
 
 if api_key:
