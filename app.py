@@ -422,7 +422,7 @@ if prompt:
                         {"name": "llama-3.2-90b-vision-preview", "type": "groq", "key": core.GROQ_KEY},
                         {"name": "pixtral-12b-2409", "type": "groq", "key": core.GROQ_KEY},
                         {"name": "gemini-1.5-flash-latest", "type": "google", "key": core.GEMINI_KEY},
-                        {"name": "gemini-1.5-pro-latest", "type": "google", "key": core.GEMINI_KEY}
+                        {"name": "gemini-1.5-flash-latest", "type": "google", "key": core.GEMINI_KEY}
                     ]
 
                     success_engine = ""
