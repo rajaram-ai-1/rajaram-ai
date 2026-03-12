@@ -4,14 +4,19 @@ import sys
 import subprocess
 import google.generativeai as genai
 
-# --- १. ईश्वरीय शक्ति: Secrets से चाबी उठाना ---
-try:
-    # यह लाइन सीधे Streamlit के Secrets से 'GEMINI_KEY' नाम की चाबी उठाएगी
-    GEMINI_API_KEY = st.secrets["GEMINI_KEY"]
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-pro')
-except Exception as e:
-    st.error("⚠️ Maalik, Streamlit Settings में 'GEMINI_KEY' नहीं मिली!")
+# --- ईश्वरीय शक्ति: Secrets से चाबी उठाना ---
+# यहाँ हम 'GEMINI_KEY' और 'gemini_key' दोनों चेक करेंगे
+api_key = st.secrets.get("GEMINI_KEY") or st.secrets.get("gemini_key")
+
+if api_key:
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        # st.success("🔱 चाबी मिल गई, महा-शक्ति तैयार है!") # टेस्टिंग के लिए इसे हटा सकते हैं
+    except Exception as e:
+        st.error(f"⚠️ चाबी तो मिली पर काम नहीं कर रही: {e}")
+else:
+    st.error("⚠️ Maalik, Streamlit Settings में 'GEMINI_KEY' अभी भी नहीं दिख रही!")
 
 class MahaShaktiEngine:
     def __init__(self):
