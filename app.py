@@ -131,7 +131,7 @@ class GlobalCore:
             "ULTIMATE_70B": "llama-3.3-70b-versatile",
             "THE_TITAN": "llama-3.1-405b-reasoning",
             "MIXTRIAL_POWER": "mixtral-8x7b-32768",
-            "EYE_OF_RA": "gemini-1.5-pro",
+            "EYE_OF_RA": "gemini-1.5-flash",
             "FLASH_VISION": "gemini-1.5-flash",
             "LLAMA_VISION_90B": "llama-3.2-90b-vision-preview",
             "CODE_WIZARD": "deepseek-v3",
