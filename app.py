@@ -360,20 +360,17 @@ with c5:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - BUTTON & INPUT SYNC FIXED 🔱
+# [PHASE 7: EXECUTION LOGIC] - CLEAN & OPTIMIZED VERSION 🔱
 # ------------------------------------------------------------------------------
-# ==============================================================================
-# [PHASE 7: EXECUTION ENGINE - FULLY REPAIRED] 🔱
-# ==============================================================================
 
 # 1. जादुई बटनों का हुक्म पकड़ना
 btn_prompt = None
 if 'pwr_cmd' in st.session_state and st.session_state.pwr_cmd:
     btn_prompt = st.session_state.pwr_cmd
-    st.session_state.pwr_cmd = None  # काम होने के बाद खाली कर दो
+    st.session_state.pwr_cmd = None  
 
-# 2. इनपुट हैंडलर (बटन या टाइपिंग - जो भी पहले आए)
-user_input = st.chat_input("Ask Rajaram AI anything.")
+# 2. इनपुट हैंडलर (बटन या टाइपिंग)
+user_input = st.chat_input("Ask Rajaram AI anything...")
 prompt = btn_prompt if btn_prompt else user_input
 
 # --- 🔱 GLOBAL INITIALIZATION ---
@@ -395,195 +392,79 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-        # --- MODULE 1: RAJARAM SUPREME HYBRID VISION ENGINE (2026 STABLE) ---
+        # --- MODULE 1: RAJARAM HYBRID VISION ENGINE (IMAGE) ---
         if uploaded_file is not None:
-            engine_id = "RAJARAM-SATELLITE"
-            with st.spinner("👁️ RAJARAM EYE: PENETRATING THE CORE..."):
+            with st.spinner("👁️ RAJARAM EYE ACTIVE..."):
                 try:
-                    import base64
-                    from PIL import Image
-                    import io
-                    import google.generativeai as genai
-                    from langchain_groq import ChatGroq
-                    from langchain_core.messages import HumanMessage
-
-                    # 1. 🔱 IMAGE SHIELD: RGBA to RGB
                     img = Image.open(uploaded_file)
-                    if img.mode != "RGB":
-                        img = img.convert("RGB")
+                    if img.mode != "RGB": img = img.convert("RGB")
                     img.thumbnail((1024, 1024))
                     
-                    buffer = io.BytesIO()
-                    img.save(buffer, format="JPEG")
-                    base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                    
-                    # 2. 🔱 LATEST MODELS LIST (Priority Order)
-                    candidate_models = [
-                        {"name": "llama-3.2-90b-vision-preview", "type": "groq", "key": core.GROQ_KEY},
-                        {"name": "pixtral-12b-2409", "type": "groq", "key": core.GROQ_KEY},
-                        {"name": "gemini-1.5-flash-latest", "type": "google", "key": core.GEMINI_KEY},
-                        {"name": "gemini-1.5-flash-latest", "type": "google", "key": core.GEMINI_KEY}
-                    ]
+                    # Gemini Flash (STABLE) for Vision
+                    genai.configure(api_key=core.GEMINI_KEY)
+                    g_model = genai.GenerativeModel("gemini-1.5-flash")
+                    response = g_model.generate_content([prompt if prompt else "Analyze this image.", img])
+                    final_response = response.text
+                    engine_id = "RAJARAM-EYE-OF-RA"
+                except Exception as e:
+                    st.error(f"Vision Glitch: {e}")
 
-                    success_engine = ""
-                    error_log = []
+        # --- MODULE 2: MEDIA & ART ENGINE ---
+        if not final_response and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
+            with st.spinner("🎨 SYNTHESIZING ART..."):
+                try:
+                    clean_p = prompt.replace(" ", "%20")
+                    img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
+                    st.image(img_url, use_container_width=True)
+                    final_response = "🔱 Image synthesized by Rajaram AI Core."
+                    engine_id = "RAJARAM-ART-V3"
+                except: pass
 
-                    # 3. 🔱 THE EXECUTION LOOP
-                    for model in candidate_models:
-                        m_name = model["name"]
-                        m_type = model["type"]
-                        m_key = model["key"]
-                        if not m_key: continue
-
-                        try:
-                            if m_type == "groq":
-                                vision_client = ChatGroq(groq_api_key=m_key, model_name=m_name)
-                                msg = HumanMessage(content=[
-                                    {"type": "text", "text": prompt if prompt else "Analyze this image for Rajaram Bhai."},
-                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                                ])
-                                response = vision_client.invoke([msg])
-                                final_response = response.content
-                            
-                            elif m_type == "google":
-                                genai.configure(api_key=m_key)
-                                g_model = genai.GenerativeModel(m_name)
-                                response = g_model.generate_content([prompt if prompt else "इसके बारे में बताएं।", img])
-                                final_response = response.text
-
-                            if final_response:
-                                success_engine = m_name
-                                engine_id = f"RAJARAM-{success_engine.upper()}"
-                                break 
-                        
-                        except Exception as e:
-                            error_log.append(f"{m_name}: {str(e)}")
-                            continue
-
-                except Exception as system_ex:
-                    st.error(f"🔱 विजन कोर में धमाका: {str(system_ex)}")
-                    engine_id = "RAJARAM-ERROR"
-
-        # --- MODULE 2: REASONING & WEB SEARCH (If Vision failed or skipped) ---
+        # --- MODULE 3: SEARCH & REASONING (FINAL BRAIN) ---
         if not final_response:
             with st.spinner("🧠 RAJARAM CORE REASONING..."):
                 intel = ""
-                # सैटेलाइट सर्च प्रोटोकॉल
-                if st.session_state.get('search_enabled'):
+                # 🛰️ Satellite Search
+                search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
+                if st.session_state.get('search_enabled') and any(k in prompt.lower() for k in search_trigger):
                     try:
-                        from langchain_community.tools.tavily_search import TavilySearchResults
-                        search = TavilySearchResults(api_key=core.TAVILY_KEY)
-                        intel = search.invoke({"query": prompt})
+                        intel = core.search_engine.run(prompt)
                         engine_id = "RAJARAM-SATELLITE-WEB"
                     except:
-                        intel = "Satellite link down."
+                        intel = "Satellite link weak."
 
-                # Reasoning Logic
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                logic_res = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, str(intel)))
-                
-                if isinstance(logic_res, tuple):
-                    final_response, engine_id = logic_res
-                else:
-                    final_response = logic_res
-                    engine_id = "RAJARAM-SUPREME-LOGIC"
+                # 🧠 Reasoning Logic
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    logic_res = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, str(intel)))
+                    
+                    if isinstance(logic_res, tuple):
+                        final_response, engine_id = logic_res
+                    else:
+                        final_response = logic_res
+                        engine_id = "RAJARAM-SUPREME-LOGIC"
+                except Exception as e:
+                    final_response = "🔱 Core overload. Please retry."
+                    st.error(f"Logic Error: {e}")
 
-        # --- 🔱 ४. परिणाम और याददाश्त (Memory) ---
+        # --- 🔱 ४. परिणाम और याददाश्त (Memory & Output) ---
         if final_response:
             st.markdown(final_response)
+            st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
             
-            # आवाज़ (Voice)
+            # आवाज़ (Voice)
             if st.session_state.get('voice_enabled'):
                 rajaram_ai.speak(final_response)
             
-            # डेटाबेस में हमेशा के लिए लॉक करो (Memory Engine)
+            # मेमोरी में सेव (Optional)
             try:
                 from memory_engine import save_to_memory
                 save_to_memory("RAJARAM_05", prompt, final_response)
-            except Exception as e:
-                pass # साइलेंट एरर हैंडलिंग
+            except: pass
                 
-            # चैट हिस्ट्री अपडेट
+            # हिस्ट्री अपडेट
             st.session_state.history.append(AIMessage(content=final_response))
-
-# --- 🔱 FOOTER INFO ---
-st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
-
-          # --- MODULE 2: MEDIA & ART (सुधरा हुआ और सुरक्षित) ---
-# हमने यहाँ 'prompt and' जोड़ दिया है ताकि खाली प्रॉम्प्ट पर एरर न आए
-if not final_response and prompt and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
-    with st.spinner("🎨 RAJARAM ART ENGINE STARTING..."):
-        try:
-            clean_p = prompt.replace(" ", "%20")
-            img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
-            st.image(img_url, use_container_width=True)
-            final_response = "🔱 Image synthesized by Rajaram AI Core."
-            engine_id = "Pollinations-V3"
-        except:
-            final_response = "🔱 आर्ट इंजन में दबाव बढ़ गया है।"
-            
-       # --- MODULE 3: SEARCH & REASONING (THE FINAL BRAIN) ---
-if not final_response and prompt: # हमने 'prompt' चेक जोड़ दिया ताकि एरर न आए
-    intel = ""
-    # 1. सैटेलाइट सर्च (सिर्फ अगर इंटरनेट से जुड़ा काम हो)
-    search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
-    
-    # prompt.lower() से पहले चेक करें कि prompt खाली तो नहीं
-    if st.session_state.get('search_enabled', False) and any(k in prompt.lower() for k in search_trigger):
-        with st.spinner("🛰️ RAJARAM SATELLITE SEARCH ACTIVE..."):
-            try:
-                intel = core.search_engine.run(prompt)
-            except:
-                intel = "Satellite network connection weak, relying on internal core logic."
-
-    # 2. असली धमाका: Reasoning Logic (सरल और सीधा)
-    with st.spinner("🧠 NEURAL SYNERGY ACTIVE (RAJARAM V7.1)..."):
-        try:
-            # Async झंझट हटाकर सीधा कॉल करने की कोशिश (अगर आपका function async है)
-            import asyncio
-            try:
-                # पहले से चल रहे लूप को चेक करना
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-
-            # Reasoning को रन करना
-            logic_result = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, intel))
-
-            # जवाब को सेट करना
-            if isinstance(logic_result, tuple):
-                final_response, engine_id = logic_result
-            else:
-                final_response = logic_result
-                engine_id = "RAJARAM-SUPREME-LOGIC"
-
-        except Exception as e:
-            # अगर सब फेल हो जाए तो 'Immortal' बैकअप
-            final_response = "🔱 राजाराम भाई, दिमाग पर बहुत ज़ोर पड़ रहा है, पर मैं हार नहीं मानूँगा! फिर से पूछें।"
-            engine_id = "SHIELD-RECOVERY"
-            st.error(f"Logic Error: {str(e)}")
-
-# --- FINAL OUTPUT: RESULT DISPLAY ---
-if final_response:
-    st.markdown(final_response)
-    # इंजन आईडी यहाँ अपडेट होगी
-    st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
-    
-    # आवाज़ (Voice)
-    if st.session_state.get('voice_enabled', False):
-        try:
-            rajaram_ai.speak(final_response)
-        except: pass
-        
-    # इतिहास (History) - सुनिश्चित करें कि AIMessage इम्पोर्टेड है
-    try:
-        from langchain_core.messages import AIMessage
-        st.session_state.history.append(AIMessage(content=final_response))
-    except:
-        pass
-
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
