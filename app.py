@@ -244,10 +244,20 @@ class RajaramAgent:
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
             
-            # २. तिजोरी (Vault) के जरिए नई फाइल बनवाना
-            import shakti_vault
-            success = shakti_vault.inject_new_shakti(command, clean_code)
-            
+            # --- २. तिजोरी (Vault) के जरिए नई फाइल बनवाना (FIXED) ---
+import shakti_vault
+import time
+
+# एक यूनिक नाम बनाना ताकि फाइलें आपस में न टकराएं
+p_name = f"shakti_{int(time.time())}" 
+
+# यहाँ हमने ३ चीजें भेजी हैं: १. चाबी, २. हुक्म (command), ३. नाम (p_name)
+success, msg = shakti_vault.inject_new_shakti(api_key, command, p_name)
+
+if success:
+    st.success(msg)
+else:
+    st.error(f"तिजोरी एरर: {msg}")
             if success:
                 st.toast(f"🔱 NEW FEATURE GENERATED: {command}", icon="🔥")
                 return f"🔱 SHAKTI STORED: '{command}' के लिए नई फाइल बन गई है। GitHub Refresh करें और Reboot करें!"
