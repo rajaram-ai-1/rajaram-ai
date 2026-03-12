@@ -6,6 +6,35 @@ import importlib.util
 import google.generativeai as genai
 import datetime
 import time
+import google.generativeai as genai
+import os
+
+def inject_new_shakti(api_key, user_command, power_name):
+    """मालिक के हुक्म पर नई फाइल (शक्ति) पैदा करना"""
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-1.5-pro')
+    
+    try:
+        # १. एआई से कोड लिखवाना
+        prompt = f"Write a standalone Python function 'run_feature()' for: {user_command}. Use streamlit as st. Return ONLY raw code."
+        response = model.generate_content(prompt)
+        code = response.text.replace('```python', '').replace('```', '').strip()
+
+        # २. तिजोरी का रास्ता साफ़ करना
+        vault_path = "rajaram_vault"
+        if not os.path.exists(vault_path):
+            os.makedirs(vault_path)
+            
+        file_path = os.path.join(vault_path, f"feature_{power_name}.py")
+        
+        # ३. फाइल में शक्ति फूंकना (Writing the file)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write("import streamlit as st\nimport os, subprocess\n\n")
+            f.write(code)
+        
+        return True, f"✅ शक्ति '{power_name}' सिद्ध हुई और तिजोरी में रख दी गई है!"
+    except Exception as e:
+        return False, str(e)
 
 # --- १. महा-शून्य की चाबी (Secrets) ---
 api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_API_key")
