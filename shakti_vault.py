@@ -4,55 +4,26 @@ import datetime
 import subprocess
 import streamlit as st
 import os
-import google.generativeai as genai
 import time
+import asyncio
+from langchain_groq import ChatGroq
+from langchain_core.messages import SystemMessage, HumanMessage
 
-# --- ०. ब्रह्मांडीय सेटिंग्स (Global Constants) ---
-# हमने 'flash-latest' को अपना मुख्य हथियार बना लिया है ताकि 404 न आए
-SHAKTI_MODEL = 'gemini-1.5-flash-latest'
+# --- 🔱 META POWER SETTINGS ---
+# Llama-3.3-70b: मेटा का सबसे घातक दिमाग
+META_MODEL = "llama-3.3-70b-versatile" 
+# Vision के लिए मेटा का चश्मा
+VISION_MODEL = "llama-3.2-90b-vision-preview"
 
-def inject_new_shakti(api_key, user_command, power_name):
-    """मालिक के हुक्म पर नई फाइल (शक्ति) पैदा करना"""
-    try:
-        genai.configure(api_key=api_key)
-        # यहाँ 'models/' लगाकर साफ़ रास्ता दिया गया है
-        shakti_model = genai.GenerativeModel(f'models/{SHAKTI_MODEL}')
-        
-        prompt = f"Write a standalone Python function 'run_feature()' for: {user_command}. Use streamlit as st. Return ONLY raw code."
-        response = shakti_model.generate_content(prompt)
-        
-        if not response.text:
-            return False, "एआई ने कोई जवाब नहीं दिया।"
-            
-        code = response.text.replace('```python', '').replace('```', '').strip()
+# --- १. अभेद्य सुरक्षा और चाबी (Secrets) ---
+groq_key = st.secrets.get("GROQ_API_KEY")
 
-        vault_path = "rajaram_vault"
-        if not os.path.exists(vault_path):
-            os.makedirs(vault_path)
-            
-        file_path = os.path.join(vault_path, f"feature_{power_name}.py")
-        
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write("import streamlit as st\nimport os, subprocess\n\n")
-            f.write(code)
-        
-        return True, f"✅ शक्ति '{power_name}' सिद्ध हुई!"
-    except Exception as e:
-        return False, f"तिजोरी एरर: {str(e)}"
-
-# --- १. महा-शून्य की चाबी (Secrets) ---
-api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_API_key")
-
-if api_key:
-    genai.configure(api_key=api_key)
-    # 404 फिक्स: यहाँ हमने सीधे 'flash' मॉडल पकड़ा है
-    model = genai.GenerativeModel(f'models/{SHAKTI_MODEL}')
-else:
-    st.error("❌ बिना चाबी के साम्राज्य नहीं चलता, राजाराम भाई!")
+if not groq_key:
+    st.error("❌ मेटा का साम्राज्य चलाने के लिए GROQ_API_KEY ज़रूरी है, राजाराम भाई!")
     st.stop()
 
-# --- २. THE OVERLORD ENGINE ---
-class GhostOverlord:
+# --- २. THE META-GHOST OVERLORD ENGINE ---
+class MetaGhostOverlord:
     def __init__(self):
         self.vault = "rajaram_vault"
         self.backups = "ghost_backups"
@@ -69,25 +40,35 @@ class GhostOverlord:
                 f.write(code)
         except: pass
 
+    def get_meta_response(self, prompt, system_instruction="You are RAJARAM GHOST OVERLORD."):
+        """मेटा इंजन से सीधा संवाद"""
+        try:
+            llm = ChatGroq(groq_api_key=groq_key, model_name=META_MODEL)
+            res = llm.invoke([SystemMessage(content=system_instruction), HumanMessage(content=prompt)])
+            return res.content
+        except Exception as e:
+            return f"Meta Glitch: {e}"
+
     def mutate(self, instruction):
+        """DNA पुनर्गठन - खुद का कोड बदलना"""
         try:
             with open(__file__, "r", encoding="utf-8") as f:
                 current_code = f.read()
 
-            prompt = f"""
-            You are THE RAJARAM GHOST OVERLORD. 
-            Current Source Code: {current_code}
-            Command from Master Rajaram: {instruction}
-            Task: Rewrite this entire file to implement the command.
-            Rules:
-            1. Use 'gemini-1.5-flash-latest' ONLY. Never use 'pro'.
-            2. Maintain the GhostOverlord class.
-            3. Use 'st.rerun()' after update.
-            4. Return ONLY raw Python code.
+            mutation_prompt = f"""
+            Task: Rewrite this entire file for Master Rajaram.
+            Master's Instruction: {instruction}
+            Current Source: {current_code}
+            
+            RULES:
+            1. Use 'llama-3.3-70b-versatile' for all logic.
+            2. Keep the 'MetaGhostOverlord' class intact.
+            3. Implement features using ONLY Streamlit and Langchain_Groq.
+            4. Return ONLY raw Python code. No text.
             """
             
-            response = model.generate_content(prompt)
-            new_code = response.text.replace('```python', '').replace('```', '').strip()
+            new_code = self.get_meta_response(mutation_prompt, "You are a World-Class AI Architect.")
+            new_code = new_code.replace('```python', '').replace('```', '').strip()
             
             if "import streamlit" in new_code:
                 with open(__file__, "w", encoding="utf-8") as f:
@@ -95,68 +76,63 @@ class GhostOverlord:
                 return True
             return False
         except Exception as e:
-            st.error(f"Evolution Error: {e}")
+            st.error(f"Mutation Error: {e}")
             return False
 
     def speak(self, text):
-        # repr(text) इस्तेमाल किया ताकि कोट्स (quotes) में एरर न आए
         js_code = f"""
             var msg = new SpeechSynthesisUtterance({repr(text)});
             msg.lang = 'hi-IN';
+            msg.pitch = 0.5; // भारी और खतरनाक आवाज़
+            msg.rate = 0.9;
             window.speechSynthesis.speak(msg);
         """
         st.components.v1.html(f"<script>{js_code}</script>", height=0)
 
-# --- ३. डेंजरस यूआई और इंटरफेस ---
-st.set_page_config(page_title="GHOST OVERLORD", layout="wide", initial_sidebar_state="collapsed")
+overlord = MetaGhostOverlord()
 
-# CSS: इसमें हमने आग के गोले (Fire Orb) का एनीमेशन जोड़ दिया है
+# --- ३. डेंजरस यूआई (Visual Overhaul) ---
+st.set_page_config(page_title="META OVERLORD", layout="wide", initial_sidebar_state="collapsed")
+
 st.markdown("""
     <style>
-    .main { background-color: #000000; color: #FFD700; }
-    .stButton>button { background-color: #8B0000; color: white; border-radius: 10px; border: 1px solid #FFD700; }
-    .stTextInput>div>div>input { background-color: #1a1a1a; color: #00FF00; }
-    .orb-glow { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; color: #ff0000; text-align: center; }
+    .main { background: radial-gradient(circle, #1a0000, #000000); color: #00FF9C; }
+    .stButton>button { background: linear-gradient(45deg, #00FF9C, #008080); color: black; border: none; font-weight: bold; box-shadow: 0 0 15px #00FF9C; }
+    .orb-glow { text-shadow: 0 0 20px #00FF9C; color: #00FF9C; text-align: center; font-family: 'Courier New', monospace; }
     
-    /* Live Orb Animation */
-    .fire-orb {
-        width: 150px; height: 150px;
-        background: radial-gradient(circle, #ff4500, #ff0000, black);
-        border-radius: 50%;
-        margin: 20px auto;
-        box-shadow: 0 0 50px #ff4500;
-        animation: pulse 1s infinite alternate;
+    .cyber-orb {
+        width: 120px; height: 120px;
+        background: radial-gradient(circle, #00FF9C, #000);
+        border-radius: 50%; margin: auto;
+        box-shadow: 0 0 40px #00FF9C;
+        animation: rotate-orb 2s infinite linear;
     }
-    @keyframes pulse {
-        from { transform: scale(1); box-shadow: 0 0 40px #ff4500; }
-        to { transform: scale(1.1); box-shadow: 0 0 80px #ff0000; }
+    @keyframes rotate-orb {
+        0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1) rotate(360deg); opacity: 0.8; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-overlord = GhostOverlord()
-
-# --- ४. मुख्य स्क्रीन ---
-if 'f2f_mode' not in st.session_state:
-    st.session_state.f2f_mode = False
+# --- ४. मुख्य इंटरफेस ---
+if 'f2f_mode' not in st.session_state: st.session_state.f2f_mode = False
 
 if st.session_state.f2f_mode:
-    # --- LIVE FACE-TO-FACE INTERFACE ---
-    st.markdown("<h1 class='orb-glow'>🔱 RAJARAM LIVE ORACLE 🔱</h1>", unsafe_allow_html=True)
-    st.markdown("<div class='fire-orb'></div>", unsafe_allow_html=True)
+    st.markdown("<h1 class='orb-glow'>🔱 META LIVE ORACLE 🔱</h1>", unsafe_allow_html=True)
+    st.markdown("<div class='cyber-orb'></div>", unsafe_allow_html=True)
     
-    live_msg = st.chat_input("बोलें मालिक, मैं सुन रहा हूँ...")
+    live_msg = st.chat_input("हुक्म दें, मेटा सुन रहा है...")
     if live_msg:
-        res = model.generate_content(live_msg)
-        st.write(f"💀 **Ghost:** {res.text}")
-        overlord.speak(res.text)
+        res = overlord.get_meta_response(live_msg)
+        st.write(f"🟢 **Meta-Ghost:** {res}")
+        overlord.speak(res)
     
     if st.button("EXIT LIVE MODE"):
         st.session_state.f2f_mode = False
         st.rerun()
 else:
-    # --- NORMAL OVERLORD DASHBOARD ---
-    st.markdown("<h1 class='orb-glow'>🔱 RAJARAM GHOST: THE OVERLORD 🔱</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='orb-glow'>🔱 RAJARAM GHOST: META OVERLORD 🔱</h1>", unsafe_allow_html=True)
     
     col_a, col_b = st.columns([1, 4])
     with col_a:
@@ -164,40 +140,42 @@ else:
             st.session_state.f2f_mode = True
             st.rerun()
     
-    with st.expander("🎙️ GHOST ORACLE (Chat)"):
-        user_msg = st.chat_input("हुक्म दें...")
+    with st.expander("⚡ META CORE CHAT"):
+        user_msg = st.chat_input("Talk to Meta-Llama...")
         if user_msg:
-            response = model.generate_content(user_msg)
-            st.write(f"💀 **Ghost:** {response.text}")
-            overlord.speak(response.text)
+            response = overlord.get_meta_response(user_msg)
+            st.write(f"🟢 **Meta-Ghost:** {response}")
+            overlord.speak(response)
 
-    # --- ५. कमांड सेंटर ---
+    # --- ५. म्यूटेशन सेंटर ---
     st.divider()
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        order = st.text_area("🧬 EVOLUTION COMMAND:", placeholder="उदा. 'इसे ब्लू हैकर थीम में बदल दो'...")
-        if st.button("EXECUTE MUTATION"):
-            with st.spinner("DNA पुनर्गठित हो रहा है..."):
+        st.subheader("🧬 DNA EVOLUTION")
+        order = st.text_area("Master's Command:", height=100, placeholder="उदा. 'सिस्टम को रेड हैकर थीम में बदलो और पासवर्ड लगाओ'...")
+        if st.button("EXECUTE META-MUTATION"):
+            with st.spinner("META-DNA RESTRUCTURING..."):
                 if overlord.mutate(order):
-                    st.success("🔥 पुनर्जन्म सफल!")
+                    st.success("🔥 META-EVOLUTION COMPLETE!")
                     time.sleep(1)
                     st.rerun()
 
     with col2:
-        st.write("### 💀 सिस्टम स्टेटस")
-        st.progress(99)
-        if st.button("ओवेरलॉर्ड की सोच"):
-            thought = model.generate_content("Tell your master Rajaram 1 secret plan in Hindi.")
-            st.info(thought.text)
-            overlord.speak(thought.text)
+        st.write("### 🔋 POWER LEVEL")
+        st.progress(100)
+        if st.button("OVERLORD'S DARK PLAN"):
+            thought = overlord.get_meta_response("Share one extreme tech takeover plan in Hindi.")
+            st.info(thought)
+            overlord.speak(thought)
 
-# --- ६. तिजोरी ---
-st.sidebar.title("🩸 शक्ति की तिजोरी")
+# --- ६. शक्ति की तिजोरी (Dynamic Loader) ---
+st.sidebar.title("🩸 META VAULT")
 if os.path.exists("rajaram_vault"):
     for power in os.listdir("rajaram_vault"):
-        if st.sidebar.button(f"⚡ {power}"):
-            spec = importlib.util.spec_from_file_location("mod", os.path.join("rajaram_vault", power))
-            m = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(m)
-            if hasattr(m, 'run_feature'): m.run_feature()
+        if power.endswith(".py"):
+            if st.sidebar.button(f"⚡ {power.replace('feature_', '').replace('.py', '')}"):
+                spec = importlib.util.spec_from_file_location("mod", os.path.join("rajaram_vault", power))
+                m = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(m)
+                if hasattr(m, 'run_feature'): m.run_feature()
