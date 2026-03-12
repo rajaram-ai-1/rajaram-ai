@@ -239,25 +239,34 @@ class RajaramAgent:
         prompt = (f"Write ONLY the logic for: '{command}'. "
                  "Do NOT write function definitions. Use 'st' for Streamlit. "
                  "Return ONLY pure Python code, no markdown.")
-        try:
+
+            try:
             # १. एआई से शुद्ध कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
             
             # --- २. तिजोरी (Vault) के जरिए नई फाइल बनवाना (FIXED) ---
-import shakti_vault
-import time
+            import shakti_vault
+            import time
 
-# एक यूनिक नाम बनाना ताकि फाइलें आपस में न टकराएं
-p_name = f"shakti_{int(time.time())}" 
+            # एक यूनिक नाम बनाना ताकि फाइलें आपस में न टकराएं
+            p_name = f"shakti_{int(time.time())}" 
 
-# यहाँ हमने ३ चीजें भेजी हैं: १. चाबी, २. हुक्म (command), ३. नाम (p_name)
-success, msg = shakti_vault.inject_new_shakti(api_key, command, p_name)
+            # यहाँ हमने ३ चीजें भेजी हैं: १. api_key, २. command, ३. p_name
+            # नोट: पक्का कर लें कि api_key ऊपर कहीं डिफाइन है
+            success, msg = shakti_vault.inject_new_shakti(api_key, command, p_name)
 
-if success:
-    st.success(msg)
-else:
-    st.error(f"तिजोरी एरर: {msg}")
+            if success:
+                st.success(msg)
+                time.sleep(1)
+                st.rerun()
+            else:
+                st.error(f"तिजोरी एरर: {msg}")
+
+        except Exception as e:
+            # यह 'except' ब्लॉक Syntax Error को खत्म करेगा
+            st.error(f"⚠️ गड़बड़ हुई मालिक: {e}")
+        
             if success:
                 st.toast(f"🔱 NEW FEATURE GENERATED: {command}", icon="🔥")
                 return f"🔱 SHAKTI STORED: '{command}' के लिए नई फाइल बन गई है। GitHub Refresh करें और Reboot करें!"
