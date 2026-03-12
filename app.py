@@ -6,7 +6,6 @@
 
 import streamlit as st
 import os
-import google.generativeai as genai
 from langchain_groq import ChatGroq
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
@@ -122,26 +121,39 @@ st.markdown("""
 
 class GlobalCore:
     def __init__(self):
-        self.GEMINI_KEY = st.secrets.get("GEMINI_API_KEY")
         self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
         self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
         
         # यहाँ साड़ी 40+ मॉडल्स की लिस्ट और KeyErrors का समाधान
         self.BRAIN_CATALOG = {
-            "ULTIMATE_70B": "llama-3.3-70b-versatile",
-            "THE_TITAN": "llama-3.1-405b-reasoning",
-            "MIXTRIAL_POWER": "mixtral-8x7b-32768",
-            "EYE_OF_RA": "gemini-1.5-flash",
-            "FLASH_VISION": "gemini-1.5-flash",
-            "LLAMA_VISION_90B": "llama-3.2-90b-vision-preview",
-            "CODE_WIZARD": "deepseek-v3",
-            "LOGIC_PRO": "Llama-3.3-70b-versatile",
-            "CYBER_EXPERT": "codellama-70b-instruct",
-            "MATH_GENIUS": "qwen-2.5-72b-instruct"
+            self.BRAIN_CATALOG = {
+    # 🔱 द अल्टीमेट गॉड: मेटा का सबसे बड़ा मॉडल (405 बिलियन पैरामीटर्स)
+    "THE_TITAN": "llama-3.1-405b-reasoning", 
+    
+    # 🔱 द सुप्रीम कमांडर: सबसे तेज़ और बुद्धिमान (70 बिलियन - लेटेस्ट)
+    "ULTIMATE_70B": "llama-3.3-70b-versatile",
+    "LOGIC_PRO": "llama-3.3-70b-versatile",
+    
+    # 🔱 द विजनरी: फोटो देखने के लिए मेटा का सबसे शक्तिशाली चश्मा
+    "EYE_OF_RA": "llama-3.2-90b-vision-preview", 
+    "FLASH_VISION": "llama-3.2-11b-vision-preview",
+    
+    # 🔱 द कोडर: प्रोग्रामिंग के लिए मेटा का स्पेशल मॉडल
+    "CODE_WIZARD": "llama-3.3-70b-versatile", # या आप deepseek-v3 रख सकते हैं
+    "CYBER_EXPERT": "llama-3.3-70b-versatile", 
+    
+    # 🔱 द मैथमेटिशियन: गणना के लिए
+    "MATH_GENIUS": "qwen-2.5-72b-instruct" # Qwen गणित में बहुत तगड़ा है, इसे रहने दें
+}
         }
 
-        if self.GEMINI_KEY:
-            genai.configure(api_key=self.GEMINI_KEY)
+       # --- सुधरा हुआ कोड (Google की छुट्टी) ---
+        if self.GROQ_KEY:
+            # अब हम यहाँ किसी genai.configure की ज़रूरत नहीं रखते
+            # क्योंकि ChatGroq अपने आप Key उठा लेता है
+            st.toast("🔱 META ENGINE ONLINE", icon="🟢")
+        else:
+            st.error("❌ GROQ_API_KEY नहीं मिली! साम्राज्य खतरे में है।")
         
         self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
 
