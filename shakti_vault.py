@@ -12,6 +12,14 @@ import os
 def inject_new_shakti(api_key, user_command, power_name):
     """मालिक के हुक्म पर नई फाइल (शक्ति) पैदा करना"""
     genai.configure(api_key=api_key)
+    # १. पहले ये पक्का करें कि आपने 'models/' लगाया है या नहीं
+# अगर 'models/gemini-1.5-flash' से नहीं चला, तो सिर्फ 'gemini-1.5-flash' लिखो
+
+try:
+    # तरीका A (ज़्यादातर यही काम करता है)
+    model = genai.GenerativeModel('gemini-1.5-flash') 
+except:
+    # तरीका B (अगर ऊपर वाला फेल हो जाए)
     model = genai.GenerativeModel('models/gemini-1.5-flash')
     
     try:
