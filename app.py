@@ -240,7 +240,7 @@ class RajaramAgent:
                  "Do NOT write function definitions. Use 'st' for Streamlit. "
                  "Return ONLY pure Python code, no markdown.")
 
-            try:
+        try:
             # १. एआई से शुद्ध कोड लेना
             new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
             clean_code = new_code_raw[0].replace("```python", "").replace("```", "").strip()
