@@ -127,7 +127,7 @@ class GlobalCore:
         # 🔱 यहाँ सिर्फ एक बार डिक्शनरी शुरू करें
         self.BRAIN_CATALOG = {
             # 🔱 द अल्टीमेट गॉड: मेटा का सबसे बड़ा मॉडल (405 बिलियन पैरामीटर्स)
-            "THE_TITAN": "llama-3.1-405b-reasoning",
+            "THE_TITAN": "llama-3.1-405b-reasoning",}
             # बाकी के 40 मॉडल्स इसके नीचे जोड़ते जाएं...
        # 🔱 यहाँ सिर्फ एक बार डिक्शनरी शुरू हुई थी
         self.BRAIN_CATALOG = {
