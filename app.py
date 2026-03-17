@@ -124,11 +124,12 @@ class GlobalCore:
         self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
         self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
         
-        # यहाँ साड़ी 40+ मॉडल्स की लिस्ट और KeyErrors का समाधान
+        # 🔱 यहाँ सिर्फ एक बार डिक्शनरी शुरू करें
         self.BRAIN_CATALOG = {
-            self.BRAIN_CATALOG = {
-    # 🔱 द अल्टीमेट गॉड: मेटा का सबसे बड़ा मॉडल (405 बिलियन पैरामीटर्स)
-    "THE_TITAN": "llama-3.1-405b-reasoning", 
+            # 🔱 द अल्टीमेट गॉड: मेटा का सबसे बड़ा मॉडल (405 बिलियन पैरामीटर्स)
+            "THE_TITAN": "llama-3.1-405b-reasoning",
+            # बाकी के 40 मॉडल्स इसके नीचे जोड़ते जाएं...
+        }
     
     # 🔱 द सुप्रीम कमांडर: सबसे तेज़ और बुद्धिमान (70 बिलियन - लेटेस्ट)
     "ULTIMATE_70B": "llama-3.3-70b-versatile",
