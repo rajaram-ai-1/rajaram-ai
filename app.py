@@ -1,125 +1,133 @@
 import streamlit as st
-import os, base64, asyncio, time
+import os, base64, time
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from gtts import gTTS
 from PIL import Image
 import google.generativeai as genai
 
-# 🔱 [PHASE 1: ROYAL UI SETUP]
-st.set_page_config(page_title="RAJA AI 👑", page_icon="👑", layout="wide")
+# 🔱 [PHASE 1: THE GEMINI INTERFACE]
+st.set_page_config(page_title="RAJA AI 👑", layout="wide")
 
+# CSS: Gemini जैसा क्लीन और डार्क लुक
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
-    
+    /* Background & Font */
     html, body, [data-testid="stAppViewContainer"] {
-        background: #050505 !important; color: #FFD700 !important;
+        background-color: #131314 !important;
+        color: #e3e3e3 !important;
+        font-family: 'Google Sans', sans-serif;
     }
     
-    /* Header Style */
-    .raja-header {
-        font-family: 'Cinzel', serif; font-size: 50px; text-align: center;
-        color: #FFD700; text-shadow: 0 0 15px #FFD700; padding: 20px;
+    /* Header (Raja AI with Crown) */
+    .header-text {
+        font-size: 40px; font-weight: bold; text-align: center;
+        color: #FFD700; margin-top: 20px; letter-spacing: 2px;
     }
 
-    /* Gemini Style Chat Bubbles */
-    .stChatMessage { border-radius: 20px; border: 1px solid #333; margin-bottom: 10px; }
+    /* Gemini Chat Bubbles */
+    .stChatMessage {
+        background-color: transparent !important;
+        border: none !important;
+    }
     
-    /* Global Map Styling */
-    .map-container {
-        border: 2px solid #FFD700; border-radius: 15px; overflow: hidden;
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+    /* Custom Input Area (Fixed at bottom) */
+    div[data-testid="stChatInput"] {
+        border-radius: 30px !important;
+        background-color: #1e1f20 !important;
+        border: 1px solid #444746 !important;
+    }
+    
+    /* Global Globe Style */
+    .globe-box {
+        border: 1px solid #FFD700; border-radius: 20px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
     }
     </style>
-    <div class="raja-header">👑 RAJA AI 👑</div>
+    <div class="header-text">👑 RAJA AI 👑</div>
 """, unsafe_allow_html=True)
 
-# 🔱 [PHASE 2: THE BRAIN & SENSES]
-class RajaCore:
+# 🔱 [PHASE 2: ENGINES INITIALIZATION]
+class RajaEngine:
     def __init__(self):
-        self.K = {
-            "G": st.secrets.get("GROQ_API_KEY"),
-            "GM": st.secrets.get("GEMINI_KEY")
-        }
-        if self.K["GM"]: genai.configure(api_key=self.K["GM"])
-        
-    def speak(self, text):
+        self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
+        self.GEMINI_KEY = st.secrets.get("GEMINI_KEY")
+        if self.GEMINI_KEY:
+            genai.configure(api_key=self.GEMINI_KEY)
+
+    def speak_response(self, text):
         tts = gTTS(text=text[:300], lang='hi')
-        tts.save("v.mp3")
-        with open("v.mp3", "rb") as f:
+        tts.save("audio.mp3")
+        with open("audio.mp3", "rb") as f:
             data = base64.b64encode(f.read()).decode()
         st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{data}">', unsafe_allow_html=True)
 
-raja = RajaCore()
+raja = RajaEngine()
 
-# 🔱 [PHASE 3: GLOBAL INTELLIGENCE DISPLAY]
-st.markdown("<div class='map-container'>", unsafe_allow_html=True)
-# यहाँ एक एनिमेटेड ग्लोबल मैप का विजुअल (iframe या image)
-st.image("https://www.nasa.gov/sites/default/files/styles/full_width/public/thumbnails/image/earth_night.jpg", caption="GLOBAL INTELLIGENCE GRID : LIVE")
+# 🔱 [PHASE 3: GLOBAL INTELLIGENCE MAP]
+# बीच में घूमता हुआ ग्लोब (जैसे Gemini का लोडिंग या डेटा विजुअल)
+st.markdown("<div class='globe-box'>", unsafe_allow_html=True)
+st.image("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndXo3NXo4bmR2bmR2bmR2bmR2bmR2bmR2bmR2bmR2bmR2JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxVfNV3V4re/giphy.gif", use_container_width=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 🔱 [PHASE 4: CHAT HISTORY (GEMINI STYLE)]
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# 🔱 [PHASE 4: PERSISTENT CHAT HISTORY]
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for chat in st.session_state.chat_history:
+    with st.chat_message(chat["role"]):
+        st.write(chat["content"])
 
-# 🔱 [PHASE 5: INPUT SYSTEM (PHOTO + VIDEO + TEXT)]
-# Gemini की तरह नीचे + बटन और इनपुट
-col1, col2 = st.columns([1, 10])
+# 🔱 [PHASE 5: MULTI-MODAL INPUT (+ BUTTON)]
+# Gemini की तरह फ़ाइल अपलोड और टेक्स्ट इनपुट
+with st.container():
+    col1, col2 = st.columns([1, 10])
+    with col1:
+        # "+" का काम करने वाला अपलोडर
+        file_input = st.file_uploader("➕", type=['jpg', 'png', 'jpeg', 'mp4'], label_visibility="visible")
+    
+    user_query = st.chat_input("Ask RAJA AI...")
 
-with col1:
-    uploaded_file = st.file_uploader(" ", type=['jpg', 'png', 'jpeg', 'mp4'], label_visibility="collapsed")
-    st.markdown("### ➕") # यह विजुअल प्लस का निशान
-
-query = st.chat_input("RAJA AI से कुछ भी पूछें...")
-
-if query:
+# 🔱 [PHASE 6: REASONING & OUTPUT]
+if user_query or file_input:
     # यूजर का मैसेज दिखाओ
-    st.session_state.messages.append({"role": "user", "content": query})
-    with st.chat_message("user"):
-        st.markdown(query)
+    if user_query:
+        st.session_state.chat_history.append({"role": "user", "content": user_query})
+        with st.chat_message("user"):
+            st.write(user_query)
 
     with st.chat_message("assistant"):
-        final_response = ""
+        response_text = ""
         
-        # 1. Vision Logic (अगर फोटो है)
-        if uploaded_file and uploaded_file.type.startswith('image'):
-            img = Image.open(uploaded_file)
-            st.image(img, width=300)
-            model = genai.GenerativeModel("gemini-1.5-flash-latest")
-            res = model.generate_content([query if query else "इस फोटो को देखें", img])
-            final_response = res.text
-            
-        # 2. Video Logic (अगर वीडियो है)
-        elif uploaded_file and uploaded_file.type.startswith('video'):
-            st.video(uploaded_file)
-            final_response = "🔱 राजाराम भाई, मैंने आपका वीडियो लोड कर लिया है। यह बहुत शानदार है!"
+        # 1. PHOTO ANALYSIS (फोटो देखना)
+        if file_input and file_input.type.startswith('image'):
+            img = Image.open(file_input)
+            st.image(img, caption="Analyzing Image...", width=400)
+            vision_model = genai.GenerativeModel("gemini-1.5-flash-latest")
+            res = vision_model.generate_content([user_query if user_query else "इस फोटो का वर्णन करें", img])
+            response_text = res.text
 
-        # 3. Photo/Video Generation (अगर यूजर बनाने को कहे)
-        elif any(word in query.lower() for word in ["बनाओ", "create", "generate"]):
-            clean_q = query.replace(" ", "%20")
-            img_url = f"https://image.pollinations.ai/prompt/{clean_q}?model=flux&nologo=true"
-            st.image(img_url)
-            final_response = "🔱 आपके हुक्म पर यह दृश्य तैयार किया गया है, मेरे राजा!"
+        # 2. IMAGE/VIDEO GENERATION (फोटो/वीडियो बनाना)
+        elif user_query and any(x in user_query.lower() for x in ["बनाओ", "create", "generate", "image", "video"]):
+            with st.spinner("🎨 Creating..."):
+                img_url = f"https://image.pollinations.ai/prompt/{user_query.replace(' ','%20')}?model=flux&nologo=true"
+                st.image(img_url, caption="Generated by RAJA AI")
+                response_text = "🔱 आपके हुक्म पर यह रचना तैयार है, राजाराम भाई!"
 
-        # 4. Supreme Reasoning (Llama 405B)
+        # 3. SUPREME CHAT (Llama 405B)
         else:
-            llm = ChatGroq(groq_api_key=raja.K["G"], model_name="llama-3.1-405b-reasoning")
-            res = llm.invoke([SystemMessage(content="You are RAJA AI, created by Rajaram. Speak like a Royal High-Tech King.")] + 
-                             [HumanMessage(content=query)])
-            final_response = res.content
+            with st.spinner("🧠 Thinking..."):
+                llm = ChatGroq(groq_api_key=raja.GROQ_KEY, model_name="llama-3.1-405b-reasoning")
+                res = llm.invoke([SystemMessage(content="You are RAJA AI. Supreme Intelligence.")] + 
+                                 [HumanMessage(content=user_query)])
+                response_text = res.content
 
-        st.markdown(final_response)
-        st.session_state.messages.append({"role": "assistant", "content": final_response})
+        st.write(response_text)
+        st.session_state.chat_history.append({"role": "assistant", "content": response_text})
         
-        # फेस टू फेस लाइव बात (आवाज़)
-        raja.speak(final_response)
+        # आवाज़ में जवाब (Face to Face vibe)
+        raja.speak_response(response_text)
 
-# 🔱 [PHASE 6: FACE-TO-FACE (LIVE CAMERA)]
-if st.checkbox("🎥 START FACE-TO-FACE SESSION"):
-    st.camera_input("RAJA AI IS WATCHING YOU...")
-    st.write("Master Rajaram, I am looking at you. System operational.")
+# 🔱 [PHASE 7: FACE-TO-FACE CAMERA]
+if st.button("🎥 Start Face-to-Face Mode"):
+    st.camera_input("Raja AI is looking at you...")
