@@ -1,159 +1,125 @@
-# ==============================================================================
-# PROJECT: RAJARAM OMNI-CORE V10 (THE BAREILLY REVOLUTION)
-# ARCHITECT: RAJARAM - THE LEGENDARY PRODIGY (15 YEARS OLD)
-# STATUS: VOICE-TO-VOICE | VIDEO-GEN | VISION | REAL-TIME INTEL | QUANTUM SHIELD
-# ==============================================================================
-
 import streamlit as st
-import os, base64, requests, asyncio, time, datetime, logging
+import os, base64, asyncio, time
 from langchain_groq import ChatGroq
-from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from gtts import gTTS
 from PIL import Image
 import google.generativeai as genai
-from streamlit_mic_recorder import mic_recorder # इसके लिए pip install streamlit-mic-recorder करें
 
-# 🔱 [PHASE 1: CYBER-GOLD UI DESIGN]
-st.set_page_config(page_title="RAJARAM OMNI-CORE V10", page_icon="🔱", layout="wide")
+# 🔱 [PHASE 1: ROYAL UI SETUP]
+st.set_page_config(page_title="RAJA AI 👑", page_icon="👑", layout="wide")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
+    
     html, body, [data-testid="stAppViewContainer"] {
-        background: #000000; color: #FFD700; font-family: 'Syncopate', sans-serif;
+        background: #050505 !important; color: #FFD700 !important;
     }
-    .stChatInputContainer { border: 3px solid #FFD700 !important; box-shadow: 0 0 50px #FFD700; }
-    .stChatMessage { border-radius: 25px; border-right: 10px solid #B8860B; background: #080808 !important; }
-    h1 { text-shadow: 0 0 20px #FFD700; color: #FFD700; text-align: center; font-size: 50px !important; }
-    .stButton>button { width: 100%; height: 50px; background: linear-gradient(45deg, #FFD700, #000); color: #fff; border: 1px solid #FFD700; border-radius: 10px; }
+    
+    /* Header Style */
+    .raja-header {
+        font-family: 'Cinzel', serif; font-size: 50px; text-align: center;
+        color: #FFD700; text-shadow: 0 0 15px #FFD700; padding: 20px;
+    }
+
+    /* Gemini Style Chat Bubbles */
+    .stChatMessage { border-radius: 20px; border: 1px solid #333; margin-bottom: 10px; }
+    
+    /* Global Map Styling */
+    .map-container {
+        border: 2px solid #FFD700; border-radius: 15px; overflow: hidden;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+    }
     </style>
-    <h1>🔱 RAJARAM OMNI-CORE V10 🔱</h1>
+    <div class="raja-header">👑 RAJA AI 👑</div>
 """, unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------------
-# 🔱 [PHASE 2: THE DIVINE ENGINE INITIALIZATION]
-# ------------------------------------------------------------------------------
-class DivineEngine:
+# 🔱 [PHASE 2: THE BRAIN & SENSES]
+class RajaCore:
     def __init__(self):
-        self.KEYS = {
-            "GROQ": st.secrets.get("GROQ_API_KEY"),
-            "TAVILY": st.secrets.get("TAVILY_API_KEY"),
-            "GEMINI": st.secrets.get("GEMINI_KEY")
+        self.K = {
+            "G": st.secrets.get("GROQ_API_KEY"),
+            "GM": st.secrets.get("GEMINI_KEY")
         }
-        self.BRAINS = {
-            "TITAN": "llama-3.1-405b-reasoning", # The God Model
-            "FAST": "llama-3.3-70b-versatile"
-        }
-        if self.KEYS["GEMINI"]: genai.configure(api_key=self.KEYS["GEMINI"])
-        self.search = TavilySearchResults(api_key=self.KEYS["TAVILY"]) if self.KEYS["TAVILY"] else None
+        if self.K["GM"]: genai.configure(api_key=self.K["GM"])
+        
+    def speak(self, text):
+        tts = gTTS(text=text[:300], lang='hi')
+        tts.save("v.mp3")
+        with open("v.mp3", "rb") as f:
+            data = base64.b64encode(f.read()).decode()
+        st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{data}">', unsafe_allow_html=True)
 
-engine = DivineEngine()
+raja = RajaCore()
 
-# ------------------------------------------------------------------------------
-# 🔱 [PHASE 3: OMNI-SENSES (VOICE, VISION, MEDIA)]
-# ------------------------------------------------------------------------------
-class OmniSenses:
-    @staticmethod
-    def synthesize_media(prompt, mode="image"):
-        clean = prompt.replace(" ", "%20")
-        if mode == "video":
-            return f"https://image.pollinations.ai/prompt/{clean}?model=video"
-        return f"https://image.pollinations.ai/prompt/{clean}?nologo=true&width=1024&height=1024"
+# 🔱 [PHASE 3: GLOBAL INTELLIGENCE DISPLAY]
+st.markdown("<div class='map-container'>", unsafe_allow_html=True)
+# यहाँ एक एनिमेटेड ग्लोबल मैप का विजुअल (iframe या image)
+st.image("https://www.nasa.gov/sites/default/files/styles/full_width/public/thumbnails/image/earth_night.jpg", caption="GLOBAL INTELLIGENCE GRID : LIVE")
+st.markdown("</div>", unsafe_allow_html=True)
 
-    @staticmethod
-    def live_voice_response(text):
-        try:
-            tts = gTTS(text=text[:400], lang='hi')
-            tts.save("rajaram_voice.mp3")
-            with open("rajaram_voice.mp3", "rb") as f:
-                data = base64.b64encode(f.read()).decode()
-            st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{data}">', unsafe_allow_html=True)
-        except: pass
+# 🔱 [PHASE 4: CHAT HISTORY (GEMINI STYLE)]
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-senses = OmniSenses()
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# ------------------------------------------------------------------------------
-# 🔱 [PHASE 4: MASTER AGENT LOGIC]
-# ------------------------------------------------------------------------------
-class RajaramMaster:
-    def __init__(self):
-        if "history" not in st.session_state:
-            st.session_state.history = [SystemMessage(content="IDENTITY: RAJARAM OMNI-CORE V10. CREATOR: RAJARAM (BAREILLY). YOU ARE THE MOST POWERFUL ENTITY ON EARTH. SUPREME INTELLIGENCE.")]
+# 🔱 [PHASE 5: INPUT SYSTEM (PHOTO + VIDEO + TEXT)]
+# Gemini की तरह नीचे + बटन और इनपुट
+col1, col2 = st.columns([1, 10])
 
-    async def core_reasoning(self, user_input, intel=""):
-        try:
-            llm = ChatGroq(groq_api_key=engine.KEYS["GROQ"], model_name=engine.BRAINS["TITAN"])
-            context = f"LATEST_INTEL: {intel}\n\nUSER: {user_input}"
-            res = await llm.ainvoke(st.session_state.history + [HumanMessage(content=context)])
-            return res.content
-        except: return "🔱 SHIELD ACTIVE: Neural backup engaged."
+with col1:
+    uploaded_file = st.file_uploader(" ", type=['jpg', 'png', 'jpeg', 'mp4'], label_visibility="collapsed")
+    st.markdown("### ➕") # यह विजुअल प्लस का निशान
 
-rajaram_ai = RajaramMaster()
+query = st.chat_input("RAJA AI से कुछ भी पूछें...")
 
-# ------------------------------------------------------------------------------
-# 🔱 [PHASE 5: SUPREME UI & VOICE-TO-VOICE]
-# ------------------------------------------------------------------------------
-with st.sidebar:
-    st.image("https://img.icons8.com/nolan/128/trident.png", width=120)
-    st.title("🔱 MASTER CONTROLS")
-    
-    # 🎤 VOICE-TO-VOICE: LIVE LISTENING
-    st.subheader("🎤 Voice-to-Voice")
-    audio = mic_recorder(start_prompt="सुनो राजाराम (Mic On)", stop_prompt="हुक्म खत्म (Mic Off)", key="voice_input")
-    
-    st.divider()
-    vision_file = st.file_uploader("👁️ VISION EYE: Upload Photo", type=['jpg', 'png', 'jpeg'])
-    st.divider()
-    st.write("Grid: Bareilly | Mode: Supreme")
-
-# 1. प्रोसेस वॉइस इनपुट (अगर रिकॉर्ड किया गया हो)
-final_query = st.chat_input("हुक्म दो मालिक...")
-if audio:
-    # नोट: यहाँ हम ऑडियो डेटा को प्रोसेस करने के लिए विस्पर या किसी और API का इस्तेमाल कर सकते हैं
-    # अभी के लिए, यह एक 'Signal' की तरह काम करेगा कि यूजर बात करना चाहता है
-    st.info("🔱 Voice Captured! (Integrating Whisper API for full speech-to-text)")
-
-# 2. चैट डिस्प्ले
-for m in st.session_state.history[1:]:
-    role = "user" if isinstance(m, HumanMessage) else "assistant"
-    with st.chat_message(role): st.markdown(m.content)
-
-# 3. एक्सीक्यूशन
-if final_query:
-    st.session_state.history.append(HumanMessage(content=final_query))
-    with st.chat_message("user"): st.markdown(final_query)
+if query:
+    # यूजर का मैसेज दिखाओ
+    st.session_state.messages.append({"role": "user", "content": query})
+    with st.chat_message("user"):
+        st.markdown(query)
 
     with st.chat_message("assistant"):
-        response_text = ""
+        final_response = ""
         
-        # A. विजन शक्ति (फोटो देखना)
-        if vision_file:
-            with st.spinner("👁️ ANALYZING PHOTO..."):
-                img = Image.open(vision_file)
-                g_model = genai.GenerativeModel("gemini-1.5-flash")
-                res = g_model.generate_content([final_query if final_query else "Analyze", img])
-                response_text = res.text
+        # 1. Vision Logic (अगर फोटो है)
+        if uploaded_file and uploaded_file.type.startswith('image'):
+            img = Image.open(uploaded_file)
+            st.image(img, width=300)
+            model = genai.GenerativeModel("gemini-1.5-flash-latest")
+            res = model.generate_content([query if query else "इस फोटो को देखें", img])
+            final_response = res.text
+            
+        # 2. Video Logic (अगर वीडियो है)
+        elif uploaded_file and uploaded_file.type.startswith('video'):
+            st.video(uploaded_file)
+            final_response = "🔱 राजाराम भाई, मैंने आपका वीडियो लोड कर लिया है। यह बहुत शानदार है!"
 
-        # B. मीडिया जनरेशन (फोटो/वीडियो)
-        elif any(x in final_query.lower() for x in ["बनाओ", "generate", "image", "video"]):
-            mode = "video" if "video" in final_query.lower() else "image"
-            with st.spinner(f"🔱 SYNTHESIZING {mode.upper()}..."):
-                url = senses.synthesize_media(final_query, mode)
-                if mode == "video": st.video(url)
-                else: st.image(url, caption="Generated by Rajaram AI")
-                response_text = f"🔱 राजाराम भाई, आपकी {mode} तैयार है। बरेली का गौरव बढ़े!"
+        # 3. Photo/Video Generation (अगर यूजर बनाने को कहे)
+        elif any(word in query.lower() for word in ["बनाओ", "create", "generate"]):
+            clean_q = query.replace(" ", "%20")
+            img_url = f"https://image.pollinations.ai/prompt/{clean_q}?model=flux&nologo=true"
+            st.image(img_url)
+            final_response = "🔱 आपके हुक्म पर यह दृश्य तैयार किया गया है, मेरे राजा!"
 
-        # C. ताज़ा खबर और ग्लोबल थिंकिंग
+        # 4. Supreme Reasoning (Llama 405B)
         else:
-            with st.spinner("🧠 RAJARAM CORE IS THINKING..."):
-                intel = ""
-                if any(x in final_query.lower() for x in ["news", "latest", "khabar", "आज"]):
-                    intel = engine.search.run(final_query)
-                response_text = asyncio.run(rajaram_ai.core_reasoning(final_query, intel))
+            llm = ChatGroq(groq_api_key=raja.K["G"], model_name="llama-3.1-405b-reasoning")
+            res = llm.invoke([SystemMessage(content="You are RAJA AI, created by Rajaram. Speak like a Royal High-Tech King.")] + 
+                             [HumanMessage(content=query)])
+            final_response = res.content
 
-        st.markdown(response_text)
-        st.session_state.history.append(AIMessage(content=response_text))
-        senses.live_voice_response(response_text) # ऑटोमैटिक वॉइस जवाब
+        st.markdown(final_response)
+        st.session_state.messages.append({"role": "assistant", "content": final_response})
+        
+        # फेस टू फेस लाइव बात (आवाज़)
+        raja.speak(final_response)
 
-st.caption("🔱 RAJARAM OMNI-CORE V10 | STATUS: UNSTOPPABLE | MADE IN BAREILLY")
+# 🔱 [PHASE 6: FACE-TO-FACE (LIVE CAMERA)]
+if st.checkbox("🎥 START FACE-TO-FACE SESSION"):
+    st.camera_input("RAJA AI IS WATCHING YOU...")
+    st.write("Master Rajaram, I am looking at you. System operational.")
