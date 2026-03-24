@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
-import os
+import streamlit as st
+import streamlit.components.v1 as components
+import base64
 
 app = Flask(__name__)
 CORS(app)
