@@ -2,8 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 
-app = Flask(__name__)
-CORS(app)
+
 
 # 🔱 राजाराम की पहचान (Identity Core)
 AI_IDENTITY = {
