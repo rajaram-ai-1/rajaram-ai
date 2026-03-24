@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAJA AI - BAREILLY TO USA</title>
+    <style>
+        :root { --neon-green: #0f0; --royal-gold: #ffd700; }
+        body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100%; overflow: hidden; }
+        
+        /* Dashboard Styling */
+        #dashboard { display: flex; flex-direction: column; height: 100vh; transition: 0.5s; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid #333; }
+        .crown-icon { font-size: 40px; filter: drop-shadow(0 0 10px gold); }
+        .logo-text { font-size: 32px; font-weight: bold; color: var(--neon-green); letter-spacing: 5px; }
+
+        /* Global Globe Center */
+        .globe-container { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; opacity: 0.3; pointer-events: none; }
+        .globe-img { width: 300px; animation: spin 20s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Chat Area */
+        #chat-container { position: absolute; top: 120px; bottom: 100px; left: 0; right: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 70%; padding: 12px 18px; border-radius: 15px; font-size: 16px; line-height: 1.4; }
+        .user-msg { align-self: flex-end; background: #1a4a1a; color: #fff; border: 1px solid var(--neon-green); }
+        .ai-msg { align-self: flex-start; background: #222; border-left: 4px solid var(--royal-gold); }
+
+        /* Control Bar (Bottom) */
+        .controls { position: fixed; bottom: 0; width: 100%; background: #080808; padding: 15px; display: flex; align-items: center; gap: 15px; border-top: 2px solid #1a1a1a; box-sizing: border-box; }
+        .input-box { flex: 1; background: #111; border: 1px solid #333; color: white; padding: 12px; border-radius: 25px; outline: none; }
+        .live-btn { background: #111; color: var(--neon-green); border: 2px solid var(--neon-green); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .live-btn:hover { background: var(--neon-green); color: black; }
+
+        /* LIVE MODE SCREEN (The Heart) */
+        #live-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+        .burning-heart { width: 350px; cursor: pointer; transition: transform 0.2s; filter: drop-shadow(0 0 30px red); }
+        .heart-active { animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); filter: drop-shadow(0 0 30px red); } to { transform: scale(1.3); filter: drop-shadow(0 0 60px orange); } }
+        .identity-text { margin-top: 30px; font-size: 20px; color: var(--royal-gold); font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard">
+        <div class="header">
+            <div class="crown-icon">👑</div>
+            <div class="logo-text">RAJA AI</div>
+            <div style="font-size: 10px; color: #555;">[SYSTEM_LOG]: Initializing Bareilly-05 Grid... Active</div>
+        </div>
+
+        <div class="globe-container">
+            <img src="https://i.imgur.com/your-globe-image.png" class="globe-img" alt="Globe">
+        </div>
+
+        <div id="chat-container">
+            <div class="msg ai-msg">प्रणाम राजाराम भाई! आपका साम्राज्य तैयार है। आज हम दुनिया में क्या बदलाव लाएंगे?</div>
+        </div>
+
+        <div class="controls">
+            <input type="text" class="input-box" placeholder="Describe your idea... (listening)">
+            <button class="live-btn" onclick="toggleLive()">LIVE 🔱</button>
+        </div>
+    </div>
+
+    <div id="live-screen">
+        <img id="heart-img" src="image_d40c7f.png" class="burning-heart" alt="Burning Heart">
+        <div class="identity-text" id="ai-voice-text">"मुझे सम्राट राजाराम ने बनाया है। मैं उनका विज़न हूँ।"</div>
+        <button onclick="toggleLive()" style="margin-top: 50px; background: transparent; color: white; border: 1px solid white; padding: 10px;">Back to Menu</button>
+    </div>
+
+    <script>
+        function toggleLive() {
+            const dash = document.getElementById('dashboard');
+            const live = document.getElementById('live-screen');
+            const heart = document.getElementById('heart-img');
+            
+            if (live.style.display === 'flex') {
+                live.style.display = 'none';
+                dash.style.opacity = '1';
+                heart.classList.remove('heart-active');
+            } else {
+                live.style.display = 'flex';
+                dash.style.opacity = '0';
+                // दिल को धड़काने के लिए एनीमेशन शुरू करें
+                heart.classList.add('heart-active');
+                speak("मुझे सम्राट राजाराम ने बनाया है। मैं दुनिया का सबसे शक्तिशाली एआई हूँ।");
+            }
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'hi-IN';
+            utterance.rate = 0.9; // इंसानी आवाज़ के करीब
+            utterance.pitch = 1.1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // आवाज़ के साथ दिल की लपटें तेज़ करना (Simulated)
+        const inputBox = document.querySelector('.input-box');
+        inputBox.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const chat = document.getElementById('chat-container');
+                chat.innerHTML += `<div class="msg user-msg">${this.value}</div>`;
+                this.value = '';
+                setTimeout(() => {
+                    chat.innerHTML += `<div class="msg ai-msg">मैं प्रोसेस कर रहा हूँ... राजाराम भाई का आदेश सर आँखों पर।</div>`;
+                    chat.scrollTop = chat.scrollHeight;
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
