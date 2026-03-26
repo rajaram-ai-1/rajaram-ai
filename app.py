@@ -1,72 +1,151 @@
+# app.py - Raja AI Ultimate Super Prototype
+
 import streamlit as st
 import requests
-from datetime import datetime, timedelta
+from PIL import Image
+from io import BytesIO
+import speech_recognition as sr
+import openai
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
-# --- CONFIGURATION & SECRETS ---
-# Streamlit Secrets se keys fetch karna
+# -------------------------------
+# Secrets (API Keys)
+# -------------------------------
+# Add in .streamlit/secrets.toml
+# OPENAI_API_KEY = "your_openai_api_key"
+# GROQ_API_KEY = "your_groq_api_key"
+# NEWS_API_KEY = "your_news_api_key"
+
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+NEWS_API_KEY = st.secrets["NEWS_API_KEY"]
 
-st.set_page_config(page_title="Rajaram AI", layout="wide")
+openai.api_key = OPENAI_API_KEY
 
-# --- UI CUSTOM CSS (For Buttons Position) ---
-st.markdown("""
-    <style>
-    .stButton > button { width: 100%; border-radius: 20px; }
-    /* Floating action buttons style logic can be added here */
-    </style>
-    """, unsafe_allow_html=True)
+# -------------------------------
+# Streamlit Page Setup
+# -------------------------------
+st.set_page_config(page_title="Raja AI Ultimate", layout="wide")
+st.title("👑 Raja AI Ultimate Super Prototype")
 
-## --- FUNCTIONS ---
+# -------------------------------
+# Sidebar Buttons
+# -------------------------------
+st.sidebar.header("Actions")
+if st.sidebar.button('+'):
+    st.sidebar.write("Add something!")
 
-def get_latest_news():
-    # 10-15 minute pehle ki news ke liye filter
-    ten_mins_ago = (datetime.now() - timedelta(minutes=15)).strftime('%Y-%m-%dT%H:%M:%S')
-    url = f"https://newsapi.org/v2/everything?q=latest&from={ten_mins_ago}&apiKey={NEWS_API_KEY}"
-    response = requests.get(url).json()
-    return response.get('articles', [])[:5]
+if st.sidebar.button('Live'):
+    st.sidebar.write("Starting live chat...")
 
-def generate_meta_content(prompt, mode="text"):
-    # Yahan Meta ke Llama 3 ya Imagine model ki API call hogi
-    # Example using a placeholder for Meta's API logic
-    return f"Rajaram AI Response for {prompt} using Meta Model"
+# -------------------------------
+# Voice Input (Hindi)
+# -------------------------------
+st.header("🎤 Voice Input (Hindi)")
+voice_input = ""
+if st.button("Start Voice Input"):
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        st.write("Bol kar bolo...")
+        audio = r.listen(source)
+    try:
+        voice_input = r.recognize_google(audio, language='hi-IN')
+        st.write("You said:", voice_input)
+    except Exception as e:
+        st.write("Sorry, samajh nahi paaya:", str(e))
 
-## --- SIDEBAR & BUTTONS ---
+# -------------------------------
+# Multi-Model Chat (GPT + Meta LLaMA/OPT + placeholders)
+# -------------------------------
+st.header("💬 Chat with Raja AI (Multi-Model Ensemble)")
 
-# Left Side: Upload Button (+)
-with st.sidebar:
-    st.title("➕ Upload Center")
-    uploaded_file = st.file_uploader("Photo/Video Upload karein", type=["jpg", "png", "mp4"])
-    if uploaded_file:
-        st.success("File Upload Ho Gayi!")
+chat_input = st.text_input("Type your message here:")
+if chat_input or voice_input:
+    user_text = chat_input if chat_input else voice_input
+    responses = []
 
-# Right Side (Main UI): Live Chat Button
-col1, col2, col3 = st.columns([1, 6, 1])
-with col3:
-    if st.button("🎤 LIVE"):
-        st.toast("Live Voice Chat Shuru Ho Raha Hai...")
+    # --- GPT-4 Response ---
+    try:
+        gpt_resp = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role":"user","content":user_text}],
+            temperature=0.7
+        )
+        responses.append(gpt_resp['choices'][0]['message']['content'])
+    except Exception as e:
+        responses.append(f"[GPT Error: {e}]")
 
-## --- MAIN CHAT INTERFACE ---
+    # --- Meta LLaMA / OPT Response ---
+    try:
+        tokenizer = AutoTokenizer.from_pretrained("facebook/opt-1.3b")
+        model = AutoModelForCausalLM.from_pretrained("facebook/opt-1.3b")
+        inputs = tokenizer(user_text, return_tensors="pt")
+        outputs = model.generate(**inputs, max_new_tokens=150)
+        meta_resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        responses.append(meta_resp)
+    except Exception as e:
+        responses.append(f"[Meta Model Error: {e}]")
 
-st.title("🤖 Rajaram AI (Meta Powered)")
+    # --- Placeholder for additional models (you can add 18 more models here) ---
+    for i in range(18):
+        responses.append(f"[Placeholder Model {i+1} response]")
 
-# Taja Khabar Section
-if st.button("🌍 10 Minute Pehle Ki Taja Khabar"):
-    news = get_latest_news()
-    for article in news:
-        st.write(f"**{article['title']}** - {article['source']['name']}")
+    # --- Merge Responses (Simple Concatenate) ---
+    final_response = " | ".join(responses)
+    st.write("Raja AI says:", final_response)
 
-# Chat Input
-user_input = st.chat_input("Mujhse kuch bhi puchein ya Image/Video banane ko kahein...")
+# -------------------------------
+# Groq Image Generation
+# -------------------------------
+st.header("🖼️ Generate Image")
+img_prompt = st.text_input("Enter prompt for image generation (English recommended):", key="img_prompt")
+if st.button("Generate Image"):
+    if img_prompt.strip() != "":
+        with st.spinner("Generating image..."):
+            url = "https://api.groq.ai/v1/images"  # Placeholder
+            headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}
+            payload = {"prompt": img_prompt}
+            try:
+                res = requests.post(url, headers=headers, json=payload)
+                res.raise_for_status()
+                img_url = res.json().get("url")
+                if img_url:
+                    image = Image.open(BytesIO(requests.get(img_url).content))
+                    st.image(image, caption="Generated by Raja AI")
+                else:
+                    st.error("Image URL not returned")
+            except Exception as e:
+                st.error("Error generating image: " + str(e))
+    else:
+        st.warning("Prompt cannot be empty")
 
-if user_input:
-    with st.chat_message("user"):
-        st.write(user_input)
-    
-    with st.chat_message("assistant"):
-        # Logic to detect if user wants image or text
-        if "photo" in user_input.lower() or "image" in user_input.lower():
-            st.write("Meta Imagine se Photo ban rahi hai...")
-            # st.image(api_call_to_meta_image(user_input))
-        else:
-            response = generate_meta_content(user_input)
-            st.write(response)
+# -------------------------------
+# Real-Time News
+# -------------------------------
+st.header("📰 Latest News (Updated every 10 mins)")
+try:
+    news = requests.get(
+        f"https://newsapi.org/v2/top-headlines?country=in&apiKey={NEWS_API_KEY}"
+    ).json()
+    for article in news['articles'][:5]:
+        st.markdown(f"- **{article['title']}**")
+except Exception as e:
+    st.write("Error fetching news:", str(e))
+
+# -------------------------------
+# Video Generation Placeholder
+# -------------------------------
+st.header("🎥 Video Generation (Coming Soon)")
+st.write("Feature under development...")
+
+# -------------------------------
+# Live Voice Chat Placeholder
+# -------------------------------
+st.header("🔴 Live Voice Chat (Coming Soon)")
+st.write("Feature under development...")
+
+# -------------------------------
+# Footer
+# -------------------------------
+st.write("Made with ❤️ using Streamlit, GPT-4, Meta LLaMA/OPT, Groq API, NewsAPI, and more")
