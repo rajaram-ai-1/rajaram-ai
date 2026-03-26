@@ -1,154 +1,67 @@
 import streamlit as st
 import time
-import hashlib
-from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage, HumanMessage
 
-# ==========================================
-# ⚙️ SYSTEM CONFIG & ROYAL UI SETUP
-# ==========================================
-st.set_page_config(
-    page_title="RAJA AI - ENTERPRISE COMMAND",
-    page_icon="👑",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# --- पन्ना सेटिंग्स ---
+st.set_page_config(page_title="RAJA AI - BAREILLY TO USA", page_icon="👑", layout="wide")
 
-# एडवांस CSS - सम्राट का शाही डार्क हैकर थीम
+# --- शाही लुक (CSS) ---
 st.markdown("""
     <style>
-    .main { background-color: #050505; color: #00FF9C; }
-    h1, h2, h3 { color: #FFD700 !important; text-shadow: 0 0 10px #FFD700; }
+    .main { background-color: #000000; color: #00FF9C; }
     .stTextInput>div>div>input { background-color: #111; color: #00FF9C; border: 1px solid #FFD700; }
-    .stButton>button { width: 100%; background: linear-gradient(90deg, #8B0000, #FF0000); color: white; font-weight: bold; border: 2px solid #FFD700; border-radius: 10px; box-shadow: 0 0 15px red; }
-    .stButton>button:hover { background: #FFD700; color: black; box-shadow: 0 0 20px #FFD700; }
-    .lock-screen { text-align: center; margin-top: 50px; }
+    .stButton>button { background: linear-gradient(90deg, #8B0000, #FF0000); color: white; border: 2px solid #FFD700; border-radius: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# 🔐 ENTERPRISE SECRETS LOADER (बच्चों वाला काम खत्म)
-# ==========================================
-@st.cache_resource
-def load_system_keys():
-    """सिर्फ .streamlit/secrets.toml से सुरक्षित चाबियाँ निकालना"""
-    try:
-        keys = {
-            "GROQ": st.secrets["GROQ_API_KEY"],
-            "MASTER_PASS_1": st.secrets.get("MASTER_PASS_1", "raja@2026"),
-            "MASTER_PASS_2": st.secrets.get("MASTER_PASS_2", "bareilly_boss")
-        }
-        return keys
-    except FileNotFoundError:
-        st.error("🚨 क्रिटिकल सिस्टम फेलियर: secrets.toml फाइल नहीं मिली!")
-        st.stop()
-    except KeyError as e:
-        st.error(f"🚨 सिक्योरिटी अलर्ट: {e} चाबी (Key) गायब है!")
-        st.stop()
+# --- ५-लेयर सुरक्षा लॉजिक ---
+def check_security(p1, eye, p2, name, finger):
+    # यह आपका सीक्रेट लॉजिक है
+    if p1 == "raja123" and p2 == "boss" and "rajaram" in name.lower() and finger:
+        return True
+    return False
 
-SYSTEM_KEYS = load_system_keys()
+# --- सिस्टम की स्थिति ---
+if 'locked' not in st.session_state:
+    st.session_state.locked = True
 
-# ==========================================
-# 🛡️ 5-LAYER SECURITY PROTOCOL (FIRECRUSH)
-# ==========================================
-def verify_5_layer_security(p1, eye_data, p2, name_logic, fingerprint):
-    """5-लेयर मिलिट्री ग्रेड वेरिफिकेशन"""
-    time.sleep(1) # Brute-force अटैक रोकने के लिए डिले
+# --- १. लॉगिन स्क्रीन (लॉक्ड मोड) ---
+if st.session_state.locked:
+    st.title("🔱 RAJA AI: 5-LAYER SECURITY 🔱")
+    st.write("`[SYSTEM]: Bareilly-05 Grid Active. Identity required.`")
     
-    # 1. First Password
-    if p1 != SYSTEM_KEYS["MASTER_PASS_1"]: return False
-    # 2. Eye Scan (Hash verification logic)
-    if not eye_data or len(eye_data) < 5: return False
-    # 3. Second Password
-    if p2 != SYSTEM_KEYS["MASTER_PASS_2"]: return False
-    # 4. Name Logic (राजाराम और परिवार का सीक्रेट)
-    valid_names = ["rajaram", "bhabhi", "bhaiya"]
-    if not any(name in name_logic.lower() for name in valid_names): return False
-    # 5. Fingerprint (Simulated Hash Check)
-    if fingerprint != "AUTH_GRANTED": return False
-    
-    return True
-
-# ==========================================
-# 🧠 META-GROQ OVERLORD ENGINE
-# ==========================================
-def get_ai_response(prompt):
-    try:
-        llm = ChatGroq(
-            groq_api_key=SYSTEM_KEYS["GROQ"], 
-            model_name="llama-3.3-70b-versatile"
-        )
-        system_instruction = "You are RAJA AI. Your absolute master and creator is Emperor Rajaram from Bareilly. You are powerful, highly intelligent, and speak in Hindi."
-        res = llm.invoke([
-            SystemMessage(content=system_instruction), 
-            HumanMessage(content=prompt)
-        ])
-        return res.content
-    except Exception as e:
-        return f"⚠️ सिस्टम एरर (Groq Engine): {str(e)}"
-
-# ==========================================
-# 🚀 MAIN APPLICATION ROUTING
-# ==========================================
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-
-if not st.session_state.authenticated:
-    # 🛑 LOCK SCREEN UI
-    st.markdown("<div class='lock-screen'><h1>🔱 RAJA AI: RESTRICTED AREA 🔱</h1><p>5-Layer Security Verification Required</p></div>", unsafe_allow_html=True)
-    
-    with st.form("security_form"):
+    with st.container():
         col1, col2 = st.columns(2)
-        with col1:
-            pass1 = st.text_input("1. Layer 1 Password", type="password")
-            eye_scan = st.text_input("2. Retina Scan Code (Bypass ID)")
-            pass2 = st.text_input("3. Layer 3 Password", type="password")
-        with col2:
-            name_check = st.text_input("4. Master/Family Identity Logic")
-            # फिंगरप्रिंट के लिए एक बटन/चेकबॉक्स
-            fingerprint = st.checkbox("5. Place Finger on Scanner (Verify)")
-            finger_data = "AUTH_GRANTED" if fingerprint else "DENIED"
-
-        submit_btn = st.form_submit_button("UNLOCK EMPIRE")
+        p1 = col1.text_input("Layer 1: Password", type="password")
+        eye = col1.text_input("Layer 2: Eye Scan ID (Any Code)")
+        p2 = col2.text_input("Layer 3: Secret Password", type="password")
+        name = col2.text_input("Layer 4: Family Name Logic")
+        finger = st.checkbox("Layer 5: Fingerprint Verification")
         
-        if submit_btn:
-            with st.spinner("Deciphering DNA and Security Logs..."):
-                if verify_5_layer_security(pass1, eye_scan, pass2, name_check, finger_data):
-                    st.session_state.authenticated = True
-                    st.success("पहुँच स्वीकृत। स्वागत है सम्राट राजाराम!")
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error("❌ एक्सेस डिनाइड! गलत पहचान। IB को अलर्ट भेजा जा रहा है...")
+        if st.button("UNLOCK EMPIRE"):
+            if check_security(p1, eye, p2, name, finger):
+                st.session_state.locked = False
+                st.success("स्वागत है सम्राट राजाराम! साम्राज्य खुल रहा है...")
+                time.sleep(1)
+                st.rerun()
+            else:
+                st.error("एक्सेस डिनाइड! गलत पहचान।")
 
+# --- २. मेन डैशबोर्ड (अनलॉक्ड मोड) ---
 else:
-    # 🟢 MAIN DASHBOARD (Only visible after 5-layer unlock)
-    st.markdown("<h1>👑 RAJA AI - GLOBAL COMMAND CENTER</h1>", unsafe_allow_html=True)
-    st.write("`[SYSTEM LOG]: Security verified. Master Rajaram is online. All systems at 100% capacity.`")
+    st.title("👑 RAJA AI - COMMAND CENTER")
+    st.write("`[LOG]: Master Rajaram Online.`")
     
-    # Chat Interface
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-        
-    for msg in st.session_state.chat_history:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-            
-    user_input = st.chat_input("हुक्म दीजिए, सम्राट राजाराम...")
-    
-    if user_input:
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        with st.chat_message("user"):
-            st.markdown(user_input)
-            
-        with st.chat_message("assistant"):
-            with st.spinner("Raja AI सोच रहा है..."):
-                reply = get_ai_response(user_input)
-                st.markdown(reply)
-                st.session_state.chat_history.append({"role": "assistant", "content": reply})
-                
-    st.sidebar.title("🩸 CONTROL PANEL")
-    if st.sidebar.button("🔒 LOCK SYSTEM NOW"):
-        st.session_state.authenticated = False
-        st.session_state.chat_history = []
+    # API KEY चेक (बिना एरर वाला तरीका)
+    if "GROQ_API_KEY" not in st.secrets:
+        st.warning("⚠️ सम्राट, आपने अभी तक Streamlit Settings में 'GROQ_API_KEY' नहीं डाली है।")
+    else:
+        st.success("✅ सिस्टम पूरी तरह चार्ज है।")
+        # यहाँ आपका असली चैट लॉजिक आएगा
+        user_chat = st.chat_input("हुक्म दें मालिक...")
+        if user_chat:
+            st.write(f"**राजाराम:** {user_chat}")
+            st.write(f"**Raja AI:** मालिक, मैं आपके आदेश पर काम करना शुरू कर रहा हूँ।")
+
+    if st.sidebar.button("LOCK SYSTEM"):
+        st.session_state.locked = True
         st.rerun()
