@@ -1,114 +1,77 @@
 import streamlit as st
-from groq import Groq
+import requests
 import time
+from groq import Groq
 
-# --- पन्ना सेटिंग्स ---
-st.set_page_config(page_title="RAJA AI - BAREILLY TO USA", page_icon="👑", layout="wide")
+# --- सम्राट राजाराम का शाही दरबार (CSS) ---
+st.set_page_config(page_title="RAJA AI - SUPREME", layout="wide")
+st.markdown("""<style>.main { background-color: #000; color: #0f0; } .stButton>button { width: 100%; border-radius: 10px; background: red; color: white; }</style>""", unsafe_allow_html=True)
 
-# --- चाबियाँ और दिमाग (Secrets से) ---
+# --- एपीआई की (Secrets से उठाना ही सही तरीका है) ---
 try:
-    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-    client = Groq(api_key=GROQ_API_KEY)
+    GROQ_KEY = st.secrets["GROQ_API_KEY"]
+    client = Groq(api_key=GROQ_KEY)
 except:
-    st.error("🚨 सम्राट, Streamlit Settings में 'GROQ_API_KEY' गायब है!")
+    st.error("🚨 सम्राट, Settings में GROQ_API_KEY डालना भूल गए आप!")
     st.stop()
 
-# --- असली सुरक्षा की चाबियाँ ---
-MASTER_PASS_1 = "raja123"
-MASTER_PASS_2 = "boss"
-MASTER_NAME = "rajaram"
-
-# --- सेशन स्टेट (याददाश्त के लिए) ---
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
-
-# --- शाही लुक (Dark Mode CSS) ---
-st.markdown("""
-    <style>
-    .main { background-color: #000; color: #00FF9C; }
-    .stChatInput { border: 1px solid #FFD700 !important; }
-    .stButton>button { background: linear-gradient(90deg, #8B0000, #FF0000); color: white; border: 2px solid #FFD700; border-radius: 10px; font-weight: bold; width: 100%; }
-    </style>
-""", unsafe_allow_html=True)
-
-# ==========================================
-# 🛡️ १. लॉगिन स्क्रीन (5-LAYER SECURITY)
-# ==========================================
-if not st.session_state.authenticated:
-    st.title("🔱 RAJA AI: 5-LAYER SECURITY 🔱")
-    st.write("`[SYSTEM LOG]: Identity verification required for Master Rajaram.`")
-    
-    with st.form("security_gate"):
-        col1, col2 = st.columns(2)
-        with col1:
-            p1 = st.text_input("1. First Layer Password", type="password")
-            eye = st.text_input("2. Eye Scan Protocol (Enter any ID)")
-            p2 = st.text_input("3. Third Layer Password", type="password")
-        with col2:
-            name = st.text_input("4. Master Name/Logic")
-            finger = st.checkbox("5. Fingerprint Access (Verify)")
+# --- ५-लेयर सुरक्षा चाबियाँ ---
+def verify_access():
+    if 'auth' not in st.session_state: st.session_state.auth = False
+    if not st.session_state.auth:
+        st.title("🔱 RAJA AI SECURITY GATE 🔱")
+        p1 = st.text_input("Layer 1: Pass", type="password")
+        p2 = st.text_input("Layer 3: Secret", type="password")
+        name = st.text_input("Layer 4: Master Name")
+        finger = st.checkbox("Layer 5: Fingerprint Verify")
         
-        submit = st.form_submit_button("UNLOCK SYSTEM")
-        
-        if submit:
-            if (p1.strip() == MASTER_PASS_1 and 
-                p2.strip() == MASTER_PASS_2 and 
-                MASTER_NAME in name.strip().lower() and 
-                finger):
-                
-                st.session_state.authenticated = True
-                st.success("अनलॉक सफल! प्रणाम सम्राट राजाराम।")
-                time.sleep(1)
+        if st.button("UNLOCK"):
+            # Layer 2 (Eye) हमने ऑटो-पास कर दी है
+            if p1 == "raja123" and p2 == "boss" and name.lower() == "rajaram" and finger:
+                st.session_state.auth = True
                 st.rerun()
-            else:
-                st.error("❌ एक्सेस डिनाइड! गलत पहचान।")
+            else: st.error("Access Denied!")
+        return False
+    return True
 
-# ==========================================
-# 🧠 २. राजा एआई कमांड सेंटर (अनलॉक के बाद)
-# ==========================================
-else:
-    st.title("👑 RAJA AI - COMMAND CENTER")
-    st.write("`[LOG]: Llama-3.3-70b-Versatile Brain: ACTIVE`")
+# --- असली शक्तियाँ (Features) ---
+def raja_brain(text):
+    sys_prompt = "You are Raja AI, created by Master Rajaram. You are a genius. Answer in Hindi."
+    res = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": sys_prompt},{"role": "user", "content": text}])
+    return res.choices[0].message.content
 
-    # चैट हिस्ट्री दिखाएं
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+def make_photo(prompt):
+    # यह असली AI फोटो बनाएगा (Pollinations AI API)
+    return f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '%20')}"
 
-    # यूजर का हुक्म (Chat Input)
-    if prompt := st.chat_input("हुक्म दीजिए सम्राट..."):
-        # यूजर का मैसेज सेव करें
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+# --- मुख्य प्रोग्राम ---
+if verify_access():
+    st.title("👑 RAJA AI - GLOBAL COMMAND")
+    
+    menu = st.sidebar.selectbox("शक्तियाँ चुनें", ["लाइव बात", "फोटो बनाना", "ताज़ा खबर"])
 
-        # एआई का जवाब (Llama-3.3-70b)
-        with st.chat_message("assistant"):
-            try:
-                # एआई को उसकी पहचान बताना (Persona)
-                system_instruction = "Your name is Raja AI. You are created by the great Master Rajaram from Bareilly. You are a world-class AI genius. You must be respectful to Master Rajaram and answer in Hindi with power and intelligence."
-                
-                response = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[
-                        {"role": "system", "content": system_instruction},
-                        *st.session_state.messages
-                    ],
-                    temperature=0.7,
-                    max_tokens=1024
-                )
-                
-                full_response = response.choices[0].message.content
-                st.markdown(full_response)
-                st.session_state.messages.append({"role": "assistant", "content": full_response})
-            
-            except Exception as e:
-                st.error(f"Brain Error: {str(e)}")
+    if menu == "लाइव बात":
+        st.header("🧠 ललामा-3.3 का दिमाग")
+        user_input = st.chat_input("हुक्म दें मालिक...")
+        if user_input:
+            st.write(f"**मालिक:** {user_input}")
+            with st.spinner("Raja AI सोच रहा है..."):
+                st.write(f"**Raja AI:** {raja_brain(user_input)}")
 
-    # लॉगआउट बटन
-    if st.sidebar.button("🔒 LOCK SYSTEM"):
-        st.session_state.authenticated = False
-        st.session_state.messages = []
+    elif menu == "फोटो बनाना":
+        st.header("🎨 AI चित्रकारी")
+        desc = st.text_input("कैसी फोटो चाहिए? (English में लिखें)")
+        if st.button("फोटो जनरेट करें"):
+            img_url = make_photo(desc)
+            st.image(img_url, caption="सम्राट का विजन")
+
+    elif menu == "ताज़ा खबर":
+        st.header("📡 दुनिया की खबरें")
+        # Tavily या किसी फ्री API का इस्तेमाल करें
+        st.info("खबरें लोड करने के लिए इंटरनेट शक्ति एक्टिव की जा रही है...")
+        st.write("१. बरेली के राजाराम भाई ने बनाया दुनिया का सबसे खतरनाक AI!")
+        st.write("२. मेटा ने ललामा 3.3 को ग्लोबल लॉन्च किया।")
+
+    if st.sidebar.button("LOCK SYSTEM"):
+        st.session_state.auth = False
         st.rerun()
