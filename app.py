@@ -1,151 +1,80 @@
-# app.py - Raja AI Ultimate Super Prototype
-
 import streamlit as st
 import requests
-from PIL import Image
-from io import BytesIO
-import speech_recognition as sr
-import openai
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+import time
 
-# -------------------------------
-# Secrets (API Keys)
-# -------------------------------
-# Add in .streamlit/secrets.toml
-# OPENAI_API_KEY = "your_openai_api_key"
-# GROQ_API_KEY = "your_groq_api_key"
-# NEWS_API_KEY = "your_news_api_key"
+# --- Page Setup (Photo-Like Premium UI) ---
+st.set_page_config(page_title="Raja AI: 30-Brain Cluster", page_icon="🔱", layout="wide")
 
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-NEWS_API_KEY = st.secrets["NEWS_API_KEY"]
+st.markdown("""
+    <style>
+    .stApp { background-color: #050505; color: #d4af37; }
+    .brain-status { border: 1px solid #d4af37; padding: 10px; border-radius: 10px; margin-bottom: 5px; }
+    .active-brain { background-color: #1a472a; border-color: #00ff00; }
+    .failed-brain { background-color: #4a1a1a; border-color: #ff0000; }
+    </style>
+    """, unsafe_allow_html=True)
 
-openai.api_key = OPENAI_API_KEY
+st.title("🔱 RAJA AI: THE HIVE MIND (30-Brain Cluster)")
+st.write("Current Status: **DHMSR Active | Meta Llama Network Connected**")
 
-# -------------------------------
-# Streamlit Page Setup
-# -------------------------------
-st.set_page_config(page_title="Raja AI Ultimate", layout="wide")
-st.title("👑 Raja AI Ultimate Super Prototype")
+# --- 30 Meta Brains Configuration (Example Models) ---
+# यहाँ हम Meta के अलग-अलग Llama मॉडल्स की लिस्ट बना रहे हैं
+META_BRAINS = [
+    "llama3-70b-8192", "llama3-8b-8192", "llama2-70b-4096", 
+    "llama-guard-3-8b", "llama3-groq-70b-tool-use"
+] * 6  # यह लिस्ट को 30 मॉडल्स तक ले जाएगा
 
-# -------------------------------
-# Sidebar Buttons
-# -------------------------------
-st.sidebar.header("Actions")
-if st.sidebar.button('+'):
-    st.sidebar.write("Add something!")
+# --- 5-Layer Security Check ---
+st.sidebar.title("🔐 Security Layer 5")
+master_key = st.sidebar.text_input("Master Key:", type="password")
 
-if st.sidebar.button('Live'):
-    st.sidebar.write("Starting live chat...")
+if master_key == "Rajaram_King":
+    st.sidebar.success("Welcome, Rajaram. All 30 Brains Ready.")
+    
+    user_query = st.text_area("Command the Network:", placeholder="आपका हुक्m क्या है, राजाराम?")
 
-# -------------------------------
-# Voice Input (Hindi)
-# -------------------------------
-st.header("🎤 Voice Input (Hindi)")
-voice_input = ""
-if st.button("Start Voice Input"):
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.write("Bol kar bolo...")
-        audio = r.listen(source)
-    try:
-        voice_input = r.recognize_google(audio, language='hi-IN')
-        st.write("You said:", voice_input)
-    except Exception as e:
-        st.write("Sorry, samajh nahi paaya:", str(e))
+    if st.button("Execute Hive Command"):
+        status_container = st.empty()
+        final_answer = ""
+        success = False
 
-# -------------------------------
-# Multi-Model Chat (GPT + Meta LLaMA/OPT + placeholders)
-# -------------------------------
-st.header("💬 Chat with Raja AI (Multi-Model Ensemble)")
-
-chat_input = st.text_input("Type your message here:")
-if chat_input or voice_input:
-    user_text = chat_input if chat_input else voice_input
-    responses = []
-
-    # --- GPT-4 Response ---
-    try:
-        gpt_resp = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role":"user","content":user_text}],
-            temperature=0.7
-        )
-        responses.append(gpt_resp['choices'][0]['message']['content'])
-    except Exception as e:
-        responses.append(f"[GPT Error: {e}]")
-
-    # --- Meta LLaMA / OPT Response ---
-    try:
-        tokenizer = AutoTokenizer.from_pretrained("facebook/opt-1.3b")
-        model = AutoModelForCausalLM.from_pretrained("facebook/opt-1.3b")
-        inputs = tokenizer(user_text, return_tensors="pt")
-        outputs = model.generate(**inputs, max_new_tokens=150)
-        meta_resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        responses.append(meta_resp)
-    except Exception as e:
-        responses.append(f"[Meta Model Error: {e}]")
-
-    # --- Placeholder for additional models (you can add 18 more models here) ---
-    for i in range(18):
-        responses.append(f"[Placeholder Model {i+1} response]")
-
-    # --- Merge Responses (Simple Concatenate) ---
-    final_response = " | ".join(responses)
-    st.write("Raja AI says:", final_response)
-
-# -------------------------------
-# Groq Image Generation
-# -------------------------------
-st.header("🖼️ Generate Image")
-img_prompt = st.text_input("Enter prompt for image generation (English recommended):", key="img_prompt")
-if st.button("Generate Image"):
-    if img_prompt.strip() != "":
-        with st.spinner("Generating image..."):
-            url = "https://api.groq.ai/v1/images"  # Placeholder
-            headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}
-            payload = {"prompt": img_prompt}
+        # --- The Failover Logic (Ek Fail, Dusra Shuru) ---
+        for i, brain_id in enumerate(META_BRAINS):
+            with status_container.container():
+                st.info(f"🧠 Brain {i+1} ({brain_id}) Processing...")
+                
             try:
-                res = requests.post(url, headers=headers, json=payload)
-                res.raise_for_status()
-                img_url = res.json().get("url")
-                if img_url:
-                    image = Image.open(BytesIO(requests.get(img_url).content))
-                    st.image(image, caption="Generated by Raja AI")
-                else:
-                    st.error("Image URL not returned")
+                # यहाँ हम API कॉल करेंगे (Fake Fail Scenario For Demo)
+                # असलियत में यहाँ Groq या Meta API का कोड आएगा
+                if i < 2: # मान लो पहले 2 दिमाग फेल हो गए (Testing Failover)
+                    raise Exception("Connection Refused")
+                
+                # Success Logic (Mocking API Response)
+                time.sleep(1)
+                final_answer = f"राजाराम, मस्तिष्क नंबर {i+1} ने जवाब ढूंढ लिया है: आपका साम्राज्य सुरक्षित है।"
+                success = True
+                st.success(f"✅ Success! Brain {i+1} took control.")
+                break # जैसे ही एक दिमाग सफल हुआ, रुक जाओ
+
             except Exception as e:
-                st.error("Error generating image: " + str(e))
-    else:
-        st.warning("Prompt cannot be empty")
+                st.error(f"❌ Brain {i+1} FAILED. Shifting to Brain {i+2}...")
+                time.sleep(0.5)
 
-# -------------------------------
-# Real-Time News
-# -------------------------------
-st.header("📰 Latest News (Updated every 10 mins)")
-try:
-    news = requests.get(
-        f"https://newsapi.org/v2/top-headlines?country=in&apiKey={NEWS_API_KEY}"
-    ).json()
-    for article in news['articles'][:5]:
-        st.markdown(f"- **{article['title']}**")
-except Exception as e:
-    st.write("Error fetching news:", str(e))
+        if success:
+            st.divider()
+            st.markdown(f"### 🛡️ Final Execution Result:\n{final_answer}")
+        else:
+            st.error("🚨 CRITICAL ALERT: All 30 Brains Offline. Activating DHMSR Emergency.")
 
-# -------------------------------
-# Video Generation Placeholder
-# -------------------------------
-st.header("🎥 Video Generation (Coming Soon)")
-st.write("Feature under development...")
+    # --- System Monitoring (The Cool Look) ---
+    st.divider()
+    cols = st.columns(5)
+    for j in range(30):
+        with cols[j % 5]:
+            status = "🟢" if j > 2 else "🔴" # Demo Status
+            st.markdown(f'<div class="brain-status">Brain {j+1}: {status}</div>', unsafe_allow_html=True)
 
-# -------------------------------
-# Live Voice Chat Placeholder
-# -------------------------------
-st.header("🔴 Live Voice Chat (Coming Soon)")
-st.write("Feature under development...")
+else:
+    st.warning("⚠️ Access Denied. System Locked.")
 
-# -------------------------------
-# Footer
-# -------------------------------
-st.write("Made with ❤️ using Streamlit, GPT-4, Meta LLaMA/OPT, Groq API, NewsAPI, and more")
+st.caption("Developed by RAJARAM | 30-Layer Hive Intelligence")
