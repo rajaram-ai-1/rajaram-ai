@@ -284,8 +284,10 @@ class RajaramAgent:
         except Exception as e:
             return f"❌ EVOLUTION ERROR: {str(e)}"
 
+
+
 # ------------------------------------------------------------------------------
-# [PHASE 4: AGENTIC PROTOCOLS] - ALL SHAKTIS INSIDE THE CORE 🔱
+# [PHASE 4: AGENTIC PROTOCOLS] - THE FINAL OMNIPOTENT CLASS 🔱
 # ------------------------------------------------------------------------------
 
 class RajaramAgent:
@@ -295,42 +297,59 @@ class RajaramAgent:
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
+    async def call_llm(self, model, prompt, system):
+        """LLM को कॉल करने की शक्ति"""
+        try:
+            llm = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=model, timeout=30)
+            res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
+            return res.content, model
+        except Exception as e:
+            return f"Neural Error in {model}: {str(e)}", model
+
     async def execute_reasoning(self, user_input, web_data=""):
         """🧠 राजाराम का मुख्य दिमाग (The Logic Engine)"""
         try:
-            # सिस्टम को निर्देश और इंटरनेट डेटा देना
             instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
-            
-            # Groq Engine को कॉल करना (LOGIC_PRO Model)
-            llm = ChatGroq(
-                groq_api_key=core.GROQ_KEY, 
-                model_name=core.BRAIN_CATALOG["LOGIC_PRO"], 
-                timeout=30
-            )
-            
-            # पिछले ८ मैसेज की याददाश्त के साथ जवाब मांगना
-            res = await llm.ainvoke(
-                [SystemMessage(content=instruction)] + st.session_state.history[-8:]
-            )
-            
-            return res.content, "RAJARAM-SUPREME-LOGIC"
+            # दो ताकतवर मॉडल्स से एक साथ सोचना
+            tasks = [
+                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], user_input, instruction),
+                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
+            ]
+            responses = await asyncio.gather(*tasks)
+            # जो जवाब सबसे लंबा और सटीक हो, उसे चुनें
+            final_choice = max(responses, key=lambda x: len(x[0]))
+            return final_choice
         except Exception as e:
-            # अगर दिमाग में कोई दिक्कत आए तो शील्ड बाईपास करेगी
-            if 'rajaram_shield' in globals():
-                rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
+            rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
             return "🔱 Shield Active: Logic Rerouted due to neural glitch.", "RECOVERY_MODE"
 
-    def speak(self, text):
-        """🗣️ राजाराम की आवाज़ (The Voice Engine)"""
+    async def evolve_system(self, command):
+        """🔱 RAJARAM GHOST ENGINE: नई शक्तियां खुद बनाना"""
+        prompt = (f"Write ONLY the logic for: '{command}'. "
+                 "Return ONLY pure Python code, no markdown.")
         try:
-            from gtts import gTTS
-            import base64
-            # आवाज़ बनाना (हिंदी भाषा में)
+            new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
+            clean_code = new_code_raw[0].replace("python", "").replace("```", "").strip()
+            
+            import shakti_vault
+            p_name = f"shakti_{int(time.time())}" 
+            # यहाँ core.GROQ_KEY का उपयोग करें
+            success, msg = shakti_vault.inject_new_shakti(core.GROQ_KEY, command, p_name)
+
+            if success:
+                st.toast(f"🔱 NEW FEATURE: {command}", icon="🔥")
+                return f"🔱 SHAKTI STORED: '{command}' फाइल बन गई है।"
+            else: return f"❌ VAULT ERROR: {msg}"
+        except Exception as e:
+            return f"❌ EVOLUTION ERROR: {str(e)}"
+
+    def speak(self, text):
+        """🗣️ राजाराम की आवाज़"""
+        try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
             with open("response.mp3", "rb") as f:
                 b64 = base64.b64encode(f.read()).decode()
-            # ऑडियो को पेज पर ऑटो-प्ले करना
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
         except Exception as e: 
             st.error(f"🔱 Voice Engine Glitch: {e}")
@@ -338,7 +357,6 @@ class RajaramAgent:
 # ------------------------------------------------------------------------------
 # [PHASE 5: MASTER IDENTITY & INITIALIZATION]
 # ------------------------------------------------------------------------------
-
 IDENTITY = f"""
 [ENTITY: RAJARAM AI GOLD CORE]
 [ARCHITECT: RAJARAM, THE BAREILLY PRODIGY]
@@ -346,8 +364,9 @@ IDENTITY = f"""
 [PROTOCOL: HINGLISH SARCASM & SUPREME INTEL]
 """
 
-# 🔱 यह लाइन अब 'AttributeError' को खत्म कर देगी!
-rajaram_ai = RajaramAgent(IDENTITY)
+# एजेंट को एक्टिवेट करें
+if 'rajaram_ai' not in globals():
+    rajaram_ai = RajaramAgent(IDENTITY)
 
 # ------------------------------------------------------------------------------
 # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
