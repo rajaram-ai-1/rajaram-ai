@@ -489,7 +489,7 @@ if prompt:
                 except: 
                     pass
 
-        # --- MODULE 3: SEARCH & REASONING (FINAL BRAIN) ---
+       # --- MODULE 3: SEARCH & REASONING (FINAL BRAIN) ---
         if not final_response:
             with st.spinner("🧠 RAJARAM CORE REASONING..."):
                 intel = ""
@@ -499,15 +499,19 @@ if prompt:
                     try:
                         intel = core.search_engine.run(prompt)
                         engine_id = "RAJARAM-SATELLITE-WEB"
-                    except:
-                        intel = "Satellite link weak."
+                    except Exception as e:
+                        intel = f"Satellite link weak: {e}"
 
-                # 🧠 Reasoning Logic (Async Execution)
+                # 🧠 Reasoning Logic
                 try:
-                    # Check if rajaram_ai exists
                     if 'rajaram_ai' in globals():
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
+                        # पुराने इवेंट लूप को साफ़ करना और नया बनाना
+                        try:
+                            loop = asyncio.get_event_loop()
+                        except RuntimeError:
+                            loop = asyncio.new_event_loop()
+                            asyncio.set_event_loop(loop)
+                        
                         logic_res = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, str(intel)))
                         
                         if isinstance(logic_res, tuple):
@@ -516,10 +520,11 @@ if prompt:
                             final_response = logic_res
                             engine_id = "RAJARAM-SUPREME-LOGIC"
                     else:
-                        final_response = "❌ ERROR: Rajaram AI Agent not initialized."
+                        final_response = "❌ ERROR: Rajaram Agent not initialized in memory."
                 except Exception as e:
-                    final_response = "🔱 Core overload. Please retry."
-                    st.error(f"Logic Error: {e}")
+                    # 🕵️‍♂️ यहाँ हम असली एरर देख पाएंगे
+                    final_response = f"🔱 Core overload. Reason: {str(e)}" 
+                    st.error(f"System Crash Log: {e}")
 
         # --- 🔱 ४. परिणाम और याददाश्त (Memory & Output) ---
         if final_response:
