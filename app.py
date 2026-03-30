@@ -282,20 +282,62 @@ class RajaramAgent:
                 return "❌ VAULT WRITE FAILURE: फाइल नहीं बन पाई।"
         except Exception as e:
             return f"❌ EVOLUTION ERROR: {str(e)}"
+
 # ------------------------------------------------------------------------------
-# [PHASE 5: MASTER IDENTITY]
+# [PHASE 4: AGENTIC PROTOCOLS] - ALL SHAKTIS INSIDE THE CORE 🔱
 # ------------------------------------------------------------------------------
-# --- PHASE 4: AGENTIC PROTOCOLS ---
+
 class RajaramAgent:
     def __init__(self, system_prompt):
+        """🔱 राजाराम एजेंट का जन्म और मेमोरी सेटअप"""
         self.system_prompt = system_prompt
-        # स्ट्रीवलिट की मेमोरी चेक करना
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
-    
-    # नोट: यहाँ आपके बाकी के फंक्शंस (execute_reasoning आदि) होने चाहिए
 
-# --- PHASE 5: MASTER IDENTITY & INITIALIZATION ---
+    async def execute_reasoning(self, user_input, web_data=""):
+        """🧠 राजाराम का मुख्य दिमाग (The Logic Engine)"""
+        try:
+            # सिस्टम को निर्देश और इंटरनेट डेटा देना
+            instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
+            
+            # Groq Engine को कॉल करना (LOGIC_PRO Model)
+            llm = ChatGroq(
+                groq_api_key=core.GROQ_KEY, 
+                model_name=core.BRAIN_CATALOG["LOGIC_PRO"], 
+                timeout=30
+            )
+            
+            # पिछले ८ मैसेज की याददाश्त के साथ जवाब मांगना
+            res = await llm.ainvoke(
+                [SystemMessage(content=instruction)] + st.session_state.history[-8:]
+            )
+            
+            return res.content, "RAJARAM-SUPREME-LOGIC"
+        except Exception as e:
+            # अगर दिमाग में कोई दिक्कत आए तो शील्ड बाईपास करेगी
+            if 'rajaram_shield' in globals():
+                rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
+            return "🔱 Shield Active: Logic Rerouted due to neural glitch.", "RECOVERY_MODE"
+
+    def speak(self, text):
+        """🗣️ राजाराम की आवाज़ (The Voice Engine)"""
+        try:
+            from gtts import gTTS
+            import base64
+            # आवाज़ बनाना (हिंदी भाषा में)
+            tts = gTTS(text=text[:300], lang='hi')
+            tts.save("response.mp3")
+            with open("response.mp3", "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            # ऑडियो को पेज पर ऑटो-प्ले करना
+            st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
+        except Exception as e: 
+            st.error(f"🔱 Voice Engine Glitch: {e}")
+
+# ------------------------------------------------------------------------------
+# [PHASE 5: MASTER IDENTITY & INITIALIZATION]
+# ------------------------------------------------------------------------------
+
 IDENTITY = f"""
 [ENTITY: RAJARAM AI GOLD CORE]
 [ARCHITECT: RAJARAM, THE BAREILLY PRODIGY]
@@ -303,7 +345,7 @@ IDENTITY = f"""
 [PROTOCOL: HINGLISH SARCASM & SUPREME INTEL]
 """
 
-# 🔱 यह लाइन सबसे ज़रूरी है, इसे मिस मत करना!
+# 🔱 यह लाइन अब 'AttributeError' को खत्म कर देगी!
 rajaram_ai = RajaramAgent(IDENTITY)
 
 # ------------------------------------------------------------------------------
