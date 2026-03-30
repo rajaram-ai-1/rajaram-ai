@@ -417,9 +417,10 @@ if prompt:
             st.warning(s)
 
         # --- MODULE 1: RAJARAM HYBRID VISION ENGINE (IMAGE) ---
-        if uploaded_file is not None:
+        if uploaded_file is not None and not final_response:
             with st.spinner("👁️ RAJARAM EYE ACTIVE..."):
                 try:
+                    import google.generativeai as genai
                     img = Image.open(uploaded_file)
                     if img.mode != "RGB": img = img.convert("RGB")
                     img.thumbnail((1024, 1024))
@@ -434,15 +435,17 @@ if prompt:
                     st.error(f"Vision Glitch: {e}")
 
         # --- MODULE 2: MEDIA & ART ENGINE ---
-        if not final_response and any(x in prompt.lower() for x in ["photo", "image", "बनाओ", "art"]):
+        art_trigger = ["photo", "image", "बनाओ", "art", "generate"]
+        if not final_response and any(x in prompt.lower() for x in art_trigger):
             with st.spinner("🎨 SYNTHESIZING ART..."):
                 try:
                     clean_p = prompt.replace(" ", "%20")
                     img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
                     st.image(img_url, use_container_width=True)
-                    final_response = "🔱 Image synthesized by Rajaram AI Core."
+                    final_response = f"🔱 Image synthesized for: '{prompt}'"
                     engine_id = "RAJARAM-ART-V3"
-                except: pass
+                except: 
+                    pass
 
         # --- MODULE 3: SEARCH & REASONING (FINAL BRAIN) ---
         if not final_response:
@@ -457,35 +460,41 @@ if prompt:
                     except:
                         intel = "Satellite link weak."
 
-                # 🧠 Reasoning Logic
+                # 🧠 Reasoning Logic (Async Execution)
                 try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    logic_res = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, str(intel)))
-                    
-                    if isinstance(logic_res, tuple):
-                        final_response, engine_id = logic_res
+                    # Check if rajaram_ai exists
+                    if 'rajaram_ai' in globals():
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        logic_res = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, str(intel)))
+                        
+                        if isinstance(logic_res, tuple):
+                            final_response, engine_id = logic_res
+                        else:
+                            final_response = logic_res
+                            engine_id = "RAJARAM-SUPREME-LOGIC"
                     else:
-                        final_response = logic_res
-                        engine_id = "RAJARAM-SUPREME-LOGIC"
+                        final_response = "❌ ERROR: Rajaram AI Agent not initialized."
                 except Exception as e:
                     final_response = "🔱 Core overload. Please retry."
                     st.error(f"Logic Error: {e}")
 
         # --- 🔱 ४. परिणाम और याददाश्त (Memory & Output) ---
         if final_response:
+            # डिस्प्ले रिस्पोंस
             st.markdown(final_response)
             st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
             
-            # आवाज़ (Voice)
-            if st.session_state.get('voice_enabled'):
+            # आवाज़ (Voice) - Safe Call
+            if st.session_state.get('voice_enabled') and hasattr(rajaram_ai, 'speak'):
                 rajaram_ai.speak(final_response)
             
             # मेमोरी में सेव (Optional)
             try:
                 from memory_engine import save_to_memory
                 save_to_memory("RAJARAM_05", prompt, final_response)
-            except: pass
+            except: 
+                pass
                 
             # हिस्ट्री अपडेट
             st.session_state.history.append(AIMessage(content=final_response))
