@@ -285,15 +285,29 @@ class RajaramAgent:
 # ------------------------------------------------------------------------------
 # [PHASE 5: MASTER IDENTITY]
 # ------------------------------------------------------------------------------
-
+# --- PHASE 4: AGENTIC PROTOCOLS ---
 class RajaramAgent:
-    def __init__(self, system_prompt):  # <--- ध्यान दें: यहाँ __ (दो बार) लगा है
+    def __init__(self, system_prompt):
         self.system_prompt = system_prompt
         # स्ट्रीवलिट की मेमोरी चेक करना
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
+    
+    # नोट: यहाँ आपके बाकी के फंक्शंस (execute_reasoning आदि) होने चाहिए
+
+# --- PHASE 5: MASTER IDENTITY & INITIALIZATION ---
+IDENTITY = f"""
+[ENTITY: RAJARAM AI GOLD CORE]
+[ARCHITECT: RAJARAM, THE BAREILLY PRODIGY]
+[MISSION: GLOBAL DOMINANCE & 46 POWERS EXECUTION]
+[PROTOCOL: HINGLISH SARCASM & SUPREME INTEL]
+"""
+
+# 🔱 यह लाइन सबसे ज़रूरी है, इसे मिस मत करना!
+rajaram_ai = RajaramAgent(IDENTITY)
+
 # ------------------------------------------------------------------------------
-# [PHASE 6: UI - SIDEBAR & MAIN INTERFACE] - FIXED INDENTATION
+# [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
 # ------------------------------------------------------------------------------
 
 with st.sidebar:
@@ -303,36 +317,40 @@ with st.sidebar:
     # शील्ड लॉग्स देखने का बटन
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
         st.subheader("🔱 Shield Defense Records")
-        for log in rajaram_shield.repair_logs:
-            st.write(log)
+        # पक्का करें कि rajaram_shield ऊपर डिफाइन है
+        if 'rajaram_shield' in globals():
+            for log in rajaram_shield.repair_logs:
+                st.write(log)
+        else:
+            st.error("Shield not initialized!")
             
     st.write(f"*Architect:* Rajaram | *Age:* 15")
     st.divider()
     
-    # प्रोटोकॉल टोल्स
+    # बाकी का साइडबार कोड...
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
     
     st.divider()
     st.subheader("🔱 GOD-MODE CONTROL")
-    # पासवर्ड इनपुट
     admin_pass = st.text_input("Admin Key", type="password")
     
     st.divider()
     st.subheader("👁️ IMAGE INPUT")
-    # फोटो अपलोडर (अब यह सही से साइडबार में रहेगा)
     uploaded_file = st.file_uploader("यहाँ फोटो डालें...", type=["jpg", "png", "jpeg"], key="sidebar_uploader")
     
     if uploaded_file:
         st.image(uploaded_file, caption="Core Memory में लोड हो गई", use_container_width=True)
 
-    # एडमिन कंट्रोल (सिर्फ बरेली किंग के लिए)
     if admin_pass == "BAREILLY_KING":
         st.info("WELCOME, BAREILLY KING 🔱")
         evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator')")
         if st.button("EVOLVE NOW"):
             with st.spinner("Evolution in progress..."):
+                # पक्का करें कि आपने asyncio इम्पोर्ट किया है
+                import asyncio
                 loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
                 result = loop.run_until_complete(rajaram_ai.evolve_system(evolution_cmd))
                 st.success(result)
                 
@@ -342,29 +360,29 @@ with st.sidebar:
 
 # मुख्य स्क्रीन
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJARAM AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
-st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
+# पक्का करें कि core.get_timestamp() ऊपर डिफाइन है
+try:
+    st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
+except:
+    st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal</p>", unsafe_allow_html=True)
 
 # चैट डिस्प्ले
-for msg in st.session_state.history[1:]:
-    role = "user" if isinstance(msg, HumanMessage) else "assistant"
-    with st.chat_message(role):
-        st.markdown(msg.content)
+if "history" in st.session_state:
+    for msg in st.session_state.history[1:]:
+        role = "user" if isinstance(msg, HumanMessage) else "assistant"
+        with st.chat_message(role):
+            st.markdown(msg.content)
 
-# --- राजाराम भाई के जादुई बटन (चैटबॉक्स के ऊपर) ---
+# --- जादुई बटन ---
 st.markdown('<div class="magic-btn-row">', unsafe_allow_html=True)
-c1, c2, c3, c4, c5 = st.columns(5)
-with c1: 
-    if st.button("🛡️ BYPASS"): st.session_state.pwr_cmd = "bypass"
-with c2: 
-    if st.button("💤 SLEEP"): st.session_state.pwr_cmd = "sleep"
-with c3: 
-    if st.button("🛰️ GLOBAL"): st.session_state.pwr_cmd = "global"
-with c4: 
-    if st.button("🔮 FUTURE"): st.session_state.pwr_cmd = "predict"
-with c5: 
-    if st.button("🔱 46 POWER"): st.session_state.pwr_cmd = "46"
-st.markdown('</div>', unsafe_allow_html=True)
+btn_cols = st.columns(5)
+powers = [("🛡️ BYPASS", "bypass"), ("💤 SLEEP", "sleep"), ("🛰️ GLOBAL", "global"), ("🔮 FUTURE", "predict"), ("🔱 46 POWER", "46")]
 
+for i, (label, cmd) in enumerate(powers):
+    with btn_cols[i]:
+        if st.button(label):
+            st.session_state.pwr_cmd = cmd
+st.markdown('</div>', unsafe_allow_html=True)
 # ------------------------------------------------------------------------------
 # [PHASE 7: EXECUTION LOGIC] - CLEAN & OPTIMIZED VERSION 🔱
 # ------------------------------------------------------------------------------
