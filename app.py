@@ -286,14 +286,12 @@ class RajaramAgent:
 # [PHASE 5: MASTER IDENTITY]
 # ------------------------------------------------------------------------------
 
-IDENTITY = f"""
-[ENTITY: RAJARAM AI GOLD CORE]
-[ARCHITECT: RAJARAM, THE BAREILLY PRODIGY]
-[MISSION: GLOBAL DOMINANCE & 46 POWERS EXECUTION]
-[PROTOCOL: HINGLISH SARCASM & SUPREME INTEL]
-"""
-
-rajaram_ai = RajaramAgent(IDENTITY)
+class RajaramAgent:
+    def __init__(self, system_prompt):  # <--- ध्यान दें: यहाँ __ (दो बार) लगा है
+        self.system_prompt = system_prompt
+        # स्ट्रीवलिट की मेमोरी चेक करना
+        if "history" not in st.session_state:
+            st.session_state.history = [SystemMessage(content=system_prompt)]
 # ------------------------------------------------------------------------------
 # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE] - FIXED INDENTATION
 # ------------------------------------------------------------------------------
