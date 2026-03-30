@@ -53,7 +53,7 @@ load_rajaram_features()
 # ------------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="RAJARAM AI: OMNIPOTENT CORE",
+    page_title="RAJA AI: OMNIPOTENT CORE",
     page_icon="🔱",
     layout="wide",
     initial_sidebar_state="expanded"
