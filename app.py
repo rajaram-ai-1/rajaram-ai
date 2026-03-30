@@ -119,17 +119,15 @@ st.markdown("""
 # [PHASE 2: NEURAL NETWORK INITIALIZATION] - ALL YOUR BRAINS PROTECTED
 # ------------------------------------------------------------------------------
 
+# [PHASE 2: NEURAL NETWORK INITIALIZATION]
 class GlobalCore:
-    def _init_(self):
+    def __init__(self):  # <--- ध्यान दें: यहाँ दो बार (__) अंडरस्कोर है
         self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
         self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
+        # Gemini key के लिए भी variable बना लें
+        self.GEMINI_KEY = st.secrets.get("GEMINI_API_KEY") 
         
-        # 🔱 यहाँ सिर्फ एक बार डिक्शनरी शुरू करें
-        self.BRAIN_CATALOG = {
-            # 🔱 द अल्टीमेट गॉड: मेटा का सबसे बड़ा मॉडल (405 बिलियन पैरामीटर्स)
-            "THE_TITAN": "llama-3.1-405b-reasoning",}
-            # बाकी के 40 मॉडल्स इसके नीचे जोड़ते जाएं...
-       # 🔱 यहाँ सिर्फ एक बार डिक्शनरी शुरू हुई थी
+        # 🔱 ब्रावो! डिक्शनरी एक ही बार रहेगी
         self.BRAIN_CATALOG = {
             "THE_TITAN": "llama-3.1-405b-reasoning",
             "ULTIMATE_70B": "llama-3.3-70b-versatile",
@@ -139,23 +137,19 @@ class GlobalCore:
             "CODE_WIZARD": "llama-3.3-70b-versatile", 
             "CYBER_EXPERT": "llama-3.3-70b-versatile", 
             "MATH_GENIUS": "qwen-2.5-72b-instruct"
-        } # <--- यहाँ सिर्फ एक बार बंद होगा
-        
-    # <-- यहाँ _init_ फंक्शन खत्म होता है (Indentation का ध्यान रखें)
+        } 
 
-       # --- सुधरा हुआ कोड (Google की छुट्टी) ---
         if self.GROQ_KEY:
-            # अब हम यहाँ किसी genai.configure की ज़रूरत नहीं रखते
-            # क्योंकि ChatGroq अपने आप Key उठा लेता है
             st.toast("🔱 META ENGINE ONLINE", icon="🟢")
         else:
-            st.error("❌ GROQ_API_KEY नहीं मिली! साम्राज्य खतरे में है।")
+            st.error("❌ GROQ_API_KEY नहीं मिली!")
         
         self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
 
     def get_timestamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
 
+# इंजन चालू करें
 core = GlobalCore()
 # ------------------------------------------------------------------------------
 # [RAJARAM SELF-HEALING SHIELD] - इसे GlobalCore क्लास के बाद जोड़ें
