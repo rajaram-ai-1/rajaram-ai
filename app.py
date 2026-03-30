@@ -160,14 +160,21 @@ core = GlobalCore()
 # ------------------------------------------------------------------------------
 # [RAJARAM SELF-HEALING SHIELD] - इसे GlobalCore क्लास के बाद जोड़ें
 # ------------------------------------------------------------------------------
+import datetime
+import logging
+
 class RajaramShield:
-    def _init_(self):
+    def __init__(self):  # <--- यहाँ _ (एक) नहीं, बल्कि __ (दो) अंडरस्कोर लगायें
         self.repair_logs = []
+        self.security_level = "MAXIMUM"
     
     def auto_fix(self, error_type, details=""):
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         log_entry = f"[{timestamp}] FIXED: {error_type} bypassed by Rajaram Shield."
+        
+        # अब यह लाइन एरर नहीं देगी क्योंकि __init__ ने इसे बना दिया है
         self.repair_logs.append(log_entry)
+        
         logging.warning(f"🔱 SHIELD ALERT: {log_entry} Details: {details}")
         return True
 
