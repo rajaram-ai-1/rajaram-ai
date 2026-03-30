@@ -487,8 +487,12 @@ st.caption("© 2026 RAJARAM AI - THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT 
 import os
 import importlib.util
 
+# --- 🔱 RAJARAM FINAL POWER LOADER ---
 def load_rajaram_features():
-    """🔱 यह फंक्शन 'feature_*.py' नाम की हर फाइल को ऐप में जोड़ देगा"""
+    """🔱 यह फंक्शन 'feature_*.py' नाम की हर फाइल को ऐप में लाइव जोड़ देगा"""
+    import os
+    import importlib.util
+    
     for file in os.listdir():
         if file.startswith("feature_") and file.endswith(".py"):
             try:
@@ -499,12 +503,14 @@ def load_rajaram_features():
                 
                 # अगर फीचर फाइल में 'run_feature' फंक्शन है, तो उसे चलाएं
                 if hasattr(module, 'run_feature'):
-                    # यह स्क्रीन पर एक सुंदर बॉक्स बना देगा
                     with st.container(border=True):
                         st.caption(f"🔱 ACTIVE POWER: {feature_name.upper()}")
                         module.run_feature()
             except Exception as e:
-                st.error(f"❌ Error loading {file}: {e}")
+                rajaram_shield.auto_fix("FEATURE_LOAD_ERROR", str(e))
 
-# लोडर को कॉल करें
+# लोडर को सबसे आखिर में कॉल करें
 load_rajaram_features()
+
+st.markdown("---")
+st.caption("© 2026 RAJARAM AI - THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT FOR SUPREMACY")
