@@ -30,7 +30,7 @@ except:
     pass
 import importlib.util
 
-def load_rajaram_features():
+def load_raja_features():
     """🔱 बाहर की सभी 'feature_*.py' फाइलों को लाइव करना"""
     for file in os.listdir():
         if file.startswith("feature_") and file.endswith(".py"):
@@ -47,7 +47,7 @@ def load_rajaram_features():
                 st.error(f"Error loading {file}: {e}")
 
 # --- इसे अपने UI के आखिर में या जहाँ आप बटन चाहते हैं वहां कॉल करें ---
-load_rajaram_features()
+load_raja_features()
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ core = GlobalCore()
 import datetime
 import logging
 
-class RajaramShield:
+class RajaShield:
     def __init__(self):  # <--- यहाँ _ (एक) नहीं, बल्कि __ (दो) अंडरस्कोर लगायें
         self.repair_logs = []
         self.security_level = "MAXIMUM"
@@ -173,12 +173,12 @@ class RajaramShield:
         return True
 
 # शील्ड का इंजन चालू करें
-rajaram_shield = RajaramShield()
+raja_shield = RajaShield()
 # ------------------------------------------------------------------------------
 # [PHASE 3: 46 POWERS INTEGRATION] - NEW LOGIC ADDED
 # ------------------------------------------------------------------------------
 
-def trigger_rajaram_powers(prompt):
+def trigger_raja_powers(prompt):
     p = prompt.lower()
     active_shaktis = []
     
@@ -203,7 +203,7 @@ def trigger_rajaram_powers(prompt):
 # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
 # ------------------------------------------------------------------------------
 
-class RajaramAgent:
+class RajaAgent:
     def _init_(self, system_prompt):
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
@@ -232,7 +232,7 @@ class RajaramAgent:
             return f"Neural Error in {model}: {str(e)}", model
 
     def speak(self, text):
-        """🔱 RAJARAM VOICE ENGINE"""
+        """🔱 RAJA VOICE ENGINE"""
         try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
@@ -243,7 +243,7 @@ class RajaramAgent:
             st.error(f"🔱 Shield Alert (Voice): {e}")
 
     async def evolve_system(self, command):
-        """🔱 RAJARAM GHOST ENGINE: CREATES INDEPENDENT FEATURE FILES"""
+        """🔱 RAJA GHOST ENGINE: CREATES INDEPENDENT FEATURE FILES"""
         # AI को सख्त हिदायत कि सिर्फ लॉजिक दे, फालतू बातें नहीं
         prompt = (f"Write ONLY the logic for: '{command}'. "
                  "Do NOT write function definitions. Use 'st' for Streamlit. "
@@ -290,9 +290,9 @@ class RajaramAgent:
 # [PHASE 4: AGENTIC PROTOCOLS] - THE FINAL OMNIPOTENT CLASS 🔱
 # ------------------------------------------------------------------------------
 
-class RajaramAgent:
+class RajaAgent:
     def __init__(self, system_prompt):
-        """🔱 राजाराम एजेंट का जन्म और मेमोरी सेटअप"""
+        """🔱 राजा Ai एजेंट का जन्म और मेमोरी सेटअप"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
@@ -307,7 +307,7 @@ class RajaramAgent:
             return f"Neural Error in {model}: {str(e)}", model
 
     async def execute_reasoning(self, user_input, web_data=""):
-        """🧠 राजाराम का मुख्य दिमाग (The Logic Engine)"""
+        """🧠 राजा Ai का मुख्य दिमाग (The Logic Engine)"""
         try:
             instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
             # दो ताकतवर मॉडल्स से एक साथ सोचना
@@ -324,7 +324,7 @@ class RajaramAgent:
             return "🔱 Shield Active: Logic Rerouted due to neural glitch.", "RECOVERY_MODE"
 
     async def evolve_system(self, command):
-        """🔱 RAJARAM GHOST ENGINE: नई शक्तियां खुद बनाना"""
+        """🔱 RAJA GHOST ENGINE: नई शक्तियां खुद बनाना"""
         prompt = (f"Write ONLY the logic for: '{command}'. "
                  "Return ONLY pure Python code, no markdown.")
         try:
@@ -344,7 +344,7 @@ class RajaramAgent:
             return f"❌ EVOLUTION ERROR: {str(e)}"
 
     def speak(self, text):
-        """🗣️ राजाराम की आवाज़"""
+        """🗣️ राजा की आवाज़"""
         try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
@@ -358,7 +358,7 @@ class RajaramAgent:
 # [PHASE 5: MASTER IDENTITY & INITIALIZATION] - यहीं से निर्देश दें
 # ------------------------------------------------------------------------------
 IDENTITY = f"""
-[ENTITY: RAJARAM AI GOLD CORE]
+[ENTITY: RAJA AI GOLD CORE]
 [ARCHITECT: RAJARAM (BAREILLY, INDIA)]
 
 [CORE COMMANDS / निर्देश]:
@@ -370,8 +370,8 @@ IDENTITY = f"""
 """
 
 # एजेंट को एक्टिवेट करें
-if 'rajaram_ai' not in globals():
-    rajaram_ai = RajaramAgent(IDENTITY)
+if 'raja_ai' not in globals():
+    raja_ai = RajaAgent(IDENTITY)
 
 # ------------------------------------------------------------------------------
 # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
@@ -379,7 +379,7 @@ if 'rajaram_ai' not in globals():
 
 with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
-    st.title("🔱 RAJARAM AI V7")
+    st.title("🔱 RAJA AI V7")
     
     # शील्ड लॉग्स देखने का बटन
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
@@ -391,7 +391,7 @@ with st.sidebar:
         else:
             st.error("Shield not initialized!")
             
-    st.write(f"*Architect:* Rajaram | *Age:* 15")
+    st.write(f"*Architect:* RajaRam | *Age:* 15")
     st.divider()
     
     # बाकी का साइडबार कोड...
@@ -418,7 +418,7 @@ with st.sidebar:
                 import asyncio
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                result = loop.run_until_complete(rajaram_ai.evolve_system(evolution_cmd))
+                result = loop.run_until_complete(raja_ai.evolve_system(evolution_cmd))
                 st.success(result)
                 
     if st.button("PURGE ALL DATA"):
@@ -465,7 +465,7 @@ user_input = st.chat_input("Ask Rajaram AI anything...")
 prompt = btn_prompt if btn_prompt else user_input
 
 # --- 🔱 GLOBAL INITIALIZATION ---
-engine_id = "RAJARAM-READY" 
+engine_id = "RAJA-READY" 
 final_response = None  
 
 # 3. एआई प्रोसेसिंग यूनिट शुरू
@@ -485,7 +485,7 @@ if prompt:
 
         # --- MODULE 1: RAJARAM HYBRID VISION ENGINE (IMAGE) ---
         if uploaded_file is not None and not final_response:
-            with st.spinner("👁️ RAJARAM EYE ACTIVE..."):
+            with st.spinner("👁️ RAJA EYE ACTIVE..."):
                 try:
                     import google.generativeai as genai
                     img = Image.open(uploaded_file)
@@ -497,7 +497,7 @@ if prompt:
                     g_model = genai.GenerativeModel("gemini-1.5-flash")
                     response = g_model.generate_content([prompt if prompt else "Analyze this image.", img])
                     final_response = response.text
-                    engine_id = "RAJARAM-EYE-OF-RA"
+                    engine_id = "RAJA-EYE-OF-RA"
                 except Exception as e:
                     st.error(f"Vision Glitch: {e}")
 
@@ -510,26 +510,26 @@ if prompt:
                     img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
                     st.image(img_url, use_container_width=True)
                     final_response = f"🔱 Image synthesized for: '{prompt}'"
-                    engine_id = "RAJARAM-ART-V3"
+                    engine_id = "RAJA-ART-V3"
                 except: 
                     pass
 
        # --- MODULE 3: SEARCH & REASONING (FINAL BRAIN) ---
         if not final_response:
-            with st.spinner("🧠 RAJARAM CORE REASONING..."):
+            with st.spinner("🧠 RAJA CORE REASONING..."):
                 intel = ""
                 # 🛰️ Satellite Search
                 search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
                 if st.session_state.get('search_enabled') and any(k in prompt.lower() for k in search_trigger):
                     try:
                         intel = core.search_engine.run(prompt)
-                        engine_id = "RAJARAM-SATELLITE-WEB"
+                        engine_id = "RAJA-SATELLITE-WEB"
                     except Exception as e:
                         intel = f"Satellite link weak: {e}"
 
                 # 🧠 Reasoning Logic
                 try:
-                    if 'rajaram_ai' in globals():
+                    if 'raja_ai' in globals():
                         # पुराने इवेंट लूप को साफ़ करना और नया बनाना
                         try:
                             loop = asyncio.get_event_loop()
@@ -543,7 +543,7 @@ if prompt:
                             final_response, engine_id = logic_res
                         else:
                             final_response = logic_res
-                            engine_id = "RAJARAM-SUPREME-LOGIC"
+                            engine_id = "RAJA-SUPREME-LOGIC"
                     else:
                         final_response = "❌ ERROR: Rajaram Agent not initialized in memory."
                 except Exception as e:
@@ -558,8 +558,8 @@ if prompt:
             st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
             
             # आवाज़ (Voice) - Safe Call
-            if st.session_state.get('voice_enabled') and hasattr(rajaram_ai, 'speak'):
-                rajaram_ai.speak(final_response)
+            if st.session_state.get('voice_enabled') and hasattr(raja_ai, 'speak'):
+                raja_ai.speak(final_response)
             
             # मेमोरी में सेव (Optional)
             try:
@@ -573,8 +573,7 @@ if prompt:
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
-st.markdown("---")
-st.caption("© 2026 RAJARAM AI - THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT FOR SUPREMACY")
+
 
 # ... (ऊपर आपकी पुरानी सारी कोडिंग: Imports, Class RajaramAgent, UI, etc.)
 
@@ -585,7 +584,7 @@ import os
 import importlib.util
 
 # --- 🔱 RAJARAM FINAL POWER LOADER ---
-def load_rajaram_features():
+def load_raja_features():
     """🔱 यह फंक्शन 'feature_*.py' नाम की हर फाइल को ऐप में लाइव जोड़ देगा"""
     import os
     import importlib.util
@@ -604,10 +603,10 @@ def load_rajaram_features():
                         st.caption(f"🔱 ACTIVE POWER: {feature_name.upper()}")
                         module.run_feature()
             except Exception as e:
-                rajaram_shield.auto_fix("FEATURE_LOAD_ERROR", str(e))
+                raja_shield.auto_fix("FEATURE_LOAD_ERROR", str(e))
 
 # लोडर को सबसे आखिर में कॉल करें
-load_rajaram_features()
+load_raja_features()
 
 st.markdown("---")
-st.caption("© 2026 RAJARAM AI - THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT FOR SUPREMACY")
+st.caption("© 2026 RAJA AI - THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT FOR SUPREMACY")
