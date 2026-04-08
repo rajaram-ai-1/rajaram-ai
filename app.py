@@ -609,4 +609,4 @@ def load_raja_features():
 load_raja_features()
 
 st.markdown("---")
-st.caption("© 2026 RAJA AI - THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT FOR SUPREMACY")
+st.caption("© 2026 RAJA AI - CEO Rajaram |THE OMNIPOTENT CORE | BORN IN BAREILLY | BUILT FOR SUPREMACY")
