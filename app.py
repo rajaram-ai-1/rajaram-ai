@@ -139,7 +139,7 @@ class GlobalCore:
             "MATH_GENIUS": "qwen-2.5-72b-instruct"
         } 
 
-        if self.GROQ_KEY:
+        if self.GROQ_API_KEY:
             st.toast("🔱 META ENGINE ONLINE", icon="🟢")
         else:
             st.error("❌ GROQ_API_KEY नहीं मिली!")
