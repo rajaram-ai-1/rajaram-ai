@@ -140,7 +140,7 @@ class GlobalCore:
         } 
 
         if self.GROQ_API_KEY:
-            st.toast("🔱 META ENGINE ONLINE", icon="🟢")
+            st.toast("🔱 Raja Ai is Active", icon="🟢")
         else:
             st.error("❌ GROQ_API_KEY नहीं मिली!")
         
