@@ -144,7 +144,7 @@ class GlobalCore:
         else:
             st.error("❌ GROQ_API_KEY नहीं मिली!")
         
-        self.search_engine = TavilySearchResults(api_key=self.TAVILY_KEY) if self.TAVILY_KEY else None
+        self.search_engine = TavilySearchResults(api_key=self.TAVILY_API_KEY) if self.TAVILY_API_KEY else None
 
     def get_timestamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
