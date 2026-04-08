@@ -122,8 +122,8 @@ st.markdown("""
 # [PHASE 2: NEURAL NETWORK INITIALIZATION]
 class GlobalCore:
     def __init__(self):  # <--- ध्यान दें: यहाँ दो बार (__) अंडरस्कोर है
-        self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
-        self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
+        self.GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
+        self.TAVILY_API_KEY = st.secrets.get("TAVILY_API_KEY")
         # Gemini key के लिए भी variable बना लें
         self.GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY") 
         
