@@ -225,7 +225,7 @@ class RajaAgent:
 
     async def call_llm(self, model, prompt, system):
         try:
-            llm = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=model, timeout=30)
+            llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
             res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
             return res.content, model
         except Exception as e:
