@@ -300,7 +300,7 @@ class RajaAgent:
     async def call_llm(self, model, prompt, system):
         """LLM को कॉल करने की शक्ति"""
         try:
-            llm = ChatGroq(groq_api_key=core.GROQ_KEY, model_name=model, timeout=30)
+            llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
             res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
             return res.content, model
         except Exception as e:
@@ -334,7 +334,7 @@ class RajaAgent:
             import shakti_vault
             p_name = f"shakti_{int(time.time())}" 
             # यहाँ core.GROQ_KEY का उपयोग करें
-            success, msg = shakti_vault.inject_new_shakti(core.GROQ_KEY, command, p_name)
+            success, msg = shakti_vault.inject_new_shakti(core.GROQ_API_KEY, command, p_name)
 
             if success:
                 st.toast(f"🔱 NEW FEATURE: {command}", icon="🔥")
