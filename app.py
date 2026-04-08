@@ -1,6 +1,6 @@
 # ==============================================================================
-# PROJECT: RAJARAM AI - THE OMNIPOTENT CORE (VERSION 7.0 - ULTIMATE)
-# DEVELOPER: RAJARAM (BAREILLY, INDIA) - THE 15-YEAR-OLD LEGEND
+# PROJECT: RAJA AI - THE OMNIPOTENT CORE (VERSION 7.0 - ULTIMATE)
+# DEVELOPER: RAJA (BAREILLY, INDIA) - THE 15-YEAR-OLD LEGEND
 # STATUS: 46 SHAKTI FULLY INTEGRATED | NO CODE DELETED
 # ==============================================================================
 
@@ -220,7 +220,7 @@ class RajaAgent:
             final_choice = max(responses, key=lambda x: len(x[0]))
             return final_choice
         except Exception as e:
-            rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
+            raja_shield.auto_fix("NEURAL_GLITCH", str(e))
             return "🔱 SHIELD ACTIVE: I'm rerouting logic due to a neural glitch.", "RECOVERY_MODE"
 
     async def call_llm(self, model, prompt, system):
@@ -426,7 +426,7 @@ with st.sidebar:
         st.rerun()
 
 # मुख्य स्क्रीन
-st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJARAM AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJA AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
 # पक्का करें कि core.get_timestamp() ऊपर डिफाइन है
 try:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
@@ -461,7 +461,7 @@ if 'pwr_cmd' in st.session_state and st.session_state.pwr_cmd:
     st.session_state.pwr_cmd = None  
 
 # 2. इनपुट हैंडलर (बटन या टाइपिंग)
-user_input = st.chat_input("Ask Rajaram AI anything...")
+user_input = st.chat_input("Ask Raja AI anything...")
 prompt = btn_prompt if btn_prompt else user_input
 
 # --- 🔱 GLOBAL INITIALIZATION ---
