@@ -496,11 +496,11 @@ if prompt:
                         img = img.convert("RGB")
                     
                     # 2. Gemini कॉन्फ़िगरेशन
-                    if not core.GEMINI_API_KEY:
-                        st.error("❌ Gemini API Key नहीं मिली! Secrets चेक करें।")
+                    if not core.GROQ_API_KEY:
+                        st.error("❌ GROQ API Key नहीं मिली! Secrets चेक करें।")
                     else:
-                        genai.configure(api_key=core.GEMINI_API_KEY)
-                        g_model = genai.GenerativeModel("gemini-1.5-flash")
+                        genai.configure(api_key=core.GROQ_API_KEY)
+                        g_model = genai.GenerativeModel("llama-3.2-90b-vision-preview")
                         
                         # 3. अगर यूजर ने कुछ नहीं लिखा, तो भी फोटो एनालाइज करो
                         analysis_prompt = prompt if (prompt and prompt.strip()) else "इस फोटो को ध्यान से देखो और बताओ इसमें क्या है?"
