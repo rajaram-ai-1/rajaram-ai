@@ -483,22 +483,39 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-        # --- MODULE 1: RAJA HYBRID VISION ENGINE (IMAGE) ---
-        if uploaded_file is not None and not final_response:
-            with st.spinner("👁️ RAJA EYE ACTIVE..."):
+      # --- MODULE 1: RAJA HYBRID VISION ENGINE (IMAGE) ---
+        # हमने 'not final_response' हटा दिया है ताकि फोटो को प्राथमिकता मिले
+        if uploaded_file is not None:
+            with st.spinner("👁️ RAJA EYE ACTIVE (Analyzing Image)..."):
                 try:
                     import google.generativeai as genai
-                    img = Image.open(uploaded_file)
-                    if img.mode != "RGB": img = img.convert("RGB")
-                    img.thumbnail((1024, 1024))
                     
-                    # Gemini Flash (STABLE) for Vision
-                    genai.configure(api_key=core.GEMINI_KEY)
-                    g_model = genai.GenerativeModel("gemini-1.5-flash")
-                    response = g_model.generate_content([prompt if prompt else "Analyze this image.", img])
-                    final_response = response.text
-                    engine_id = "RAJA-EYE-OF-RA"
+                    # 1. फोटो को सही फॉर्मेट में तैयार करना
+                    img = Image.open(uploaded_file)
+                    if img.mode != "RGB": 
+                        img = img.convert("RGB")
+                    
+                    # 2. Gemini कॉन्फ़िगरेशन
+                    if not core.GEMINI_API_KEY:
+                        st.error("❌ Gemini API Key नहीं मिली! Secrets चेक करें।")
+                    else:
+                        genai.configure(api_key=core.GEMINI_API_KEY)
+                        g_model = genai.GenerativeModel("gemini-1.5-flash")
+                        
+                        # 3. अगर यूजर ने कुछ नहीं लिखा, तो भी फोटो एनालाइज करो
+                        analysis_prompt = prompt if (prompt and prompt.strip()) else "इस फोटो को ध्यान से देखो और बताओ इसमें क्या है?"
+                        
+                        # 4. AI से जवाब मांगना
+                        response = g_model.generate_content([analysis_prompt, img])
+                        
+                        if response and response.text:
+                            final_response = response.text
+                            engine_id = "RAJA-EYE-OF-RA"
+                        else:
+                            final_response = "🔱 राजा की आँखें देख तो रही हैं, पर समझ नहीं पा रहीं (Empty Response)."
+                
                 except Exception as e:
+                    raja_shield.auto_fix("VISION_CORE_CRASH", str(e))
                     st.error(f"Vision Glitch: {e}")
 
         # --- MODULE 2: MEDIA & ART ENGINE ---
