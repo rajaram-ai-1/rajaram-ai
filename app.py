@@ -164,7 +164,7 @@ class RajaShield:
     
     def auto_fix(self, error_type, details=""):
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        log_entry = f"[{timestamp}] FIXED: {error_type} bypassed by Rajaram Shield."
+        log_entry = f"[{timestamp}] FIXED: {error_type} bypassed by Raja Shield."
         
         # अब यह लाइन एरर नहीं देगी क्योंकि __init__ ने इसे बना दिया है
         self.repair_logs.append(log_entry)
@@ -190,7 +190,7 @@ def trigger_raja_powers(prompt):
         "ghost": "👻 SHAKTI 4: GHOST MEMORY LAYER INITIALIZED",
         "predict": "🔮 SHAKTI 5: FUTURE EVENTS PREDICTION SYNC",
         "hack": "🛡️ SHAKTI 6: KERNEL-LEVEL EXPLOIT ARMED",
-        "vision": "👁️ SHAKTI 7: RAJARAM EYE (X-RAY VISION) ON",
+        "vision": "👁️ SHAKTI 7: RAJA EYE (X-RAY VISION) ON",
         "46": "🔱 SHAKTI ALL: 46 POWERS UNLEASHED SIMULTANEOUSLY!"
     }
     
@@ -320,7 +320,7 @@ class RajaAgent:
             final_choice = max(responses, key=lambda x: len(x[0]))
             return final_choice
         except Exception as e:
-            rajaram_shield.auto_fix("NEURAL_GLITCH", str(e))
+            raja_shield.auto_fix("NEURAL_GLITCH", str(e))
             return "🔱 Shield Active: Logic Rerouted due to neural glitch.", "RECOVERY_MODE"
 
     async def evolve_system(self, command):
@@ -384,9 +384,9 @@ with st.sidebar:
     # शील्ड लॉग्स देखने का बटन
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
         st.subheader("🔱 Shield Defense Records")
-        # पक्का करें कि rajaram_shield ऊपर डिफाइन है
-        if 'rajaram_shield' in globals():
-            for log in rajaram_shield.repair_logs:
+        # पक्का करें कि raja_shield ऊपर डिफाइन है
+        if 'raja_shield' in globals():
+            for log in raja_shield.repair_logs:
                 st.write(log)
         else:
             st.error("Shield not initialized!")
@@ -471,7 +471,7 @@ final_response = None
 # 3. एआई प्रोसेसिंग यूनिट शुरू
 if prompt:
     # शक्तियों को चेक करें
-    triggered = trigger_rajaram_powers(prompt)
+    triggered = trigger_raja_powers(prompt)
     
     # यूजर मैसेज को डिस्प्ले और हिस्ट्री में सेव करें
     st.session_state.history.append(HumanMessage(content=prompt))
@@ -483,7 +483,7 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-        # --- MODULE 1: RAJARAM HYBRID VISION ENGINE (IMAGE) ---
+        # --- MODULE 1: RAJA HYBRID VISION ENGINE (IMAGE) ---
         if uploaded_file is not None and not final_response:
             with st.spinner("👁️ RAJA EYE ACTIVE..."):
                 try:
@@ -537,7 +537,7 @@ if prompt:
                             loop = asyncio.new_event_loop()
                             asyncio.set_event_loop(loop)
                         
-                        logic_res = loop.run_until_complete(rajaram_ai.execute_reasoning(prompt, str(intel)))
+                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, str(intel)))
                         
                         if isinstance(logic_res, tuple):
                             final_response, engine_id = logic_res
@@ -545,7 +545,7 @@ if prompt:
                             final_response = logic_res
                             engine_id = "RAJA-SUPREME-LOGIC"
                     else:
-                        final_response = "❌ ERROR: Rajaram Agent not initialized in memory."
+                        final_response = "❌ ERROR: Raja Agent not initialized in memory."
                 except Exception as e:
                     # 🕵️‍♂️ यहाँ हम असली एरर देख पाएंगे
                     final_response = f"🔱 Core overload. Reason: {str(e)}" 
@@ -575,7 +575,7 @@ if prompt:
 # ------------------------------------------------------------------------------
 
 
-# ... (ऊपर आपकी पुरानी सारी कोडिंग: Imports, Class RajaramAgent, UI, etc.)
+# ... (ऊपर आपकी पुरानी सारी कोडिंग: Imports, Class RajaAgent, UI, etc.)
 
 # ---------------------------------------------------------
 # 🔱 APP के बिल्कुल आखिर में यह लोडर जोड़ें
@@ -583,7 +583,7 @@ if prompt:
 import os
 import importlib.util
 
-# --- 🔱 RAJARAM FINAL POWER LOADER ---
+# --- 🔱 RAJA FINAL POWER LOADER ---
 def load_raja_features():
     """🔱 यह फंक्शन 'feature_*.py' नाम की हर फाइल को ऐप में लाइव जोड़ देगा"""
     import os
