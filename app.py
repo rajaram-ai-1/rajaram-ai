@@ -125,7 +125,7 @@ class GlobalCore:
         self.GROQ_KEY = st.secrets.get("GROQ_API_KEY")
         self.TAVILY_KEY = st.secrets.get("TAVILY_API_KEY")
         # Gemini key के लिए भी variable बना लें
-        self.GEMINI_KEY = st.secrets.get("GEMINI_API_KEY") 
+        self.GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY") 
         
         # 🔱 ब्रावो! डिक्शनरी एक ही बार रहेगी
         self.BRAIN_CATALOG = {
