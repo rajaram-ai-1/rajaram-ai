@@ -511,22 +511,22 @@ if prompt:
                 except Exception as e:
                     st.error(f"Vision Error: {e}")
 
-   # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
+  # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
 if not final_response:
     with st.spinner("🧠 RAJA CORE THINKING..."):
         intel = ""
         # 1. सर्च ट्रिगर (Satellite Search)
         if st.session_state.get('search_enabled'):
             search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज"]
-            if any(k in prompt.lower() for k in search_keys):
+            
+            # ✅ यहाँ हमने 'prompt' को चेक किया है ताकि AttributeError न आए
+            if prompt and any(k in prompt.lower() for k in search_keys):
                 try:
-                    # सर्च को और सटीक बनाने के लिए prompt में 'today' या 'Bareilly' जोड़ना
                     search_query = f"{prompt} today latest update"
                     intel = core.search_engine.run(search_query)
                     engine_id = "RAJA-SATELLITE"
                 except Exception as e:
                     intel = f"Satellite connection error: {e}"
-
         # 2. AI को आदेश देना (Reasoning)
         try:
             # शक्तियों का संदर्भ (Context)
