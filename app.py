@@ -511,69 +511,75 @@ if prompt:
                 except Exception as e:
                     st.error(f"Vision Error: {e}")
 
- # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
+ # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग - Hybrid Version) ---
 if not final_response:
     with st.spinner("🧠 RAJA CORE THINKING..."):
         intel = ""
-        # 1. सर्च ट्रिगर (Satellite Search)
+        # 1. सर्च ट्रिगर (Satellite Search) - सिर्फ ज़रूरी होने पर!
         if st.session_state.get('search_enabled'):
-            search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज"]
+            # हमने कीवर्ड्स को और सटीक बनाया है ताकि फालतू में सर्च न चले
+            search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज", "update"]
             
-            # ✅ यहाँ 'prompt' चेक किया ताकि खाली होने पर AttributeError न आए
             if prompt and any(k in prompt.lower() for k in search_keys):
                 try:
-                    search_query = f"{prompt} today latest update"
+                    # सर्च क्वेरी में 'current' जोड़ना ताकि 2026 की जानकारी मिले
+                    search_query = f"current {prompt} in bareilly latest news"
                     intel = core.search_engine.run(search_query)
                     engine_id = "RAJA-SATELLITE"
                 except Exception as e:
                     intel = f"Satellite connection error: {e}"
 
-        # 2. AI को आदेश देना (Reasoning)
+        # 2. AI को आदेश देना (Reasoning & Personality)
         try:
-            # ✅ 'triggered' को सुरक्षित तरीके से चेक करना ताकि 'not defined' एरर न आए
-            # अगर triggered ऊपर नहीं बना है, तो यह 'GENERAL' मान लेगा
             shakti_context = " | ".join(triggered) if ('triggered' in locals() and triggered) else "GENERAL MODE"
             
-            # 🔱 intel को prompt के साथ जोड़ना ताकि ताज़ा जानकारी मिले
+            # 🔱 यहाँ हमने PROMPT को 'Gold Core' लेवल पर अपग्रेड किया है
             if intel:
-                combined_prompt = f"SYSTEM: Use this LIVE_INTEL to answer accurately. \nLIVE_INTEL: {intel}\n\nUSER_COMMAND: {prompt}"
+                # एआई को साफ़ आदेश कि डेटा का इस्तेमाल करो पर अपनी 'राजाराम एआई' वाली स्टाइल मत छोड़ो
+                combined_prompt = f"""
+                [CORE IDENTITY]: You are RAJA AI GOLD CORE, created by RAJA RAM. 
+                [LIVE INTEL]: {intel}
+                [TASK]: Answer the user using the Intel provided. Keep your confidence, authority, and Rajaram's signature style. Don't be a boring bot.
+                [USER]: {prompt}
+                """
             else:
                 combined_prompt = prompt
 
-            # पुराने लूप को साफ़ करके नया बनाना (Safe Async)
+            # Safe Async Loop
             try:
                 loop = asyncio.get_running_loop()
             except RuntimeError:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # एआई ताज़ा जानकारी के साथ सोचेगा
+            # एआई अब ताज़ा जानकारी और अपनी पुरानी बुद्धि (Knowledge) को मिलाएगा
             logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
             
             if isinstance(logic_res, tuple):
                 final_response, engine_id = logic_res
             else:
                 final_response = logic_res
-                engine_id = "RAJA-SUPREME"
+                # अगर सर्च नहीं हुआ, तो इसे GOLD-LOGIC दिखाएँगे
+                engine_id = "RAJA-GOLD-LOGIC" if not intel else "RAJA-HYBRID-SATELLITE"
                 
         except Exception as e:
-            # एरर आने पर शील्ड एक्टिवेट करना
             raja_shield.auto_fix("LOGIC_CRASH", str(e))
             final_response = f"🔱 Core overload. Reason: {str(e)}"
             st.error(f"Logic Error: {e}")
 
-# --- 3. परिणाम दिखाना और बोलना (इसे 'if not final_response' के बाहर रखें) ---
+# --- 3. परिणाम दिखाना और बोलना ---
 if final_response:
-    st.markdown(final_response)
-    st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
-    
-    # आवाज़ (Voice)
-    if st.session_state.get('voice_enabled') and hasattr(raja_ai, 'speak'):
-        raja_ai.speak(final_response)
+    with st.chat_message("assistant"):
+        st.markdown(final_response)
+        st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
         
-    # हिस्ट्री अपडेट (सिर्फ तब जब आखिरी मैसेज सेम न हो)
-    if not st.session_state.history or st.session_state.history[-1].content != final_response:
-        st.session_state.history.append(AIMessage(content=final_response))
+        # आवाज़ (Voice)
+        if st.session_state.get('voice_enabled') and hasattr(raja_ai, 'speak'):
+            raja_ai.speak(final_response)
+            
+        # हिस्ट्री अपडेट
+        if not st.session_state.history or st.session_state.history[-1].content != final_response:
+            st.session_state.history.append(AIMessage(content=final_response))
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
