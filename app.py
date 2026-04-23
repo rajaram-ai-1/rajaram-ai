@@ -511,7 +511,7 @@ if prompt:
                 except Exception as e:
                     st.error(f"Vision Error: {e}")
 
-  # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
+ # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
 if not final_response:
     with st.spinner("🧠 RAJA CORE THINKING..."):
         intel = ""
@@ -519,7 +519,7 @@ if not final_response:
         if st.session_state.get('search_enabled'):
             search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज"]
             
-            # ✅ यहाँ हमने 'prompt' को चेक किया है ताकि AttributeError न आए
+            # ✅ यहाँ 'prompt' चेक किया ताकि खाली होने पर AttributeError न आए
             if prompt and any(k in prompt.lower() for k in search_keys):
                 try:
                     search_query = f"{prompt} today latest update"
@@ -527,26 +527,27 @@ if not final_response:
                     engine_id = "RAJA-SATELLITE"
                 except Exception as e:
                     intel = f"Satellite connection error: {e}"
+
         # 2. AI को आदेश देना (Reasoning)
         try:
-            # शक्तियों का संदर्भ (Context)
-            shakti_context = " | ".join(triggered) if triggered else "GENERAL MODE"
+            # ✅ 'triggered' को सुरक्षित तरीके से चेक करना ताकि 'not defined' एरर न आए
+            # अगर triggered ऊपर नहीं बना है, तो यह 'GENERAL' मान लेगा
+            shakti_context = " | ".join(triggered) if ('triggered' in locals() and triggered) else "GENERAL MODE"
             
-            # 🔱 यहाँ सबसे जरूरी बदलाव है: intel को prompt के साथ जोड़ना
-            # हम एआई को बता रहे हैं कि ये इंटरनेट से मिली ताज़ा जानकारी है
+            # 🔱 intel को prompt के साथ जोड़ना ताकि ताज़ा जानकारी मिले
             if intel:
-                combined_prompt = f"SYSTEM: Use this LIVE_INTEL to answer. \nLIVE_INTEL: {intel}\n\nUSER_COMMAND: {prompt}"
+                combined_prompt = f"SYSTEM: Use this LIVE_INTEL to answer accurately. \nLIVE_INTEL: {intel}\n\nUSER_COMMAND: {prompt}"
             else:
                 combined_prompt = prompt
 
-            # पुराने लूप को साफ़ करके नया बनाना (Safe Async)
+            # पुराने लूप को साफ़ करके नया बनाना (Safe Async)
             try:
-                loop = asyncio.get_event_loop()
+                loop = asyncio.get_running_loop()
             except RuntimeError:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # अब एआई ताज़ा जानकारी के साथ सोचेगा
+            # एआई ताज़ा जानकारी के साथ सोचेगा
             logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
             
             if isinstance(logic_res, tuple):
@@ -556,20 +557,23 @@ if not final_response:
                 engine_id = "RAJA-SUPREME"
                 
         except Exception as e:
+            # एरर आने पर शील्ड एक्टिवेट करना
+            raja_shield.auto_fix("LOGIC_CRASH", str(e))
             final_response = f"🔱 Core overload. Reason: {str(e)}"
             st.error(f"Logic Error: {e}")
 
-        # --- 3. परिणाम दिखाना और बोलना ---
-        if final_response:
-            st.markdown(final_response)
-            st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
-            
-            # आवाज़ (Voice)
-            if st.session_state.get('voice_enabled'):
-                raja_ai.speak(final_response)
-                
-            # हिस्ट्री अपडेट
-            st.session_state.history.append(AIMessage(content=final_response))
+# --- 3. परिणाम दिखाना और बोलना (इसे 'if not final_response' के बाहर रखें) ---
+if final_response:
+    st.markdown(final_response)
+    st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
+    
+    # आवाज़ (Voice)
+    if st.session_state.get('voice_enabled') and hasattr(raja_ai, 'speak'):
+        raja_ai.speak(final_response)
+        
+    # हिस्ट्री अपडेट (सिर्फ तब जब आखिरी मैसेज सेम न हो)
+    if not st.session_state.history or st.session_state.history[-1].content != final_response:
+        st.session_state.history.append(AIMessage(content=final_response))
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
