@@ -501,7 +501,7 @@ if prompt:
                 try:
                     import google.generativeai as genai
                     img = Image.open(uploaded_file)
-                    genai.configure(api_key=core.GROQ_API_KEY) # अपनी सही की का उपयोग करें
+                    genai.configure(api_key=core.GEMINI_API_KEY) # अपनी सही की का उपयोग करें
                     g_model = genai.GenerativeModel("gemini-1.5-flash") # विजन के लिए
                     
                     analysis_p = prompt if prompt.strip() else "इस फोटो के बारे में बताओ।"
