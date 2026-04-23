@@ -511,37 +511,53 @@ if prompt:
                 except Exception as e:
                     st.error(f"Vision Error: {e}")
 
-        # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
-        if not final_response:
-            with st.spinner("🧠 RAJA CORE THINKING..."):
-                intel = ""
-                # सर्च ट्रिगर
-                if st.session_state.get('search_enabled'):
-                    search_keys = ["news", "today", "latest", "mausam", "weather"]
-                    if any(k in prompt.lower() for k in search_keys):
-                        try:
-                            intel = core.search_engine.run(prompt)
-                            engine_id = "RAJA-SATELLITE"
-                        except: pass
-
-                # AI को कॉल करना
+   # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
+if not final_response:
+    with st.spinner("🧠 RAJA CORE THINKING..."):
+        intel = ""
+        # 1. सर्च ट्रिगर (Satellite Search)
+        if st.session_state.get('search_enabled'):
+            search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज"]
+            if any(k in prompt.lower() for k in search_keys):
                 try:
-                    # बटन वाली शक्तियों का डेटा जोड़ना
-                    shakti_context = " | ".join(triggered) if triggered else ""
-                    full_query = f"[MODE: {shakti_context}] {prompt}" if shakti_context else prompt
-                    
-                    # Async कॉल
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(full_query, str(intel)))
-                    
-                    if isinstance(logic_res, tuple):
-                        final_response, engine_id = logic_res
-                    else:
-                        final_response = logic_res
-                        engine_id = "RAJA-SUPREME"
+                    # सर्च को और सटीक बनाने के लिए prompt में 'today' या 'Bareilly' जोड़ना
+                    search_query = f"{prompt} today latest update"
+                    intel = core.search_engine.run(search_query)
+                    engine_id = "RAJA-SATELLITE"
                 except Exception as e:
-                    final_response = f"🔱 Core overload. Reason: {str(e)}"
+                    intel = f"Satellite connection error: {e}"
+
+        # 2. AI को आदेश देना (Reasoning)
+        try:
+            # शक्तियों का संदर्भ (Context)
+            shakti_context = " | ".join(triggered) if triggered else "GENERAL MODE"
+            
+            # 🔱 यहाँ सबसे जरूरी बदलाव है: intel को prompt के साथ जोड़ना
+            # हम एआई को बता रहे हैं कि ये इंटरनेट से मिली ताज़ा जानकारी है
+            if intel:
+                combined_prompt = f"SYSTEM: Use this LIVE_INTEL to answer. \nLIVE_INTEL: {intel}\n\nUSER_COMMAND: {prompt}"
+            else:
+                combined_prompt = prompt
+
+            # पुराने लूप को साफ़ करके नया बनाना (Safe Async)
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            
+            # अब एआई ताज़ा जानकारी के साथ सोचेगा
+            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
+            
+            if isinstance(logic_res, tuple):
+                final_response, engine_id = logic_res
+            else:
+                final_response = logic_res
+                engine_id = "RAJA-SUPREME"
+                
+        except Exception as e:
+            final_response = f"🔱 Core overload. Reason: {str(e)}"
+            st.error(f"Logic Error: {e}")
 
         # --- 3. परिणाम दिखाना और बोलना ---
         if final_response:
