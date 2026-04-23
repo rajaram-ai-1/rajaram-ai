@@ -465,7 +465,7 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 
 # 1. इनपुट पकड़ना (टाइपिंग या जादुई बटन)
-user_input = st.chat_input("हुक्म दें, बरेली किंग...")
+user_input = st.chat_input("Ask anything to Raja Ai")
 prompt = None
 
 # बटन का हुक्म चेक करना
