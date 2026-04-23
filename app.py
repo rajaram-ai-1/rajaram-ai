@@ -178,23 +178,6 @@ raja_shield = RajaShield()
 # [PHASE 3: 46 POWERS INTEGRATION] - NEW LOGIC ADDED
 # ------------------------------------------------------------------------------
 
-# --- राजाराम एआई: जन सेवा केंद्र ---
-st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
-
-btn_cols = st.columns(5)
-
-# आपकी नई थीम के अनुसार बटन
-powers = [
-    ("💧 जल जीवन", "jal_jeevan"), 
-    ("❤️ दिल की बात", "dil_ki_baat"), 
-    ("🌾 कृषि ज्ञान", "kheti"), 
-    ("📚 न्यू स्किल्स", "skills"), 
-    ("🔮 भविष्य", "predict")
-]
-
-for col, (label, key) in zip(btn_cols, powers):
-    if col.button(label):
-        st.session_state.prompt = f"ACTIVATE {key.upper()}"
 
 # ------------------------------------------------------------------------------
 # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
