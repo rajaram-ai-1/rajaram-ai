@@ -380,10 +380,8 @@ with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJA AI V7")
     
-    # शील्ड लॉग्स देखने का बटन
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
         st.subheader("🔱 Shield Defense Records")
-        # पक्का करें कि raja_shield ऊपर डिफाइन है
         if 'raja_shield' in globals():
             for log in raja_shield.repair_logs:
                 st.write(log)
@@ -393,7 +391,6 @@ with st.sidebar:
     st.write(f"*Architect:* RajaRam | *Age:* 15")
     st.divider()
     
-    # बाकी का साइडबार कोड...
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
     
@@ -413,56 +410,41 @@ with st.sidebar:
         evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator')")
         if st.button("EVOLVE NOW"):
             with st.spinner("Evolution in progress..."):
-                # पक्का करें कि आपने asyncio इम्पोर्ट किया है
                 import asyncio
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                result = loop.run_until_complete(raja_ai.evolve_system(evolution_cmd))
-                st.success(result)
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    result = loop.run_until_complete(raja_ai.evolve_system(evolution_cmd))
+                    st.success(result)
+                except Exception as e:
+                    st.error(f"Evolution Failed: {e}")
                 
     if st.button("PURGE ALL DATA"):
-        st.session_state.history = [SystemMessage(content=IDENTITY)]
+        if "history" in st.session_state:
+            # IDENTITY को पक्का करें कि ऊपर डिफाइन है
+            st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
 
-# मुख्य स्क्रीन
+# --- मुख्य स्क्रीन का शीर्षक ---
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJA AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
-# पक्का करें कि core.get_timestamp() ऊपर डिफाइन है
+
 try:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
 except:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal</p>", unsafe_allow_html=True)
 
-# चैट डिस्प्ले
-if "history" in st.session_state:
-    for msg in st.session_state.history[1:]:
-        role = "user" if isinstance(msg, HumanMessage) else "assistant"
-        with st.chat_message(role):
-            st.markdown(msg.content)
-
+# --- शक्तियों का लॉजिक फंक्शन ---
 def trigger_raja_powers(prompt):
     p = prompt.lower()
     active_shaktis = []
     
-   # --- राजाराम एआई: जन सेवा केंद्र ---
-st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
-
-btn_cols = st.columns(5)
-
-# आपकी नई थीम के अनुसार बटन
-powers = [
-    ("💧 जल जीवन", "jal_jeevan"), 
-    ("❤️ दिल की बात", "dil_ki_baat"), 
-    ("🌾 कृषि ज्ञान", "kheti"), 
-    ("📚 न्यू स्किल्स", "skills"), 
-    ("🔮 भविष्य", "predict")
-]
-
-# यहाँ हमने 'key' जोड़ा है ताकि Duplicate Element वाली एरर न आए
-for i, (col, (label, k)) in enumerate(zip(btn_cols, powers)):
-    if col.button(label, key=f"btn_{k}_{i}"):
-        st.session_state.prompt = f"ACTIVATE {k.upper()}"
-        # अगर आप चाहते हैं कि बटन दबाते ही पेज रिफ्रेश होकर काम करे:
-        st.rerun()
+    powers_map = {
+        "jal_jeevan": "💧 जल जीवन मिशन: पानी की हर बूंद कीमती है।",
+        "dil_ki_baat": "❤️ दिल की बात: जीवन, वेद-पुराण और संस्कृति का ज्ञान।",
+        "kheti": "🌾 कृषि शक्ति: उन्नत खेती और किसान मित्र मोड सक्रिय।",
+        "skills": "📚 स्किल इंडिया: भविष्य के नए हुनर सीखें।",
+        "predict": "🔮 भविष्य: आपके लक्ष्य का विश्लेषण सक्रिय।"
+    }
     
     for key, val in powers_map.items():
         if key in p:
@@ -470,11 +452,31 @@ for i, (col, (label, k)) in enumerate(zip(btn_cols, powers)):
             
     return active_shaktis
 
-for i, (label, cmd) in enumerate(powers):
-    with btn_cols[i]:
-        if st.button(label):
-            st.session_state.pwr_cmd = cmd
-st.markdown('</div>', unsafe_allow_html=True)
+# --- जन सेवा केंद्र (बटन इंटरफेस) ---
+st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
+
+# बटन की लिस्ट
+custom_powers = [
+    ("💧 जल जीवन", "jal_jeevan"), 
+    ("❤️ दिल की बात", "dil_ki_at"), 
+    ("🌾 कृषि ज्ञान", "kheti"), 
+    ("📚 न्यू स्किल्स", "skills"), 
+    ("🔮 भविष्य", "predict")
+]
+
+cols = st.columns(5)
+for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
+    if col.button(label, key=f"gen_sev_{k}_{i}"):
+        st.session_state.prompt = f"ACTIVATE {k.upper()}"
+        st.rerun()
+
+# --- चैट डिस्प्ले ---
+if "history" in st.session_state:
+    for msg in st.session_state.history[1:]:
+        from langchain_core.messages import HumanMessage
+        role = "user" if isinstance(msg, HumanMessage) else "assistant"
+        with st.chat_message(role):
+            st.markdown(msg.content)
 # ------------------------------------------------------------------------------
 # [PHASE 7: EXECUTION LOGIC] - CLEAN & OPTIMIZED VERSION 🔱
 # ------------------------------------------------------------------------------
