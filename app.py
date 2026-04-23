@@ -178,26 +178,23 @@ raja_shield = RajaShield()
 # [PHASE 3: 46 POWERS INTEGRATION] - NEW LOGIC ADDED
 # ------------------------------------------------------------------------------
 
-def trigger_raja_powers(prompt):
-    p = prompt.lower()
-    active_shaktis = []
-    
-    # आपकी 46 शक्तियों का लॉजिक यहाँ है
-    powers_map = {
-        "bypass": "🔱 SHAKTI 1: SYSTEM FIREWALL BYPASS ACTIVE",
-        "sleep": "💤 SHAKTI 2: DEEP SLEEP NEURAL LOGIC ENGAGED",
-        "global": "🛰️ SHAKTI 3: GLOBAL SATELLITE NETWORK LINKED",
-        "ghost": "👻 SHAKTI 4: GHOST MEMORY LAYER INITIALIZED",
-        "predict": "🔮 SHAKTI 5: FUTURE EVENTS PREDICTION SYNC",
-        "hack": "🛡️ SHAKTI 6: KERNEL-LEVEL EXPLOIT ARMED",
-        "vision": "👁️ SHAKTI 7: RAJA EYE (X-RAY VISION) ON",
-        "46": "🔱 SHAKTI ALL: 46 POWERS UNLEASHED SIMULTANEOUSLY!"
-    }
-    
-    for key, val in powers_map.items():
-        if key in p:
-            active_shaktis.append(val)
-    return active_shaktis
+# --- राजाराम एआई: जन सेवा केंद्र ---
+st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
+
+btn_cols = st.columns(5)
+
+# आपकी नई थीम के अनुसार बटन
+powers = [
+    ("💧 जल जीवन", "jal_jeevan"), 
+    ("❤️ दिल की बात", "dil_ki_baat"), 
+    ("🌾 कृषि ज्ञान", "kheti"), 
+    ("📚 न्यू स्किल्स", "skills"), 
+    ("🔮 भविष्य", "predict")
+]
+
+for col, (label, key) in zip(btn_cols, powers):
+    if col.button(label):
+        st.session_state.prompt = f"ACTIVATE {key.upper()}"
 
 # ------------------------------------------------------------------------------
 # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
@@ -442,10 +439,24 @@ if "history" in st.session_state:
         with st.chat_message(role):
             st.markdown(msg.content)
 
-# --- जादुई बटन ---
-st.markdown('<div class="magic-btn-row">', unsafe_allow_html=True)
-btn_cols = st.columns(5)
-powers = [("🛡️ BYPASS", "bypass"), ("💤 SLEEP", "sleep"), ("🛰️ GLOBAL", "global"), ("🔮 FUTURE", "predict"), ("🔱 46 POWER", "46")]
+def trigger_raja_powers(prompt):
+    p = prompt.lower()
+    active_shaktis = []
+    
+    # समाज और संस्कृति विकास मैप
+    powers_map = {
+        "jal_jeevan": "💧 जल जीवन मिशन: पानी की हर बूंद कीमती है। (संरक्षण और शुद्धता मोड सक्रिय)",
+        "dil_ki_baat": "❤️ दिल की बात: जीवन, प्रेम, वेद-पुराण और हिंदू संस्कृति का ज्ञान। (संस्कार मोड सक्रिय)",
+        "kheti": "🌾 कृषि शक्ति: उन्नत खेती, खाद और फसलों की सुरक्षा की जानकारी। (किसान मित्र मोड सक्रिय)",
+        "skills": "📚 स्किल इंडिया: कोडिंग, एआई, और भविष्य के नए हुनर सीखें। (कौशल विकास मोड सक्रिय)",
+        "predict": "🔮 भविष्य: आपके लक्ष्य और आने वाले समय का विश्लेषण। (फ्यूचर मोड सक्रिय)"
+    }
+    
+    for key, val in powers_map.items():
+        if key in p:
+            active_shaktis.append(val)
+            
+    return active_shaktis
 
 for i, (label, cmd) in enumerate(powers):
     with btn_cols[i]:
