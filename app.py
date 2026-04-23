@@ -461,139 +461,95 @@ if "history" in st.session_state:
         with st.chat_message(role):
             st.markdown(msg.content)
 # ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - CLEAN & OPTIMIZED VERSION 🔱
+# [PHASE 7: EXECUTION LOGIC] - FIXED FOR RAJA BUTTONS 🔱
 # ------------------------------------------------------------------------------
 
-# 1. जादुई बटनों का हुक्म पकड़ना
-btn_prompt = None
-if 'pwr_cmd' in st.session_state and st.session_state.pwr_cmd:
-    btn_prompt = st.session_state.pwr_cmd
-    st.session_state.pwr_cmd = None  
+# 1. इनपुट पकड़ना (टाइपिंग या जादुई बटन)
+user_input = st.chat_input("हुक्म दें, बरेली किंग...")
+prompt = None
 
-# 2. इनपुट हैंडलर (बटन या टाइपिंग)
-user_input = st.chat_input("Ask Raja AI anything...")
-prompt = btn_prompt if btn_prompt else user_input
+# बटन का हुक्म चेक करना
+if st.session_state.get("prompt"):
+    prompt = st.session_state.prompt
+    st.session_state.prompt = None # काम होने के बाद खाली करें
+elif user_input:
+    prompt = user_input
 
-# --- 🔱 GLOBAL INITIALIZATION ---
+# इंजन वेरिएबल्स
 engine_id = "RAJA-READY" 
 final_response = None  
 
-# 3. एआई प्रोसेसिंग यूनिट शुरू
+# 2. एआई प्रोसेसिंग यूनिट
 if prompt:
-    # शक्तियों को चेक करें
+    # शक्तियों के नाम को ट्रिगर करना
     triggered = trigger_raja_powers(prompt)
     
-    # यूजर मैसेज को डिस्प्ले और हिस्ट्री में सेव करें
+    # यूजर का मैसेज स्क्रीन पर दिखाना
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # शक्तियों का स्टेटस दिखाओ
+        # शक्तियों का स्टेटस (पीली पट्टी) दिखाना
         for s in triggered:
             st.warning(s)
 
-      # --- MODULE 1: RAJA HYBRID VISION ENGINE (IMAGE) ---
-        # हमने 'not final_response' हटा दिया है ताकि फोटो को प्राथमिकता मिले
+        # --- MODULE 1: VISION ENGINE (अगर फोटो है) ---
         if uploaded_file is not None:
-            with st.spinner("👁️ RAJA EYE ACTIVE (Analyzing Image)..."):
+            with st.spinner("👁️ RAJA EYE ANALYZING..."):
                 try:
                     import google.generativeai as genai
-                    
-                    # 1. फोटो को सही फॉर्मेट में तैयार करना
                     img = Image.open(uploaded_file)
-                    if img.mode != "RGB": 
-                        img = img.convert("RGB")
+                    genai.configure(api_key=core.GROQ_API_KEY) # अपनी सही की का उपयोग करें
+                    g_model = genai.GenerativeModel("gemini-1.5-flash") # विजन के लिए
                     
-                    # 2. Gemini कॉन्फ़िगरेशन
-                    if not core.GROQ_API_KEY:
-                        st.error("❌ GROQ API Key नहीं मिली! Secrets चेक करें।")
-                    else:
-                        genai.configure(api_key=core.GROQ_API_KEY)
-                        g_model = genai.GenerativeModel("llama-3.2-90b-vision-preview")
-                        
-                        # 3. अगर यूजर ने कुछ नहीं लिखा, तो भी फोटो एनालाइज करो
-                        analysis_prompt = prompt if (prompt and prompt.strip()) else "इस फोटो को ध्यान से देखो और बताओ इसमें क्या है?"
-                        
-                        # 4. AI से जवाब मांगना
-                        response = g_model.generate_content([analysis_prompt, img])
-                        
-                        if response and response.text:
-                            final_response = response.text
-                            engine_id = "RAJA-EYE-OF-RA"
-                        else:
-                            final_response = "🔱 राजा की आँखें देख तो रही हैं, पर समझ नहीं पा रहीं (Empty Response)."
-                
+                    analysis_p = prompt if prompt.strip() else "इस फोटो के बारे में बताओ।"
+                    response = g_model.generate_content([analysis_p, img])
+                    final_response = response.text
+                    engine_id = "RAJA-EYE-OF-RA"
                 except Exception as e:
-                    raja_shield.auto_fix("VISION_CORE_CRASH", str(e))
-                    st.error(f"Vision Glitch: {e}")
+                    st.error(f"Vision Error: {e}")
 
-        # --- MODULE 2: MEDIA & ART ENGINE ---
-        art_trigger = ["photo", "image", "बनाओ", "art", "generate"]
-        if not final_response and any(x in prompt.lower() for x in art_trigger):
-            with st.spinner("🎨 SYNTHESIZING ART..."):
-                try:
-                    clean_p = prompt.replace(" ", "%20")
-                    img_url = f"https://image.pollinations.ai/prompt/{clean_p}?nologo=true&enhance=true"
-                    st.image(img_url, use_container_width=True)
-                    final_response = f"🔱 Image synthesized for: '{prompt}'"
-                    engine_id = "RAJA-ART-V3"
-                except: 
-                    pass
-
-       # --- MODULE 3: SEARCH & REASONING (FINAL BRAIN) ---
+        # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग) ---
         if not final_response:
-            with st.spinner("🧠 RAJA CORE REASONING..."):
+            with st.spinner("🧠 RAJA CORE THINKING..."):
                 intel = ""
-                # 🛰️ Satellite Search
-                search_trigger = ["today", "news", "weather", "latest", "current", "who is"]
-                if st.session_state.get('search_enabled') and any(k in prompt.lower() for k in search_trigger):
-                    try:
-                        intel = core.search_engine.run(prompt)
-                        engine_id = "RAJA-SATELLITE-WEB"
-                    except Exception as e:
-                        intel = f"Satellite link weak: {e}"
-
-                # 🧠 Reasoning Logic
-                try:
-                    if 'raja_ai' in globals():
-                        # पुराने इवेंट लूप को साफ़ करना और नया बनाना
+                # सर्च ट्रिगर
+                if st.session_state.get('search_enabled'):
+                    search_keys = ["news", "today", "latest", "mausam", "weather"]
+                    if any(k in prompt.lower() for k in search_keys):
                         try:
-                            loop = asyncio.get_event_loop()
-                        except RuntimeError:
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-                        
-                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, str(intel)))
-                        
-                        if isinstance(logic_res, tuple):
-                            final_response, engine_id = logic_res
-                        else:
-                            final_response = logic_res
-                            engine_id = "RAJA-SUPREME-LOGIC"
-                    else:
-                        final_response = "❌ ERROR: Raja Agent not initialized in memory."
-                except Exception as e:
-                    # 🕵️‍♂️ यहाँ हम असली एरर देख पाएंगे
-                    final_response = f"🔱 Core overload. Reason: {str(e)}" 
-                    st.error(f"System Crash Log: {e}")
+                            intel = core.search_engine.run(prompt)
+                            engine_id = "RAJA-SATELLITE"
+                        except: pass
 
-        # --- 🔱 ४. परिणाम और याददाश्त (Memory & Output) ---
+                # AI को कॉल करना
+                try:
+                    # बटन वाली शक्तियों का डेटा जोड़ना
+                    shakti_context = " | ".join(triggered) if triggered else ""
+                    full_query = f"[MODE: {shakti_context}] {prompt}" if shakti_context else prompt
+                    
+                    # Async कॉल
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(full_query, str(intel)))
+                    
+                    if isinstance(logic_res, tuple):
+                        final_response, engine_id = logic_res
+                    else:
+                        final_response = logic_res
+                        engine_id = "RAJA-SUPREME"
+                except Exception as e:
+                    final_response = f"🔱 Core overload. Reason: {str(e)}"
+
+        # --- 3. परिणाम दिखाना और बोलना ---
         if final_response:
-            # डिस्प्ले रिस्पोंस
             st.markdown(final_response)
-            st.caption(f"Engine: {engine_id} | Location: Bareilly-05 | Status: Immortal 🔱")
+            st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
             
-            # आवाज़ (Voice) - Safe Call
-            if st.session_state.get('voice_enabled') and hasattr(raja_ai, 'speak'):
+            # आवाज़ (Voice)
+            if st.session_state.get('voice_enabled'):
                 raja_ai.speak(final_response)
-            
-            # मेमोरी में सेव (Optional)
-            try:
-                from memory_engine import save_to_memory
-                save_to_memory("RAJARAM_05", prompt, final_response)
-            except: 
-                pass
                 
             # हिस्ट्री अपडेट
             st.session_state.history.append(AIMessage(content=final_response))
