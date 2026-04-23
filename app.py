@@ -443,14 +443,26 @@ def trigger_raja_powers(prompt):
     p = prompt.lower()
     active_shaktis = []
     
-    # समाज और संस्कृति विकास मैप
-    powers_map = {
-        "jal_jeevan": "💧 जल जीवन मिशन: पानी की हर बूंद कीमती है। (संरक्षण और शुद्धता मोड सक्रिय)",
-        "dil_ki_baat": "❤️ दिल की बात: जीवन, प्रेम, वेद-पुराण और हिंदू संस्कृति का ज्ञान। (संस्कार मोड सक्रिय)",
-        "kheti": "🌾 कृषि शक्ति: उन्नत खेती, खाद और फसलों की सुरक्षा की जानकारी। (किसान मित्र मोड सक्रिय)",
-        "skills": "📚 स्किल इंडिया: कोडिंग, एआई, और भविष्य के नए हुनर सीखें। (कौशल विकास मोड सक्रिय)",
-        "predict": "🔮 भविष्य: आपके लक्ष्य और आने वाले समय का विश्लेषण। (फ्यूचर मोड सक्रिय)"
-    }
+   # --- राजाराम एआई: जन सेवा केंद्र ---
+st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
+
+btn_cols = st.columns(5)
+
+# आपकी नई थीम के अनुसार बटन
+powers = [
+    ("💧 जल जीवन", "jal_jeevan"), 
+    ("❤️ दिल की बात", "dil_ki_baat"), 
+    ("🌾 कृषि ज्ञान", "kheti"), 
+    ("📚 न्यू स्किल्स", "skills"), 
+    ("🔮 भविष्य", "predict")
+]
+
+# यहाँ हमने 'key' जोड़ा है ताकि Duplicate Element वाली एरर न आए
+for i, (col, (label, k)) in enumerate(zip(btn_cols, powers)):
+    if col.button(label, key=f"btn_{k}_{i}"):
+        st.session_state.prompt = f"ACTIVATE {k.upper()}"
+        # अगर आप चाहते हैं कि बटन दबाते ही पेज रिफ्रेश होकर काम करे:
+        st.rerun()
     
     for key, val in powers_map.items():
         if key in p:
