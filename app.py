@@ -462,48 +462,43 @@ if "history" in st.session_state:
         with st.chat_message(role):
             st.markdown(msg.content)
 # ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - FIXED FOR RAJA BUTTONS 🔱
+# [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
 # ------------------------------------------------------------------------------
 
-# 1. इनपुट पकड़ना (टाइपिंग या जादुई बटन)
+# 1. इनपुट पकड़ना
 user_input = st.chat_input("Ask anything to Raja Ai")
 prompt = None
 
-# बटन का हुक्म चेक करना
 if st.session_state.get("prompt"):
     prompt = st.session_state.prompt
-    st.session_state.prompt = None # काम होने के बाद खाली करें
+    st.session_state.prompt = None 
 elif user_input:
     prompt = user_input
 
-# इंजन वेरिएबल्स
+# इंजन वेरिएबल्स - हर बार शुरू में खाली करें
 engine_id = "RAJA-READY" 
 final_response = None  
 
-# 2. एआई प्रोसेसिंग यूनिट
+# 2. एआई प्रोसेसिंग यूनिट (सब कुछ इसके अंदर होना चाहिए)
 if prompt:
-    # शक्तियों के नाम को ट्रिगर करना
     triggered = trigger_raja_powers(prompt)
     
-    # यूजर का मैसेज स्क्रीन पर दिखाना
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # शक्तियों का स्टेटस (पीली पट्टी) दिखाना
         for s in triggered:
             st.warning(s)
 
-        # --- MODULE 1: VISION ENGINE (अगर फोटो है) ---
+        # --- MODULE 1: VISION ENGINE ---
         if uploaded_file is not None:
             with st.spinner("👁️ RAJA EYE ANALYZING..."):
                 try:
                     import google.generativeai as genai
                     img = Image.open(uploaded_file)
-                    genai.configure(api_key=core.GEMINI_API_KEY) # अपनी सही की का उपयोग करें
-                    g_model = genai.GenerativeModel("gemini-1.5-flash") # विजन के लिए
-                    
+                    genai.configure(api_key=core.GEMINI_API_KEY)
+                    g_model = genai.GenerativeModel("gemini-1.5-flash")
                     analysis_p = prompt if prompt.strip() else "इस फोटो के बारे में बताओ।"
                     response = g_model.generate_content([analysis_p, img])
                     final_response = response.text
@@ -511,75 +506,58 @@ if prompt:
                 except Exception as e:
                     st.error(f"Vision Error: {e}")
 
- # --- MODULE 2: REASONING & SHAKTI LOGIC (मुख्य दिमाग - Hybrid Version) ---
-if not final_response:
-    with st.spinner("🧠 RAJA CORE THINKING..."):
-        intel = ""
-        # 1. सर्च ट्रिगर (Satellite Search) - सिर्फ ज़रूरी होने पर!
-        if st.session_state.get('search_enabled'):
-            # हमने कीवर्ड्स को और सटीक बनाया है ताकि फालतू में सर्च न चले
-            search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज", "update"]
-            
-            if prompt and any(k in prompt.lower() for k in search_keys):
+        # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
+        if not final_response:
+            with st.spinner("🧠 RAJA CORE THINKING..."):
+                intel = ""
+                # सर्च तभी होगा जब बटन चालू हो और कीवर्ड मिले
+                if st.session_state.get('search_enabled'):
+                    search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज", "update"]
+                    if any(k in prompt.lower() for k in search_keys):
+                        try:
+                            search_query = f"latest {prompt} update 2026"
+                            intel = core.search_engine.run(search_query)
+                            engine_id = "RAJA-SATELLITE"
+                        except: pass
+
                 try:
-                    # सर्च क्वेरी में 'current' जोड़ना ताकि 2026 की जानकारी मिले
-                    search_query = f"current {prompt} in bareilly latest news"
-                    intel = core.search_engine.run(search_query)
-                    engine_id = "RAJA-SATELLITE"
+                    # हाइब्रिड प्रॉम्ट
+                    if intel:
+                        combined_prompt = f"LIVE_INTEL: {intel}\nUSER: {prompt}\n(Answer concisely based on live intel)"
+                    else:
+                        combined_prompt = prompt
+
+                    # Async Execution
+                    try:
+                        loop = asyncio.get_event_loop()
+                    except RuntimeError:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                    
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
+                    
+                    if isinstance(logic_res, tuple):
+                        final_response, engine_id = logic_res
+                    else:
+                        final_response = logic_res
+                        engine_id = "RAJA-GOLD-LOGIC" if not intel else "RAJA-HYBRID"
                 except Exception as e:
-                    intel = f"Satellite connection error: {e}"
+                    final_response = f"🔱 Core Error: {str(e)}"
 
-        # 2. AI को आदेश देना (Reasoning & Personality)
-        try:
-            shakti_context = " | ".join(triggered) if ('triggered' in locals() and triggered) else "GENERAL MODE"
+        # --- 3. परिणाम दिखाना (सिर्फ prompt होने पर) ---
+        if final_response:
+            st.markdown(final_response)
+            st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
             
-            # 🔱 यहाँ हमने PROMPT को 'Gold Core' लेवल पर अपग्रेड किया है
-            if intel:
-                # एआई को साफ़ आदेश कि डेटा का इस्तेमाल करो पर अपनी 'राजाराम एआई' वाली स्टाइल मत छोड़ो
-                combined_prompt = f"""
-                [CORE IDENTITY]: You are RAJA AI GOLD CORE, created by RAJA RAM. 
-                [LIVE INTEL]: {intel}
-                [TASK]: Answer the user using the Intel provided. Keep your confidence, authority, and Rajaram's signature style. Don't be a boring bot.
-                [USER]: {prompt}
-                """
-            else:
-                combined_prompt = prompt
-
-            # Safe Async Loop
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+            if st.session_state.get('voice_enabled'):
+                raja_ai.speak(final_response)
             
-            # एआई अब ताज़ा जानकारी और अपनी पुरानी बुद्धि (Knowledge) को मिलाएगा
-            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
-            
-            if isinstance(logic_res, tuple):
-                final_response, engine_id = logic_res
-            else:
-                final_response = logic_res
-                # अगर सर्च नहीं हुआ, तो इसे GOLD-LOGIC दिखाएँगे
-                engine_id = "RAJA-GOLD-LOGIC" if not intel else "RAJA-HYBRID-SATELLITE"
-                
-        except Exception as e:
-            raja_shield.auto_fix("LOGIC_CRASH", str(e))
-            final_response = f"🔱 Core overload. Reason: {str(e)}"
-            st.error(f"Logic Error: {e}")
-
-# --- 3. परिणाम दिखाना और बोलना ---
-if final_response:
-    with st.chat_message("assistant"):
-        st.markdown(final_response)
-        st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
-        
-        # आवाज़ (Voice)
-        if st.session_state.get('voice_enabled') and hasattr(raja_ai, 'speak'):
-            raja_ai.speak(final_response)
-            
-        # हिस्ट्री अपडेट
-        if not st.session_state.history or st.session_state.history[-1].content != final_response:
+            # हिस्ट्री अपडेट
             st.session_state.history.append(AIMessage(content=final_response))
+            
+            # 🔥 सबसे ज़रूरी: प्रॉम्ट को खत्म करना ताकि लूप न बने
+            prompt = None
+            st.session_state.prompt = None
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
