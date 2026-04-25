@@ -533,40 +533,58 @@ if prompt:
                     st.error(f"Vision Error: {e}")
 
         # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
-       # --- MODULE 2: REASONING & SHAKTI LOGIC (SMART-SEARCH VERSION) ---
+     # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
         if not final_response:
-            with st.spinner("🧠 RAJA CORE THINKING..."):
+            with st.spinner("🧠 RAJA CORE SCANNING THE WEB..."):
                 intel = ""
                 
-                # १. लिंक डिटेक्शन (अगर यूजर लिंक भेजे)
+                # १. लिंक डिटेक्शन (Deep Link Scraper)
                 if "http" in prompt:
-                    st.toast("🔱 Link Detected! Reading Content...", icon="🔗")
+                    st.toast("🔱 Deep-Reading Link...", icon="🔗")
                     words = prompt.split()
                     link = [w for w in words if "http" in w][0]
                     intel = raja_link_reader(link)
                     engine_id = "RAJA-LINK-READER"
                 
-                # २. ताज़ा जानकारी (अगर मौसम या खबर पूछे)
+                # २. ताज़ा जानकारी (Internet-Wide Intelligence)
                 elif st.session_state.get('search_enabled'):
-                    search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज", "update", "भाव"]
+                    search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज", "update", "भाव", "result"]
                     if any(k in prompt.lower() for k in search_keys):
-                        st.toast("🔱 Satellite Search Active (No-Key Mode)", icon="🛰️")
+                        st.toast("🔱 Scanning Entire Internet...", icon="🌐")
+                        # पूरे वेब से सोना (Gold) जैसा डेटा लाना
                         intel = raja_web_search(prompt)
-                        engine_id = "RAJA-SATELLITE-V2"
+                        engine_id = "RAJA-OMNIPOTENT-WEB"
 
                 try:
-                    # हाइब्रिड प्रॉम्ट तैयार करना
-                    combined_prompt = f"LIVE_INTEL: {intel}\n\nUSER_PROMPT: {prompt}"
+                    # 🔱 प्रॉम्ट को कमांडिंग बनाना (यही वो जादुई हिस्सा है)
+                    combined_prompt = f"""
+                    [SYSTEM: RAJA AI OMNIPOTENT MODE]
+                    तुम्हारे पास नीचे इंटरनेट से निकाला गया 'RAW DATA' है।
                     
-                    # Async Execution (Gemini Back-up Logic)
-                    loop = asyncio.get_event_loop()
+                    निर्देश:
+                    1. वेबसाइट का परिचय बिल्कुल मत देना।
+                    2. केवल ताज़ा खबरें, आंकड़े, और मुख्य हेडलाइंस निकालो।
+                    3. डेटा को मिलाकर एक 'Power Summary' तैयार करो जो Gemini से भी बेहतर हो।
+                    4. अगर डेटा में राजनीति, खेल या रिजल्ट है, तो उसे अलग-अलग पॉइंट्स में बताओ।
+
+                    RAW DATA: {intel}
+                    USER QUESTION: {prompt}
+                    """
+                    
+                    # Async Execution
+                    try:
+                        loop = asyncio.get_event_loop()
+                    except RuntimeError:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        
                     logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
                     
                     if isinstance(logic_res, tuple):
                         final_response, engine_id = logic_res
                     else:
                         final_response = logic_res
-                        engine_id = "RAJA-OMNIPOTENT" if not intel else engine_id
+                        engine_id = engine_id if intel else "RAJA-GOLD-LOGIC"
                 except Exception as e:
                     final_response = f"🔱 Core Error: {str(e)}"
         # --- 3. परिणाम दिखाना (सिर्फ prompt होने पर) ---
