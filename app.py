@@ -26,31 +26,7 @@ import requests
 from bs4 import BeautifulSoup
 from duckduckgo_search import DDGS
 # 🔱 तिजोरी से सारी शक्तियों को बुलाना
-try:
-    import shakti_vault
-    from shakti_vault import *
-except:
-    pass
-import importlib.util
 
-def load_raja_features():
-    """🔱 बाहर की सभी 'feature_*.py' फाइलों को लाइव करना"""
-    for file in os.listdir():
-        if file.startswith("feature_") and file.endswith(".py"):
-            try:
-                feature_name = file[:-3]
-                spec = importlib.util.spec_from_file_location(feature_name, file)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                
-                # अगर फाइल में 'run_feature' फंक्शन है, तो उसे चलाओ
-                if hasattr(module, 'run_feature'):
-                    module.run_feature()
-            except Exception as e:
-                st.error(f"Error loading {file}: {e}")
-
-# --- इसे अपने UI के आखिर में या जहाँ आप बटन चाहते हैं वहां कॉल करें ---
-load_raja_features()
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
@@ -641,30 +617,7 @@ if uploaded_file is not None:
 # ---------------------------------------------------------
 # 🔱 APP के बिल्कुल आखिर में यह लोडर जोड़ें
 # ---------------------------------------------------------
-import os
-import importlib.util
 
-# --- 🔱 RAJA FINAL POWER LOADER ---
-def load_raja_features():
-    """🔱 यह फंक्शन 'feature_*.py' नाम की हर फाइल को ऐप में लाइव जोड़ देगा"""
-    import os
-    import importlib.util
-    
-    for file in os.listdir():
-        if file.startswith("feature_") and file.endswith(".py"):
-            try:
-                feature_name = file[:-3]
-                spec = importlib.util.spec_from_file_location(feature_name, file)
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                
-                # अगर फीचर फाइल में 'run_feature' फंक्शन है, तो उसे चलाएं
-                if hasattr(module, 'run_feature'):
-                    with st.container(border=True):
-                        st.caption(f"🔱 ACTIVE POWER: {feature_name.upper()}")
-                        module.run_feature()
-            except Exception as e:
-                raja_shield.auto_fix("FEATURE_LOAD_ERROR", str(e))
 
 # लोडर को सबसे आखिर में कॉल करें
 load_raja_features()
