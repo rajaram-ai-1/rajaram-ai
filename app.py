@@ -505,73 +505,61 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-   # --- MODULE 1: RAJA SATELLITE VISION (GOD MODE - GEMINI KILLER) ---
+ # --- [PHASE: VISION & CHAT HYBRID LOGIC] ---
+
+# 1. पहले चेक करें कि क्या फोटो अपलोड हुई है
 if uploaded_file is not None:
-    with st.spinner("🕵️ RAJA SATELLITE 'GOD MODE': ACTIVATING SENSORS..."):
+    with st.spinner("🕵️ RAJA SATELLITE 'GOD MODE': SCANNING..."):
         try:
             import easyocr
-            import numpy as np
-            from PIL import Image
-            import io
             from duckduckgo_search import DDGS
             
-            # १. फोटो को लोकल आँखों से "तोड़ना" (The Foundation)
+            # --- LOCAL EYE ---
             image_data = uploaded_file.getvalue()
             img = Image.open(io.BytesIO(image_data))
-            img_array = np.array(img)
-            
-            # A. टेक्स्ट पढ़ना (OCR - Unlimited & Free)
-            reader = easyocr.Reader(['hi', 'en']) # हिंदी और इंग्लिश पढ़ेगा
-            text_data = reader.readtext(img_array, detail=0)
+            reader = easyocr.Reader(['hi', 'en'])
+            text_data = reader.readtext(np.array(img), detail=0)
             detected_text = " ".join(text_data)
+
+            # --- SATELLITE SEARCH ---
+            # अगर फोटो है तभी सर्च इंजन एक्टिव होगा
+            search_query = f"{detected_text} details uses in Hindi" if detected_text else "latest information about this object in Hindi"
             
-            # २. सैटेलाइट इंटरनेट सर्च (The Global Intel)
-            # अगर फोटो में कुछ लिखा है, तो हम उस पर सर्च करेंगे, वरना फोटो के ऑब्जेक्ट्स पर।
-            if detected_text:
-                search_query = f"{detected_text} details and latest news in Hindi"
-            else:
-                search_query = "identify object in this image and find its uses in Hindi"
+            with DDGS() as ddgs:
+                search_results = [r['body'] for r in ddgs.text(search_query, max_results=3)]
+                internet_intel = "\n".join(search_results)
 
-            st.write(f"🌐 Searching satellite for: `{search_query}`")
+            # --- POWERFUL BRAIN EXECUTION ---
+            # दिमाग को सख्त निर्देश कि फोटो पर ही बात करनी है
+            god_mode_prompt = f"""
+            SYSTEM: तुम राजा एआई के 'गॉड मोड' हो। 
+            USER ने एक फोटो भेजी है। इंटरनेट सर्च से यह जानकारी मिली है: {internet_intel}
+            फोटो में यह टेक्स्ट लिखा है: {detected_text}
+            
+            INSTRUCTION: इस जानकारी के आधार पर फोटो का विस्तार से वर्णन करो। 
+            इधर-उधर की फालतू बातें या अपना परिचय मत दो। सीधा मुद्दे पर आओ और हैकर स्टाइल में जवाब दो।
+            """
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            final_response = loop.run_until_complete(raja_ai.execute_reasoning(god_mode_prompt, "GOD_MODE_VISION"))
+            st.write(f"🔱 **राजा Ai' रिपोर्ट:**\n\n{final_response}")
 
-            # ३. इंटरनेट से डेटा खींचना (No API Key)
-            internet_intel = ""
-            try:
-                with DDGS() as ddgs:
-                    # हम फोटो के बारे में ३ सबसे बेस्ट रिजल्ट्स लाएंगे
-                    search_results = [r['body'] for r in ddgs.text(search_query, max_results=3)]
-                    internet_intel = "\n---\n".join(search_results)
-            except Exception as search_error:
-                internet_intel = f"Satellite Search failed, but we have text: {detected_text}"
-
-            # ४. महा-दिमाग (Groq) को सारा डेटा भेजना (The Execution)
-            if hasattr(core, 'GROQ_API_KEY') and core.GROQ_API_KEY:
-                
-                # गॉड मोड का सिस्टम प्रॉम्प्ट
-                god_mode_prompt = f"""
-                तुम राजाराम एआई (RAJA AI) के 'गॉड मोड' (God Mode) हो। तुम्हारे पास एक फोटो की पूरी रिपोर्ट आई है।
-                राजाराम भाई को इस फोटो का ऐसा दमदार विवरण दो कि Gemini भी शर्मिंदा हो जाए।
-                तुम्हें इंटरनेट से मिली जानकारी और फोटो के टेक्स्ट दोनों का इस्तेमाल करना है।
-                जवाब एकदम कॉन्फिडेंट, विस्तृत और हैकर-स्टाइल hindi  में होना चाहिए।
-                
-                ---[ फोटो रिपोर्ट ]---
-                लोकल आँखों ने क्या देखा (OCR Text): "{detected_text}"
-                सैटेलाइट इंटरनेट ने क्या बताया:
-                {internet_intel}
-                """
-                
-                # Groq इंजन को सीधे कॉल करना
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(god_mode_prompt, "RAJA_GOD_MODE_VISION"))
-                
-                final_response = f"🔱 **राजा 'गॉड मोड' सैटेलाइट रिपोर्ट:**\n\n{final_analysis}"
-                engine_id = "RAJA-GOD-MODE-V1"
-            else:
-                final_response = "भाई, इंटरनेट से डेटा तो मिल गया पर दिमाग (Groq) सो रहा है।"
-                
         except Exception as e:
-            final_response = f"🔱 God Mode System Error: {e}"
+            st.error(f"Vision Error: {e}")
+
+# 2. अगर फोटो नहीं है, तो नॉर्मल बातचीत (पुराना दिमाग)
+else:
+    if user_input := st.chat_input(" भाई, कुछ पूछना है?"):
+        # यहाँ आपका नॉर्मल Groq / Gemini चैट वाला कोड चलेगा
+        # इसमें इंटरनेट सर्च की ज़रूरत नहीं है (बचत होगी!)
+        with st.chat_message("user"):
+            st.markdown(user_input)
+            
+        with st.chat_message("assistant"):
+            # नॉर्मल चैट रिस्पॉन्स
+            response = loop.run_until_complete(raja_ai.execute_reasoning(user_input, "NORMAL_CHAT"))
+            st.markdown(response)
         # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
         if not final_response:
