@@ -126,7 +126,6 @@ st.markdown("""
 class GlobalCore:
     def __init__(self):  # <--- ध्यान दें: यहाँ दो बार (__) अंडरस्कोर है
         self.GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
-        self.TAVILY_API_KEY = st.secrets.get("TAVILY_API_KEY")
         # Gemini key के लिए भी variable बना लें
         self.GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY") 
         
@@ -146,8 +145,6 @@ class GlobalCore:
             st.toast("🔱 Raja Ai is Active", icon="🟢")
         else:
             st.error("❌ GROQ_API_KEY नहीं मिली!")
-        
-        self.search_engine = TavilySearchResults(api_key=self.TAVILY_API_KEY) if self.TAVILY_API_KEY else None
 
     def get_timestamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
