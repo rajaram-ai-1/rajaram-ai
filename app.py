@@ -154,29 +154,44 @@ class GlobalCore:
 
 # इंजन चालू करें
 core = GlobalCore()
-# --- 🔱 RAJA FREE-INTEL ENGINES (No Key Required) ---
-
-def raja_web_search(query):
-    """बिना Tavily के ताज़ा जानकारी निकालने वाली शक्ति"""
-    try:
-        with DDGS() as ddgs:
-            results = [r['body'] for r in ddgs.text(query, max_results=4)]
-            return "\n".join(results) if results else ""
-    except:
-        return ""
-
 def raja_link_reader(url):
-    """किसी भी लिंक को अंदर से पढ़ने वाली शक्ति"""
+    """पावरफुल वर्जन: यह अब सिर्फ टेक्स्ट नहीं, बल्कि खबरों का ढांचा पकड़ेगा"""
     try:
-        header = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=header, timeout=10)
+        import requests
+        from bs4 import BeautifulSoup
+        import re
+        
+        # 🛡️ शक्ति १: एन्टी-ब्लॉक सिस्टम (ब्राउज़र की तरह व्यवहार)
+        header = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'Accept-Language': 'hi-IN,hi;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
+        
+        response = requests.get(url, headers=header, timeout=12)
         soup = BeautifulSoup(response.text, 'html.parser')
-        # वेबसाइट का सारा काम का टेक्स्ट निकालना
-        lines = [p.text for p in soup.find_all(['p', 'h1', 'h2', 'h3'])]
-        content = " ".join(lines)
-        return content[:2500] # एआई की लिमिट के हिसाब से छोटा करना
+        
+        # 🧹 शक्ति २: फालतू कचरा साफ़ करना (Scripts, Styles, Ads हटाना)
+        for script_or_style in soup(["script", "style", "nav", "footer", "header", "aside"]):
+            script_or_style.decompose()
+            
+        # 🔱 शक्ति ३: 'Smart News Extractor' (खबरों का निचोड़)
+        intel_vault = []
+        
+        # उन टैग्स को ढूंढना जहाँ ताज़ा खबरें होती हैं
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'p']):
+            text = tag.get_text().strip()
+            # केवल वही लाइनें उठाना जिनमें दम हो (30 से 200 अक्षर)
+            if 30 < len(text) < 250:
+                # डुप्लीकेट लाइनों को रोकना
+                if text not in intel_vault:
+                    intel_vault.append(text)
+        
+        # डेटा को एक साथ जोड़ना और एआई के लिए तैयार करना
+        final_intel = "\n---\n".join(intel_vault[:25]) # टॉप 25 ताज़ा जानकारी
+        return final_intel if final_intel else "सर्वर से कोई ताज़ा खबर नहीं मिली।"
+        
     except Exception as e:
-        return f"Link Reading Error: {e}"
+        return f"🔱 Link Reading Error: {e}"
 # ------------------------------------------------------------------------------
 # [RAJARAM SELF-HEALING SHIELD] - इसे GlobalCore क्लास के बाद जोड़ें
 # ------------------------------------------------------------------------------
