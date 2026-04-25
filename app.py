@@ -505,17 +505,17 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-     # --- MODULE 1: RAJA HYBRID-VISION (HACKER PATH) ---
+   # --- MODULE 1: RAJA SATELLITE VISION (GOD MODE - GEMINI KILLER) ---
 if uploaded_file is not None:
-    with st.spinner("🕵️ RAJA LOCAL EYE SCANNING & GROQ BRAIN THINKING..."):
+    with st.spinner("🕵️ RAJA SATELLITE 'GOD MODE': ACTIVATING SENSORS..."):
         try:
             import easyocr
             import numpy as np
-            from PIL import Image, ImageStat
+            from PIL import Image
             import io
+            from duckduckgo_search import DDGS
             
-            # 🔱 स्टेप १: लोकल आँखों (The Eye) से फोटो को "तोड़ना"
-            # फोटो को लोड करना
+            # १. फोटो को लोकल आँखों से "तोड़ना" (The Foundation)
             image_data = uploaded_file.getvalue()
             img = Image.open(io.BytesIO(image_data))
             img_array = np.array(img)
@@ -525,48 +525,53 @@ if uploaded_file is not None:
             text_data = reader.readtext(img_array, detail=0)
             detected_text = " ".join(text_data)
             
-            # B. फोटो का मेटाडेटा और रंग-रूप
-            width, height = img.size
-            
-            # औसत रंग निकालना (Brightness check)
-            try:
-                mean_color = ImageStat.Stat(img).mean
-                brightness = sum(mean_color) / len(mean_color)
-                color_type = "Brighter/Warm" if brightness > 127 else "Darker/Cool"
-            except:
-                color_type = "Unknown"
+            # २. सैटेलाइट इंटरनेट सर्च (The Global Intel)
+            # अगर फोटो में कुछ लिखा है, तो हम उस पर सर्च करेंगे, वरना फोटो के ऑब्जेक्ट्स पर।
+            if detected_text:
+                search_query = f"{detected_text} details and latest news in Hindi"
+            else:
+                search_query = "identify object in this image and find its uses in Hindi"
 
-            # C. हैकर रिपोर्ट तैयार करना (The Intel Report)
-            intel_report = f"""
-            ## IMAGE INTEL REPORT
-            - File Size: {width}x{height} pixels
-            - Dominant Light Type: {color_type}
-            - Detected Text (Local OCR):
-              "{detected_text if detected_text else "None - No text found"}"
-            """
-            
-            # 🔱 स्टेप २: इस रिपोर्ट को 'दिमाग' (Groq LLM) के पास भेजना
-            if "groq" in core.BRAIN_CATALOG:
-                analysis_prompt = f"""
-                You are RAJA AI, built by Rajaram. You have access to a local OCR report for an image.
-                Read this report and describe the image *as if you can see it*, in a confident, hacker-style Hinglish.
-                Keep it concise and focus on any text found. Make it sound powerfull.
+            st.write(f"🌐 Searching satellite for: `{search_query}`")
+
+            # ३. इंटरनेट से डेटा खींचना (No API Key)
+            internet_intel = ""
+            try:
+                with DDGS() as ddgs:
+                    # हम फोटो के बारे में ३ सबसे बेस्ट रिजल्ट्स लाएंगे
+                    search_results = [r['body'] for r in ddgs.text(search_query, max_results=3)]
+                    internet_intel = "\n---\n".join(search_results)
+            except Exception as search_error:
+                internet_intel = f"Satellite Search failed, but we have text: {detected_text}"
+
+            # ४. महा-दिमाग (Groq) को सारा डेटा भेजना (The Execution)
+            if hasattr(core, 'GROQ_API_KEY') and core.GROQ_API_KEY:
                 
-                {intel_report}
+                # गॉड मोड का सिस्टम प्रॉम्प्ट
+                god_mode_prompt = f"""
+                तुम राजाराम एआई (RAJA AI) के 'गॉड मोड' (God Mode) हो। तुम्हारे पास एक फोटो की पूरी रिपोर्ट आई है।
+                राजाराम भाई को इस फोटो का ऐसा दमदार विवरण दो कि Gemini भी शर्मिंदा हो जाए।
+                तुम्हें इंटरनेट से मिली जानकारी और फोटो के टेक्स्ट दोनों का इस्तेमाल करना है।
+                जवाब एकदम कॉन्फिडेंट, विस्तृत और हैकर-स्टाइल hindi  में होना चाहिए।
+                
+                ---[ फोटो रिपोर्ट ]---
+                लोकल आँखों ने क्या देखा (OCR Text): "{detected_text}"
+                सैटेलाइट इंटरनेट ने क्या बताया:
+                {internet_intel}
                 """
                 
+                # Groq इंजन को सीधे कॉल करना
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                # Groq का दिमाग यहाँ जवाब देगा
-                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(analysis_prompt, "GROQ_VISION_INTERPRET"))
+                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(god_mode_prompt, "RAJA_GOD_MODE_VISION"))
                 
-                final_response = f"🔱 **राजा महा-दिमाग रिपोर्ट:**\n\n{final_analysis}"
-                engine_id = "RAJA-HYBRID-VISION"
+                final_response = f"🔱 **राजा 'गॉड मोड' सैटेलाइट रिपोर्ट:**\n\n{final_analysis}"
+                engine_id = "RAJA-GOD-MODE-V1"
             else:
-                final_response = "भाई, दिमाग (Groq Key) कनेक्टेड नहीं है, पर लोकल आँखों को फोटो में यह दिखा: \n\n" + detected_text
+                final_response = "भाई, इंटरनेट से डेटा तो मिल गया पर दिमाग (Groq) सो रहा है।"
                 
         except Exception as e:
-            final_response = f"🔱 Hybrid Vision Error: {e}"
+            final_response = f"🔱 God Mode System Error: {e}"
         # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
         if not final_response:
