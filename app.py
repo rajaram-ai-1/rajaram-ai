@@ -529,20 +529,41 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-        # --- MODULE 1: VISION ENGINE ---
-        if uploaded_file is not None:
-            with st.spinner("👁️ RAJA EYE ANALYZING..."):
-                try:
-                    import google.generativeai as genai
-                    img = Image.open(uploaded_file)
-                    genai.configure(api_key=core.GEMINI_API_KEY)
-                    g_model = genai.GenerativeModel("gemini-1.5-flash")
-                    analysis_p = prompt if prompt.strip() else "इस फोटो के बारे में बताओ।"
-                    response = g_model.generate_content([analysis_p, img])
-                    final_response = response.text
-                    engine_id = "RAJA-EYE-OF-RA"
-                except Exception as e:
-                    st.error(f"Vision Error: {e}")
+       # --- MODULE 1: SUPER HACKER VISION (ULTRA-POWER) ---
+if uploaded_file is not None:
+    with st.spinner("🕵️ RAJA HACKER EYE: DEEP SCANNING..."):
+        try:
+            import requests
+            # शक्तिशाली मॉडल का उपयोग
+            API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
+            
+            # 🔱 हैकर ट्रिक: बिना Key के एक्सेस के लिए Headers (कभी-कभी काम आता है)
+            headers = {"Authorization": "Bearer hf_xxxxxxxxxxxx"} # यहाँ अपनी फ्री HF Key भी डाल सकते हैं अगर चाहें
+            
+            img_bytes = uploaded_file.getvalue()
+            response = requests.post(API_URL, data=img_bytes)
+            result = response.json()
+            
+            if isinstance(result, list) and 'generated_text' in result[0]:
+                raw_description = result[0]['generated_text']
+                
+                # 🔱 ताक़त बढ़ाना: अब एआई इस इंग्लिश डिस्क्रिप्शन को समझकर हिंदी में विस्तार से बताएगा
+                # इसके लिए हम अपने मौजूदा LLM (Groq/Gemini) का इस्तेमाल करेंगे बिना Vision Key के
+                
+                analysis_command = f"Translate and expand this image description into powerful Hindi: {raw_description}"
+                
+                # यहाँ आपका पुराना Execute Reasoning काम आएगा
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(analysis_command, "IMAGE_SCAN"))
+                
+                final_response = f"🔱 **राजा हैकर विजन रिपोर्ट:**\n\n{final_analysis}"
+                engine_id = "RAJA-HACKER-VISION-V2"
+            else:
+                # अगर मॉडल सो रहा है (Loading Error)
+                final_response = "📍 मॉडल अभी लोड हो रहा है भाई, ५ सेकंड रुक कर फिर फोटो भेजें।"
+        except Exception as e:
+            final_response = f"🔱 Vision System Bypass Error: {e}"
 
         # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
