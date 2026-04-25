@@ -610,13 +610,42 @@ if uploaded_file is not None:
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
-
-
-# ... (ऊपर आपकी पुरानी सारी कोडिंग: Imports, Class RajaAgent, UI, etc.)
-
 # ---------------------------------------------------------
-# 🔱 APP के बिल्कुल आखिर में यह लोडर जोड़ें
+# 🔱 RAJA FEATURE LOADER (यहाँ फंक्शन को परिभाषित करें)
 # ---------------------------------------------------------
+def load_raja_features():
+    """राजा एआई के खास फीचर्स और हैकर लुक को एक्टिव करने वाली शक्ति"""
+    # १. हैकर स्टाइल CSS (लुक)
+    st.markdown("""
+        <style>
+        .stApp {
+            background-color: #050505;
+            color: #00FF41;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .stButton>button {
+            border: 2px solid #00FF41;
+            background-color: #000000;
+            color: #00FF41;
+            transition: 0.3s;
+        }
+        .stButton>button:hover {
+            background-color: #00FF41;
+            color: black;
+            box-shadow: 0 0 10px #00FF41;
+        }
+        </style>
+    """, unsafe_check_html=True)
+
+    # २. स्टेटस इंडिकेटर (चेक करें कि सब ठीक है या नहीं)
+    with st.sidebar:
+        st.markdown("### 🔱 SYSTEM STATUS")
+        st.success("🟢 HACKER VISION: ACTIVE")
+        st.success("🟢 SATELLITE SEARCH: READY")
+        st.info("⚡ ENGINE: RAJA OMNIPOTENT")
+
+# --- अब इसके नीचे आपका पुराना लोडर कॉल काम करेगा ---
+load_raja_features()
 
 
 # लोडर को सबसे आखिर में कॉल करें
