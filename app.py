@@ -530,40 +530,37 @@ if prompt:
             st.warning(s)
 
        # --- MODULE 1: SUPER HACKER VISION (ULTRA-POWER) ---
+# --- MODULE 1: RAJA HACKER VISION (NO-KEY MODE) ---
 if uploaded_file is not None:
-    with st.spinner("🕵️ RAJA HACKER EYE: DEEP SCANNING..."):
+    with st.spinner("🕵️ RAJA HACKER EYE: SCANNING WITHOUT GOOGLE..."):
         try:
             import requests
-            # शक्तिशाली मॉडल का उपयोग
+            # 🔱 बिना किसी Key के मुफ़्त हैकर मॉडल (Salesforce BLIP)
             API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
             
-            # 🔱 हैकर ट्रिक: बिना Key के एक्सेस के लिए Headers (कभी-कभी काम आता है)
-            headers = {"Authorization": "Bearer hf_xxxxxxxxxxxx"} # यहाँ अपनी फ्री HF Key भी डाल सकते हैं अगर चाहें
-            
             img_bytes = uploaded_file.getvalue()
-            response = requests.post(API_URL, data=img_bytes)
+            # हैकर ट्रिक: हम सीधे Hugging Face के मुफ़्त सर्वर को फोटो भेज रहे हैं
+            response = requests.post(API_URL, data=img_bytes, timeout=15)
             result = response.json()
             
             if isinstance(result, list) and 'generated_text' in result[0]:
-                raw_description = result[0]['generated_text']
+                raw_intel = result[0]['generated_text']
                 
-                # 🔱 ताक़त बढ़ाना: अब एआई इस इंग्लिश डिस्क्रिप्शन को समझकर हिंदी में विस्तार से बताएगा
-                # इसके लिए हम अपने मौजूदा LLM (Groq/Gemini) का इस्तेमाल करेंगे बिना Vision Key के
+                # अब इस इंग्लिश जानकारी को राजा की भाषा (Hindi) में बदलने के लिए LLM का उपयोग
+                analysis_prompt = f"इस फोटो की जानकारी को राजाराम भाई के लिए दमदार हिंदी में समझाओ: {raw_intel}"
                 
-                analysis_command = f"Translate and expand this image description into powerful Hindi: {raw_description}"
-                
-                # यहाँ आपका पुराना Execute Reasoning काम आएगा
+                # यहाँ आपका Groq या Gemini का TEXT मॉडल काम करेगा (Vision Key की ज़रूरत नहीं)
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(analysis_command, "IMAGE_SCAN"))
+                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(analysis_prompt, "HACKER_VISION"))
                 
-                final_response = f"🔱 **राजा हैकर विजन रिपोर्ट:**\n\n{final_analysis}"
-                engine_id = "RAJA-HACKER-VISION-V2"
+                final_response = f"🔱 **राजा विजन रिपोर्ट:**\n\n{final_analysis}"
+                engine_id = "RAJA-HACKER-VISION"
             else:
-                # अगर मॉडल सो रहा है (Loading Error)
-                final_response = "📍 मॉडल अभी लोड हो रहा है भाई, ५ सेकंड रुक कर फिर फोटो भेजें।"
+                final_response = "📍 भाई, मॉडल अभी गरम हो रहा है (Loading)। १० सेकंड रुक कर फिर फोटो अपलोड करें।"
+                
         except Exception as e:
-            final_response = f"🔱 Vision System Bypass Error: {e}"
+            final_response = f"🔱 Hacker Vision System Error: {e}"
 
         # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
