@@ -505,39 +505,68 @@ if prompt:
         for s in triggered:
             st.warning(s)
 
-       # --- MODULE 1: SUPER HACKER VISION (ULTRA-POWER) ---
-# --- MODULE 1: RAJA HACKER VISION (NO-KEY MODE) ---
+     # --- MODULE 1: RAJA HYBRID-VISION (HACKER PATH) ---
 if uploaded_file is not None:
-    with st.spinner("🕵️ RAJA HACKER EYE: SCANNING WITHOUT GOOGLE..."):
+    with st.spinner("🕵️ RAJA LOCAL EYE SCANNING & GROQ BRAIN THINKING..."):
         try:
-            import requests
-            # 🔱 बिना किसी Key के मुफ़्त हैकर मॉडल (Salesforce BLIP)
-            API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
+            import easyocr
+            import numpy as np
+            from PIL import Image, ImageStat
+            import io
             
-            img_bytes = uploaded_file.getvalue()
-            # हैकर ट्रिक: हम सीधे Hugging Face के मुफ़्त सर्वर को फोटो भेज रहे हैं
-            response = requests.post(API_URL, data=img_bytes, timeout=15)
-            result = response.json()
+            # 🔱 स्टेप १: लोकल आँखों (The Eye) से फोटो को "तोड़ना"
+            # फोटो को लोड करना
+            image_data = uploaded_file.getvalue()
+            img = Image.open(io.BytesIO(image_data))
+            img_array = np.array(img)
             
-            if isinstance(result, list) and 'generated_text' in result[0]:
-                raw_intel = result[0]['generated_text']
+            # A. टेक्स्ट पढ़ना (OCR - Unlimited & Free)
+            reader = easyocr.Reader(['hi', 'en']) # हिंदी और इंग्लिश पढ़ेगा
+            text_data = reader.readtext(img_array, detail=0)
+            detected_text = " ".join(text_data)
+            
+            # B. फोटो का मेटाडेटा और रंग-रूप
+            width, height = img.size
+            
+            # औसत रंग निकालना (Brightness check)
+            try:
+                mean_color = ImageStat.Stat(img).mean
+                brightness = sum(mean_color) / len(mean_color)
+                color_type = "Brighter/Warm" if brightness > 127 else "Darker/Cool"
+            except:
+                color_type = "Unknown"
+
+            # C. हैकर रिपोर्ट तैयार करना (The Intel Report)
+            intel_report = f"""
+            ## IMAGE INTEL REPORT
+            - File Size: {width}x{height} pixels
+            - Dominant Light Type: {color_type}
+            - Detected Text (Local OCR):
+              "{detected_text if detected_text else "None - No text found"}"
+            """
+            
+            # 🔱 स्टेप २: इस रिपोर्ट को 'दिमाग' (Groq LLM) के पास भेजना
+            if "groq" in core.BRAIN_CATALOG:
+                analysis_prompt = f"""
+                You are RAJA AI, built by Rajaram. You have access to a local OCR report for an image.
+                Read this report and describe the image *as if you can see it*, in a confident, hacker-style Hinglish.
+                Keep it concise and focus on any text found. Make it sound powerfull.
                 
-                # अब इस इंग्लिश जानकारी को राजा की भाषा (Hindi) में बदलने के लिए LLM का उपयोग
-                analysis_prompt = f"इस फोटो की जानकारी को राजाराम भाई के लिए दमदार हिंदी में समझाओ: {raw_intel}"
+                {intel_report}
+                """
                 
-                # यहाँ आपका Groq या Gemini का TEXT मॉडल काम करेगा (Vision Key की ज़रूरत नहीं)
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(analysis_prompt, "HACKER_VISION"))
+                # Groq का दिमाग यहाँ जवाब देगा
+                final_analysis = loop.run_until_complete(raja_ai.execute_reasoning(analysis_prompt, "GROQ_VISION_INTERPRET"))
                 
-                final_response = f"🔱 **राजा विजन रिपोर्ट:**\n\n{final_analysis}"
-                engine_id = "RAJA-HACKER-VISION"
+                final_response = f"🔱 **राजा महा-दिमाग रिपोर्ट:**\n\n{final_analysis}"
+                engine_id = "RAJA-HYBRID-VISION"
             else:
-                final_response = "📍 भाई, मॉडल अभी गरम हो रहा है (Loading)। १० सेकंड रुक कर फिर फोटो अपलोड करें।"
+                final_response = "भाई, दिमाग (Groq Key) कनेक्टेड नहीं है, पर लोकल आँखों को फोटो में यह दिखा: \n\n" + detected_text
                 
         except Exception as e:
-            final_response = f"🔱 Hacker Vision System Error: {e}"
-
+            final_response = f"🔱 Hybrid Vision Error: {e}"
         # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
         if not final_response:
