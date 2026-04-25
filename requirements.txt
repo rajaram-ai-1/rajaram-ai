@@ -12,3 +12,6 @@ requests
 streamlit-mic-recorder
 flask
 flask-cors
+beautifulsoup4
+duckduckgo-search
+asyncio
