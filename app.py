@@ -507,8 +507,7 @@ if prompt:
 
  # --- [PHASE: VISION & CHAT HYBRID LOGIC] ---
      # --- MODULE 1: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
-
-      import google.generativeai as genai
+import google.generativeai as genai
 import streamlit as st
 from PIL import Image
 import io
