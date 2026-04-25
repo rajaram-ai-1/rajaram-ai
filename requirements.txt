@@ -6,7 +6,6 @@ langchain-core
 python-dotenv
 gtts
 google-generativeai>=0.8.3
-Pillow
 requests
 streamlit-mic-recorder
 flask
@@ -14,3 +13,7 @@ flask-cors
 beautifulsoup4
 duckduckgo-search
 asyncio
+easyocr
+opencv-python-headless
+Pillow
+numpy
