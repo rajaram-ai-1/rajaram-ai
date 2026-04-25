@@ -643,11 +643,6 @@ def load_raja_features():
         st.success("🟢 HACKER VISION: ACTIVE")
         st.success("🟢 SATELLITE SEARCH: READY")
         st.info("⚡ ENGINE: RAJA OMNIPOTENT")
-
-# --- अब इसके नीचे आपका पुराना लोडर कॉल काम करेगा ---
-load_raja_features()
-
-
 # लोडर को सबसे आखिर में कॉल करें
 load_raja_features()
 
