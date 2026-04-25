@@ -506,48 +506,60 @@ if prompt:
             st.warning(s)
 
  # --- [PHASE: VISION & CHAT HYBRID LOGIC] ---
+     # --- MODULE 1: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
 
-# --- MODULE 1: RAJA SUPREME VISION (GEMINI POWERED) ---
-import google.generativeai as genai
+      import google.generativeai as genai
+import streamlit as st
+from PIL import Image
+import io
 
 def raja_vision_engine(uploaded_file):
     try:
-        # 🔱 Gemini को कॉन्फ़िगर करना
+        # 🔱 १. कॉन्फ़िगरेशन
+        if "GEMINI_API_KEY" not in st.secrets:
+            return "🔱 Error: GEMINI_API_KEY नहीं मिली भाई!"
+            
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+        
+        # 🔱 २. मॉडल सेटअप (Flash सबसे तेज़ है)
         model = genai.GenerativeModel('gemini-1.5-flash')
 
-        # फोटो को बाइट्स में पढ़ना
-        img_bytes = uploaded_file.getvalue()
-        image_parts = [
-            {
-                "mime_type": uploaded_file.type,
-                "data": img_bytes
-            }
-        ]
-
-        # हैकर स्टाइल प्रॉम्प्ट
-        prompt = """
+        # 🔱 ३. इमेज प्रोसेसिंग (PIL का इस्तेमाल)
+        img = Image.open(uploaded_file)
+        
+        # 🔱 ४. हैकर प्रॉम्प्ट
+        hacker_prompt = """
         तुम राजाराम एआई (RAJA AI) के 'Supreme Vision' मोड में हो। 
         इस फोटो को गहराई से देखो और राजाराम भाई को बताओ कि इसमें क्या है। 
-        तुम्हें फोटो के पीछे छिपी बारीकियां, टेक्स्ट, और माहौल सब कुछ समझाना है। 
-        अंदाज एकदम दमदार, बुद्धिमान और हैकर-स्टाइल Hinglish में होना चाहिए।
+        बारीकियां, टेक्स्ट और माहौल सब कुछ समझाओ। 
+        अंदाज दमदार, बुद्धिमान और हैकर-स्टाइल Hinglish में हो।
         """
 
-        # जवाब हासिल करना
-        response = model.generate_content([prompt, image_parts[0]])
-        return response.text
+        # 🔱 ५. जवाब हासिल करना (Safety filters को हैंडल करते हुए)
+        response = model.generate_content([hacker_prompt, img])
+        
+        # चेक करें कि क्या जवाब आया है
+        if response.text:
+            return response.text
+        else:
+            return "🔱 राजा विजन: फोटो देख ली, पर सेफ्टी फिल्टर्स की वजह से जवाब नहीं दे सकता।"
 
     except Exception as e:
-        return f"🔱 Vision Engine Error: {e}"
+        # अगर 404 आए तो समझो लाइब्रेरी अपडेट करनी है
+        return f"🔱 Vision Engine Error: {str(e)}"
 
-# --- UI में इसे ऐसे इस्तेमाल करें ---
+# --- UI LOGIC ---
 if uploaded_file is not None:
-    st.image(uploaded_file, caption="Scan in progress...", use_container_width=True)
+    # फोटो दिखाना
+    st.image(uploaded_file, caption="Target Locked 🔱", use_container_width=True)
+    
     if st.button("🔱 SCAN WITH RAJA VISION"):
-        with st.spinner("🕵️ RAJA EYE SCANNING..."):
+        with st.spinner("🕵️ RAJA EYE SCANNING THE TARGET..."):
             result = raja_vision_engine(uploaded_file)
-            st.markdown(f"### 🔱 राजा विजन रिपोर्ट:\n\n{result}")
-      
+            
+            # रिजल्ट को एक कूल बॉक्स में दिखाना
+            st.info("### 🔱 राजा विजन रिपोर्ट:")
+            st.markdown(result)
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
         if not final_response:
             with st.spinner("🧠 RAJA CORE SCANNING THE WEB..."):
