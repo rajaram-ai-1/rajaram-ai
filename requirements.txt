@@ -3,7 +3,6 @@ langchain>=0.2.0
 langchain-groq
 langchain-community
 langchain-core
-tavily-python
 python-dotenv
 gtts
 google-generativeai>=0.8.3
