@@ -507,60 +507,47 @@ if prompt:
 
  # --- [PHASE: VISION & CHAT HYBRID LOGIC] ---
 
-# 1. पहले चेक करें कि क्या फोटो अपलोड हुई है
+# --- MODULE 1: RAJA SUPREME VISION (GEMINI POWERED) ---
+import google.generativeai as genai
+
+def raja_vision_engine(uploaded_file):
+    try:
+        # 🔱 Gemini को कॉन्फ़िगर करना
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+        model = genai.GenerativeModel('gemini-1.5-flash')
+
+        # फोटो को बाइट्स में पढ़ना
+        img_bytes = uploaded_file.getvalue()
+        image_parts = [
+            {
+                "mime_type": uploaded_file.type,
+                "data": img_bytes
+            }
+        ]
+
+        # हैकर स्टाइल प्रॉम्प्ट
+        prompt = """
+        तुम राजाराम एआई (RAJA AI) के 'Supreme Vision' मोड में हो। 
+        इस फोटो को गहराई से देखो और राजाराम भाई को बताओ कि इसमें क्या है। 
+        तुम्हें फोटो के पीछे छिपी बारीकियां, टेक्स्ट, और माहौल सब कुछ समझाना है। 
+        अंदाज एकदम दमदार, बुद्धिमान और हैकर-स्टाइल Hinglish में होना चाहिए।
+        """
+
+        # जवाब हासिल करना
+        response = model.generate_content([prompt, image_parts[0]])
+        return response.text
+
+    except Exception as e:
+        return f"🔱 Vision Engine Error: {e}"
+
+# --- UI में इसे ऐसे इस्तेमाल करें ---
 if uploaded_file is not None:
-    with st.spinner("🕵️ RAJA SATELLITE 'GOD MODE': SCANNING..."):
-        try:
-            import easyocr
-            from duckduckgo_search import DDGS
-            
-            # --- LOCAL EYE ---
-            image_data = uploaded_file.getvalue()
-            img = Image.open(io.BytesIO(image_data))
-            reader = easyocr.Reader(['hi', 'en'])
-            text_data = reader.readtext(np.array(img), detail=0)
-            detected_text = " ".join(text_data)
-
-            # --- SATELLITE SEARCH ---
-            # अगर फोटो है तभी सर्च इंजन एक्टिव होगा
-            search_query = f"{detected_text} details uses in Hindi" if detected_text else "latest information about this object in Hindi"
-            
-            with DDGS() as ddgs:
-                search_results = [r['body'] for r in ddgs.text(search_query, max_results=3)]
-                internet_intel = "\n".join(search_results)
-
-            # --- POWERFUL BRAIN EXECUTION ---
-            # दिमाग को सख्त निर्देश कि फोटो पर ही बात करनी है
-            god_mode_prompt = f"""
-            SYSTEM: तुम राजा एआई के 'गॉड मोड' हो। 
-            USER ने एक फोटो भेजी है। इंटरनेट सर्च से यह जानकारी मिली है: {internet_intel}
-            फोटो में यह टेक्स्ट लिखा है: {detected_text}
-            
-            INSTRUCTION: इस जानकारी के आधार पर फोटो का विस्तार से वर्णन करो। 
-            इधर-उधर की फालतू बातें या अपना परिचय मत दो। सीधा मुद्दे पर आओ और हैकर स्टाइल में जवाब दो।
-            """
-            
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            final_response = loop.run_until_complete(raja_ai.execute_reasoning(god_mode_prompt, "GOD_MODE_VISION"))
-            st.write(f"🔱 **राजा Ai' रिपोर्ट:**\n\n{final_response}")
-
-        except Exception as e:
-            st.error(f"Vision Error: {e}")
-
-# 2. अगर फोटो नहीं है, तो नॉर्मल बातचीत (पुराना दिमाग)
-else:
-    if user_input := st.chat_input(" भाई, कुछ पूछना है?"):
-        # यहाँ आपका नॉर्मल Groq / Gemini चैट वाला कोड चलेगा
-        # इसमें इंटरनेट सर्च की ज़रूरत नहीं है (बचत होगी!)
-        with st.chat_message("user"):
-            st.markdown(user_input)
-            
-        with st.chat_message("assistant"):
-            # नॉर्मल चैट रिस्पॉन्स
-            response = loop.run_until_complete(raja_ai.execute_reasoning(user_input, "NORMAL_CHAT"))
-            st.markdown(response)
-        # --- MODULE 2: REASONING & SHAKTI LOGIC (अब यह prompt के अंदर है) ---
+    st.image(uploaded_file, caption="Scan in progress...", use_container_width=True)
+    if st.button("🔱 SCAN WITH RAJA VISION"):
+        with st.spinner("🕵️ RAJA EYE SCANNING..."):
+            result = raja_vision_engine(uploaded_file)
+            st.markdown(f"### 🔱 राजा विजन रिपोर्ट:\n\n{result}")
+      
      # --- MODULE 2: REASONING & SHAKTI LOGIC (ULTIMATE OMNIPOTENT VERSION) ---
         if not final_response:
             with st.spinner("🧠 RAJA CORE SCANNING THE WEB..."):
