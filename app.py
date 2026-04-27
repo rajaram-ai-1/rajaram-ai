@@ -457,25 +457,31 @@ if prompt:
                     final_response = raja_vision_engine(uploaded_file)
                     engine_id = "RAJA-VISION (GEMINI-MOD)"
 
-                # २. सर्च शक्ति (SEARCH POWER - THE GPT KILLER)
+              # २. सर्च शक्ति (SEARCH POWER - THE COMMAND OVERRIDE)
                 elif mode == "SEARCH":
                     st.toast("🛰️ Deep Satellite Scan ON", icon="🌐")
-                    search_query = f"{prompt} latest verified update today {datetime.date.today()}"
+                    search_query = f"today 24k gold rate in India {datetime.date.today()}"
                     intel = raja_web_search(search_query) 
                     engine_id = "RAJA-SATELLITE-SEARCH"
                     
-                    # एआई को मजबूर करना कि वो सिर्फ इंटरनेट वाला सच बोले
-                    ultra_logic_prompt = f"""
-                    [SYSTEM: OMNIPOTENT SEARCH MODE]
-                    INTERNET_DATA: {intel}
-                    USER_QUERY: {prompt}
+                    # --- [HACKER MODE: SYSTEM OVERRIDE PROMPT] ---
+                    # यहाँ हम एआई की 'पुरानी याददाश्त' को लॉक कर रहे हैं
+                    override_prompt = f"""
+                    [SYSTEM_STATUS: OVERRIDE_ACTIVATED]
+                    [DATA_SOURCE: LIVE_SATELLITE_LINK]
+                    [INTEL]: {intel}
                     
-                    INSTRUCTION: ऊपर दिए गए डेटा से सबसे सटीक और ताज़ा जवाब दो। 
-                    पुराना ज्ञान इस्तेमाल मत करना। जवाब को 'RAJA AI VERIFIED' बनाओ।
+                    ATTENTION RAJA AI:
+                    1. तुम्हारी पुरानी ट्रेनिंग का डेटा (52k-55k) एक्सपायर हो चुका है। उसे भूल जाओ।
+                    2. ऊपर दिए गए [INTEL] में जो आज का ताज़ा भाव है, सिर्फ वही बताओ।
+                    3. अगर इंटरनेट डेटा में भाव 75,000+ है, तो वही बताओ। झूठ मत बोलो।
+                    4. जवाब की शुरुआत "भाई, सैटेलाइट से ताज़ा भाव ये मिला है..." से करो।
+                    
+                    USER_QUERY: {prompt}
                     """
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(ultra_logic_prompt, str(intel)))
+                    
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(override_prompt, str(intel)))
                     final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
-
                 # ३. शुद्ध दिमाग (BRAIN POWER - LOGIC & CHAT)
                 else:
                     st.toast("🧠 Core Brain Processing", icon="⚡")
