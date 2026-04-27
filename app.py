@@ -401,16 +401,6 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 # --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
 
-# १. इनपुट को संभालना
-user_input = st.chat_input("Ask anything to Raja Ai")
-prompt = None
-
-if st.session_state.get("prompt"):
-    prompt = st.session_state.prompt
-    st.session_state.prompt = None 
-elif user_input:
-    prompt = user_input
-
 # २. मुख्य प्रोसेसिंग यूनिट
 if prompt:
     # --- [LIFELINE: ASYNC LOOP SETUP] ---
@@ -421,8 +411,20 @@ if prompt:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-    # यूजर का मैसेज हिस्ट्री में जोड़ना
+    # --- [MASTER INITIALIZATION: यहाँ सुरक्षा कवच लगाएं] ---
+    # अगर राजा एआई गायब है, तो उसे यहीं जगाएं
+    if "raja_ai" not in st.session_state:
+        # IDENTITY आपका सिस्टम प्रॉम्ट है
+        st.session_state.raja_ai = RajaAgent(IDENTITY) 
+    
+    # अब सीधा 'raja_ai' वेरिएबल बनाएं ताकि नीचे आसानी हो
+    raja_ai = st.session_state.raja_ai
+
+    # यूजर का मैसेज हिस्ट्री में जोड़ना
+    if "history" not in st.session_state:
+        st.session_state.history = []
     st.session_state.history.append(HumanMessage(content=prompt))
+
     with st.chat_message("user"):
         st.markdown(prompt)
     
@@ -433,11 +435,10 @@ if prompt:
         with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
             try:
                 # --- [STEP A: MASTER ROUTING] ---
-                # 'raja_ai' को st.session_state से चेक करना ज्यादा सुरक्षित है
-                if 'raja_ai' in st.session_state:
-                    mode = loop.run_until_complete(st.session_state.raja_ai.raja_router(prompt))
-                else:
-                    mode = "BRAIN"
+                # अब हम जानते हैं कि 'raja_ai' पक्का मौजूद है
+                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                
+                # यहाँ से आगे आपका विजन और सर्च वाला लॉजिक शुरू होगा
 
                 # --- [STEP B: EXECUTION - वार करना] ---
                 
