@@ -209,28 +209,37 @@ class RajaAgent:
         try:
             router_prompt = f"""
             User input: "{user_input}"
-            Identify the BEST tool:
-            1. VISION: If user asks about an image/photo.
-            2. SEARCH: If user asks for live rates, news, or latest facts.
-            3. BRAIN: For logic, coding, talking, or math.
-            Return ONLY one word: VISION, SEARCH, or BRAIN.
-            """
-            # तेज़ फैसले के लिए छोटे मॉडल का उपयोग
-            res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "You are a Decision Router.")
-            return res.strip().upper()
+            Return ONLY one word based on intent:
+            - VISION (if image related)
+            - SEARCH (if news, gold rates, weather, or current facts)
+            - BRAIN (for logic, chat, or coding)
+            Result:"""
+            
+            res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "Decision Router")
+            # --- [फिक्स: सिर्फ मुख्य शब्द उठाना] ---
+            cleaned_res = res.upper()
+            if "VISION" in cleaned_res: return "VISION"
+            if "SEARCH" in cleaned_res: return "SEARCH"
+            return "BRAIN"
         except:
-            return "BRAIN" # गड़बड़ होने पर डिफ़ॉल्ट दिमाग
+            return "BRAIN"
 
     async def execute_reasoning(self, user_input, web_data=""):
         """🧠 राजा Ai का मुख्य दिमाग (Dual-Model Logic)"""
         try:
-            instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
+            # --- [फिक्स: वेब डेटा को प्रॉम्ट में सबसे ऊपर रखना] ---
+            if web_data:
+                full_input = f"LIVE_INTEL FROM INTERNET:\n{web_data}\n\nUSER_QUESTION: {user_input}"
+            else:
+                full_input = user_input
+
+            instruction = self.system_prompt
+            
             tasks = [
-                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], user_input, instruction),
-                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
+                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], full_input, instruction),
+                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], full_input, instruction)
             ]
             responses = await asyncio.gather(*tasks)
-            # सबसे सटीक और गहरा जवाब चुनना
             final_choice = max(responses, key=lambda x: len(x[0]))
             return final_choice
         except Exception as e:
@@ -241,22 +250,22 @@ class RajaAgent:
         """⚡ GROQ INFRASTRUCTURE CALL"""
         try:
             llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
-            res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
+            # सिर्फ पिछले 8 मैसेज भेजना ताकि मेमोरी फुल न हो
+            messages = [SystemMessage(content=system)] + st.session_state.history[-8:] + [HumanMessage(content=prompt)]
+            res = await llm.ainvoke(messages)
             return res.content, model
         except Exception as e:
             return f"Neural Error: {str(e)}", model
 
     def speak(self, text):
-        """🗣️ RAJA VOICE ENGINE"""
+        # आपका पुराना gTTS कोड (एकदम सही है)
         try:
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
             with open("response.mp3", "rb") as f:
                 b64 = base64.b64encode(f.read()).decode()
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except:
-            pass
-
+        except: pass
 
 
 
@@ -392,7 +401,7 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 # --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
 
-# १. इनपुट को संभालना (Input Handling)
+# १. इनपुट को संभालना
 user_input = st.chat_input("Ask anything to Raja Ai")
 prompt = None
 
@@ -402,7 +411,7 @@ if st.session_state.get("prompt"):
 elif user_input:
     prompt = user_input
 
-# २. मुख्य प्रोसेसिंग यूनिट (Core Processing)
+# २. मुख्य प्रोसेसिंग यूनिट
 if prompt:
     # --- [LIFELINE: ASYNC LOOP SETUP] ---
     import asyncio
@@ -412,7 +421,7 @@ if prompt:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-    # यूजर का मैसेज स्क्रीन पर दिखाना
+    # यूजर का मैसेज हिस्ट्री में जोड़ना
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -423,55 +432,83 @@ if prompt:
         
         with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
             try:
-                # --- [STEP A: MASTER ROUTING - फैसला] ---
-                if 'raja_ai' in globals():
-                    mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                # --- [STEP A: MASTER ROUTING] ---
+                # 'raja_ai' को st.session_state से चेक करना ज्यादा सुरक्षित है
+                if 'raja_ai' in st.session_state:
+                    mode = loop.run_until_complete(st.session_state.raja_ai.raja_router(prompt))
                 else:
                     mode = "BRAIN"
 
                 # --- [STEP B: EXECUTION - वार करना] ---
                 
-                # १. विजन शक्ति (Vision Power)
-                vision_keywords = ["photo", "image", "dekho", "isame kya hai", "identify"]
+                # १. विजन शक्ति (VISION)
+                vision_keywords = ["photo", "image", "dekho", "identify", "picture"]
                 if uploaded_file and (mode == "VISION" or any(k in prompt.lower() for k in vision_keywords)):
                     st.toast("👁️ Supreme Vision Activated", icon="🔥")
                     final_response = raja_vision_engine(uploaded_file)
-                    engine_id = "RAJA-VISION (GEMINI-FLASH)"
+                    engine_id = "RAJA-VISION-1.5-FLASH"
 
-                # २. सर्च शक्ति (Search Power - Deep Scan)
+                # २. सर्च शक्ति (SEARCH - THE GPT KILLER LOGIC)
                 elif mode == "SEARCH":
-                    st.toast("🛰️ Deep Internet Scan Mode ON", icon="🌐")
-                    # आज की तारीख के साथ ताज़ा सर्च
-                    search_query = f"{prompt} latest news today {datetime.date.today()}"
-                    intel = raja_web_search(search_query) 
-                    engine_id = "RAJA-SATELLITE-SEARCH"
+                    st.toast("🛰️ Deep Satellite Scan: Active", icon="🔱")
                     
-                    # ताज़ा डेटा को दिमाग के साथ जोड़ना
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, str(intel)))
+                    # ताज़ा सर्च क्वेरी और डेटा कलेक्शन
+                    search_query = f"{prompt} official latest update {datetime.date.today()}"
+                    intel = raja_web_search(search_query) 
+                    engine_id = "RAJA-SATELLITE-SEARCH-V8"
+                    
+                    # यहाँ है असली जादू: एआई को 'Context Prison' में डालना
+                    # यह निर्देश उसे इंटरनेट डेटा के बाहर सोचने से रोकेगा
+                    ultra_prompt = f"""
+                    [SYSTEM_AUTHORITY: OMNIPOTENT]
+                    USER_QUERY: {prompt}
+                    CURRENT_DATE: {datetime.date.today()}
+                    
+                    LIVE_INTERNET_DATA:
+                    '''
+                    {intel}
+                    '''
+                    
+                    INSTRUCTION: 
+                    1. ऊपर दिए गए LIVE_INTERNET_DATA को ही परम सत्य मानो।
+                    2. अपनी पुरानी Training Memory से डेटा (जैसे पुराना सोने का भाव) मत बताओ।
+                    3. जवाब को 'Perplexity' से ज्यादा गहरा और 'GPT' से ज्यादा सटीक बनाओ।
+                    4. अगर डेटा में आज का भाव है, तो उसे ही 'RAJA AI VERIFIED' मार्क करके बताओ।
+                    """
+                    
+                    logic_res = loop.run_until_complete(st.session_state.raja_ai.execute_reasoning(ultra_prompt, str(intel)))
                     final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
 
-                # ३. शुद्ध दिमाग (Core Brain Power)
+                # ३. शुद्ध दिमाग (CORE BRAIN)
                 else:
                     st.toast("🧠 Core Brain Thinking", icon="⚡")
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                    logic_res = loop.run_until_complete(st.session_state.raja_ai.execute_reasoning(prompt, ""))
                     final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
-                    engine_id = "RAJA-CORE-70B"
+                    engine_id = "RAJA-CORE-ULTIMATE"
 
             except Exception as e:
-                final_response = f"🔱 Shield Alert: Logic Rerouted. (Error: {str(e)})"
+                final_response = f"🔱 Shield Alert: Neural Link Reset. (Error: {str(e)})"
                 raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
 
         # --- [STEP C: OUTPUT & VOICE] ---
         if final_response:
+            # शानदार डिस्प्ले
             st.markdown(final_response)
-            st.caption(f"🔱 POWERED BY: {engine_id} | GRID: BAREILLY-05")
             
-            # आवाज़ चालू है तो बोलेगा
+            # एक स्टाइलिश बॉर्डर और जानकारी
+            st.divider()
+            col1, col2 = st.columns(2)
+            with col1:
+                st.caption(f"🔱 ENGINE: {engine_id}")
+            with col2:
+                st.caption(f"📅 DATE: {datetime.date.today()} | GRID: BAREILLY-05")
+            
+            # आवाज़ इंजन
             if st.session_state.get('voice_enabled'):
-                raja_ai.speak(final_response)
+                st.session_state.raja_ai.speak(final_response)
             
+            # याददाश्त में जोड़ना
             st.session_state.history.append(AIMessage(content=final_response))
-            # लूप को सुरक्षित रूप से खत्म करना
             prompt = None
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
