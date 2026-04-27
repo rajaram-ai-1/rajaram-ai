@@ -253,16 +253,41 @@ class RajaAgent:
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
-    async def raja_router(self, user_input):
+   async def raja_router(self, user_input):
         """🔱 MASTER ROUTER: यह तय करेगा कि कौन सी शक्ति इस्तेमाल करनी है"""
         try:
+            p = user_input.lower()
+            
+            # --- [FORCE OVERRIDE: हैकर की पहली शक्ति] ---
+            # अगर ये शब्द मैसेज में हैं, तो एआई से पूछना ही नहीं है, सीधा SEARCH करना है
+            search_keywords = ["सोना", "gold", "price", "bhav", "rate", "weather", "mausam", "news", "खबर", "आज का"]
+            if any(word in p for word in search_keywords):
+                return "SEARCH"
+
+            # अगर फोटो की बात हो रही है
+            vision_keywords = ["photo", "image", "dekho", "image", "pic", "फोटो"]
+            if any(word in p for word in vision_keywords):
+                return "VISION"
+
+            # --- [LLM DECISION: बाकी सब के लिए] ---
             router_prompt = f"""
             User input: "{user_input}"
             Return ONLY one word based on intent:
-            - VISION (if image related)
-            - SEARCH (if news, gold rates, weather, or current facts)
-            - BRAIN (for logic, chat, or coding)
+            - VISION (if it's about seeing an image)
+            - SEARCH (if it's about current real-world facts)
+            - BRAIN (for conversation, logic, or code)
             Result:"""
+            
+            res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "Decision Router")
+            
+            cleaned_res = res.upper()
+            if "VISION" in cleaned_res: return "VISION"
+            if "SEARCH" in cleaned_res: return "SEARCH"
+            return "BRAIN"
+            
+        except Exception as e:
+            # अगर राउटर फेल हुआ, तो डिफ़ॉल्ट ब्रेन पर जाओ
+            return "BRAIN"
             
             res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "Decision Router")
             # --- [फिक्स: सिर्फ मुख्य शब्द उठाना] ---
