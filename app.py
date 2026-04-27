@@ -206,17 +206,20 @@ class RajaAgent:
 
     async def raja_router(self, user_input):
         """🔱 MASTER ROUTER: यह तय करेगा कि कौन सी शक्ति इस्तेमाल करनी है"""
-        router_prompt = f"""
-        User said: "{user_input}"
-        Identify the BEST tool:
-        1. VISION: If user wants to see/describe an image.
-        2. SEARCH: If user asks for news, weather, or current facts.
-        3. BRAIN: For logic, coding, talking, or math.
-        Return ONLY one word: VISION, SEARCH, or BRAIN.
-        """
-        # तेज़ फैसले के लिए छोटे मॉडल का उपयोग
-        res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "You are a Decision Router.")
-        return res.strip().upper()
+        try:
+            router_prompt = f"""
+            User input: "{user_input}"
+            Identify the BEST tool:
+            1. VISION: If user asks about an image/photo.
+            2. SEARCH: If user asks for live rates, news, or latest facts.
+            3. BRAIN: For logic, coding, talking, or math.
+            Return ONLY one word: VISION, SEARCH, or BRAIN.
+            """
+            # तेज़ फैसले के लिए छोटे मॉडल का उपयोग
+            res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "You are a Decision Router.")
+            return res.strip().upper()
+        except:
+            return "BRAIN" # गड़बड़ होने पर डिफ़ॉल्ट दिमाग
 
     async def execute_reasoning(self, user_input, web_data=""):
         """🧠 राजा Ai का मुख्य दिमाग (Dual-Model Logic)"""
@@ -238,93 +241,24 @@ class RajaAgent:
         """⚡ GROQ INFRASTRUCTURE CALL"""
         try:
             llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
-            # पिछले 8 संदेशों की याददाश्त के साथ
             res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
             return res.content, model
         except Exception as e:
-            return f"Neural Error in {model}: {str(e)}", model
+            return f"Neural Error: {str(e)}", model
 
     def speak(self, text):
         """🗣️ RAJA VOICE ENGINE"""
         try:
-            # आवाज़ को भारी और शाही बनाने के लिए (300 शब्दों की लिमिट)
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
             with open("response.mp3", "rb") as f:
                 b64 = base64.b64encode(f.read()).decode()
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except Exception as e: 
-            st.error(f"🔱 Shield Alert (Voice): {e}")
-    
+        except:
+            pass
 
 
-# ------------------------------------------------------------------------------
-# [PHASE 4: AGENTIC PROTOCOLS] - THE FINAL OMNIPOTENT CLASS 🔱
-# ------------------------------------------------------------------------------
 
-class RajaAgent:
-    def __init__(self, system_prompt):
-        """🔱 राजा Ai एजेंट का जन्म और मेमोरी सेटअप"""
-        self.system_prompt = system_prompt
-        if "history" not in st.session_state:
-            st.session_state.history = [SystemMessage(content=system_prompt)]
-
-    async def call_llm(self, model, prompt, system):
-        """LLM को कॉल करने की शक्ति"""
-        try:
-            llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
-            res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
-            return res.content, model
-        except Exception as e:
-            return f"Neural Error in {model}: {str(e)}", model
-
-    async def execute_reasoning(self, user_input, web_data=""):
-        """🧠 राजा Ai का मुख्य दिमाग (The Logic Engine)"""
-        try:
-            instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
-            # दो ताकतवर मॉडल्स से एक साथ सोचना
-            tasks = [
-                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], user_input, instruction),
-                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
-            ]
-            responses = await asyncio.gather(*tasks)
-            # जो जवाब सबसे लंबा और सटीक हो, उसे चुनें
-            final_choice = max(responses, key=lambda x: len(x[0]))
-            return final_choice
-        except Exception as e:
-            raja_shield.auto_fix("NEURAL_GLITCH", str(e))
-            return "🔱 Shield Active: Logic Rerouted due to neural glitch.", "RECOVERY_MODE"
-
-    async def evolve_system(self, command):
-        """🔱 RAJA GHOST ENGINE: नई शक्तियां खुद बनाना"""
-        prompt = (f"Write ONLY the logic for: '{command}'. "
-                 "Return ONLY pure Python code, no markdown.")
-        try:
-            new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
-            clean_code = new_code_raw[0].replace("python", "").replace("```", "").strip()
-            
-            import shakti_vault
-            p_name = f"shakti_{int(time.time())}" 
-            # यहाँ core.GROQ_KEY का उपयोग करें
-            success, msg = shakti_vault.inject_new_shakti(core.GROQ_API_KEY, command, p_name)
-
-            if success:
-                st.toast(f"🔱 NEW FEATURE: {command}", icon="🔥")
-                return f"🔱 SHAKTI STORED: '{command}' फाइल बन गई है।"
-            else: return f"❌ VAULT ERROR: {msg}"
-        except Exception as e:
-            return f"❌ EVOLUTION ERROR: {str(e)}"
-
-    def speak(self, text):
-        """🗣️ राजा की आवाज़"""
-        try:
-            tts = gTTS(text=text[:300], lang='hi')
-            tts.save("response.mp3")
-            with open("response.mp3", "rb") as f:
-                b64 = base64.b64encode(f.read()).decode()
-            st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except Exception as e: 
-            st.error(f"🔱 Voice Engine Glitch: {e}")
 
 # ------------------------------------------------------------------------------
 # [PHASE 5: MASTER IDENTITY & INITIALIZATION] - यहीं से निर्देश दें
