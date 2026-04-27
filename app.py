@@ -236,48 +236,7 @@ class RajaAgent:
         except Exception as e: 
             st.error(f"🔱 Shield Alert (Voice): {e}")
 
-    async def evolve_system(self, command):
-        """🔱 RAJA GHOST ENGINE: CREATES INDEPENDENT FEATURE FILES"""
-        # AI को सख्त हिदायत कि सिर्फ लॉजिक दे, फालतू बातें नहीं
-        prompt = (f"Write ONLY the logic for: '{command}'. "
-                 "Do NOT write function definitions. Use 'st' for Streamlit. "
-                 "Return ONLY pure Python code, no markdown.")
-
-        try:
-            # १. एआई से शुद्ध कोड लेना
-            new_code_raw = await self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], command, prompt)
-            clean_code = new_code_raw[0].replace("python", "").replace("", "").strip()
-            
-            # --- २. तिजोरी (Vault) के जरिए नई फाइल बनवाना (FIXED) ---
-            import shakti_vault
-            import time
-
-            # एक यूनिक नाम बनाना ताकि फाइलें आपस में न टकराएं
-            p_name = f"shakti_{int(time.time())}" 
-
-            # यहाँ हमने ३ चीजें भेजी हैं: १. api_key, २. command, ३. p_name
-            # नोट: पक्का कर लें कि api_key ऊपर कहीं डिफाइन है
-            success, msg = shakti_vault.inject_new_shakti(api_key, command, p_name)
-
-            if success:
-                st.success(msg)
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.error(f"तिजोरी एरर: {msg}")
-
-        except Exception as e:
-            # यह 'except' ब्लॉक Syntax Error को खत्म करेगा
-            st.error(f"⚠️ गड़बड़ हुई मालिक: {e}")
-        
-            if success:
-                st.toast(f"🔱 NEW FEATURE GENERATED: {command}", icon="🔥")
-                return f"🔱 SHAKTI STORED: '{command}' के लिए नई फाइल बन गई है। GitHub Refresh करें और Reboot करें!"
-            else:
-                return "❌ VAULT WRITE FAILURE: फाइल नहीं बन पाई।"
-        except Exception as e:
-            return f"❌ EVOLUTION ERROR: {str(e)}"
-
+    
 
 
 # ------------------------------------------------------------------------------
@@ -493,7 +452,7 @@ def raja_vision_engine(uploaded_file):
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         model = genai.GenerativeModel('gemini-1.5-flash')
         img = Image.open(uploaded_file)
-        hacker_prompt = "तुम राजाराम एआई के 'Supreme Vision' मोड में हो। इस फोटो को गहराई से देखो और बारीकियां Hinglish में समझाओ।"
+        hacker_prompt = "तुम राजा एआई के 'Supreme Vision' मोड में हो। इस फोटो को गहराई से देखो और बारीकियां Hinglish में समझाओ।"
         response = model.generate_content([hacker_prompt, img])
         return response.text if response.text else "🔱 विजन इंजन ने कोई जवाब नहीं दिया।"
     except Exception as e:
