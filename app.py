@@ -253,7 +253,7 @@ class RajaAgent:
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
-   async def raja_router(self, user_input):
+    async def raja_router(self, user_input):
         """🔱 MASTER ROUTER: यह तय करेगा कि कौन सी शक्ति इस्तेमाल करनी है"""
         try:
             p = user_input.lower()
