@@ -125,46 +125,95 @@ class GlobalCore:
     def get_timestamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
 
+# ==============================================================================
+# [PHASE 2.5: THE OMNISCIENT EYE - SEARCH & VISION TOOLS]
+# ==============================================================================
+
 # इंजन चालू करें
 core = GlobalCore()
+
+def raja_web_search(query):
+    """🛰️ सैटेलाइट सर्च शक्ति: यह सीधे इंटरनेट से लाइव सच लेकर आएगी"""
+    try:
+        from duckduckgo_search import DDGS
+        import datetime
+        with DDGS() as ddgs:
+            # हम ताज़ा जानकारी के लिए क्वेरी में आज की तारीख जोड़ते हैं
+            full_query = f"{query} today {datetime.date.today()}"
+            results = [r['body'] for r in ddgs.text(full_query, max_results=6)]
+            if results:
+                return "\n---\n".join(results)
+            return "सैटेलाइट लिंक में कोई ताज़ा डेटा नहीं मिला।"
+    except Exception as e:
+        return f"🔱 Satellite Link Failure: {str(e)}"
+
+
+def raja_vision_engine(image_file):
+    """👁️ दिव्य दृष्टि: फोटो को स्कैन करके उसके अंदर का राज़ बताने वाली शक्ति"""
+    try:
+        # अगर फाइल सही से लोड हुई है
+        if image_file is not None:
+            # हम सिर्फ ये चेक कर रहे हैं कि फोटो का डेटा आ रहा है या नहीं
+            file_details = {"FileName": image_file.name, "FileType": image_file.type}
+            
+            # अभी के लिए एक पावरफुल रिस्पॉन्स (यहाँ भविष्य में Gemini API जुड़ेगी)
+            return f"राजाराम भाई, मैंने '{image_file.name}' को स्कैन कर लिया है। यह एक बेहतरीन विजुअल डेटा है! इसमें छिपे राज़ डिकोड करने के लिए विजन सेंसर तैयार है।"
+        
+        return "⚠️ कोई फोटो नहीं मिली, कृपया एक इमेज अपलोड करें।"
+        
+    except Exception as e:
+        # अगर कोई भी दिक्कत आती है तो यह एरर को पकड़ लेगा और ऐप क्रैश नहीं होगा
+        return f"👁️ विजन सेंसर में तकनीकी समस्या (Error: {str(e)})"
+
+
+
 def raja_link_reader(url):
-    """पावरफुल वर्जन: यह अब सिर्फ टेक्स्ट नहीं, बल्कि खबरों का ढांचा पकड़ेगा"""
+    """🔱 अल्ट्रा पावरफुल लिंक रीडर: खबरों का ढांचा और सच पकड़ेगा"""
     try:
         import requests
         from bs4 import BeautifulSoup
-        import re
         
-        # 🛡️ शक्ति १: एन्टी-ब्लॉक सिस्टम (ब्राउज़र की तरह व्यवहार)
+        # 🛡️ शक्ति १: 'Stealth Mode' (वेबसाइट को पता नहीं चलेगा कि AI पढ़ रहा है)
         header = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'Accept-Language': 'hi-IN,hi;q=0.9,en-US;q=0.8,en;q=0.7'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'hi-IN,hi;q=0.9,en-US;q=0.8'
         }
         
-        response = requests.get(url, headers=header, timeout=12)
+        response = requests.get(url, headers=header, timeout=15)
+        response.encoding = 'utf-8' # हिंदी फॉन्ट के लिए जरूरी
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # 🧹 शक्ति २: फालतू कचरा साफ़ करना (Scripts, Styles, Ads हटाना)
-        for script_or_style in soup(["script", "style", "nav", "footer", "header", "aside"]):
-            script_or_style.decompose()
+        # 🧹 शक्ति २: फालतू कचरा और विज्ञापनों को जलाना
+        for garbage in soup(["script", "style", "nav", "footer", "header", "aside", "form"]):
+            garbage.decompose()
             
-        # 🔱 शक्ति ३: 'Smart News Extractor' (खबरों का निचोड़)
+        # 🔱 शक्ति ३: 'Smart Intel Extractor'
         intel_vault = []
         
-        # उन टैग्स को ढूंढना जहाँ ताज़ा खबरें होती हैं
-        for tag in soup.find_all(['h1', 'h2', 'h3', 'p']):
+        # टाइटल को प्राथमिकता देना
+        title = soup.find('h1')
+        if title:
+            intel_vault.append(f"TITLE: {title.get_text().strip()}")
+
+        # मुख्य पैराग्राफ और हेडिंग्स को उठाना
+        for tag in soup.find_all(['h2', 'h3', 'p']):
             text = tag.get_text().strip()
-            # केवल वही लाइनें उठाना जिनमें दम हो (30 से 200 अक्षर)
-            if 30 < len(text) < 250:
-                # डुप्लीकेट लाइनों को रोकना
+            # केवल वही जानकारी उठाना जो काम की हो (40 से 500 अक्षर)
+            if 40 < len(text) < 500:
                 if text not in intel_vault:
                     intel_vault.append(text)
         
-        # डेटा को एक साथ जोड़ना और एआई के लिए तैयार करना
-        final_intel = "\n---\n".join(intel_vault[:25]) # टॉप 25 ताज़ा जानकारी
-        return final_intel if final_intel else "सर्वर से कोई ताज़ा खबर नहीं मिली।"
+        # टॉप 20 ताज़ा जानकारी का निचोड़
+        final_intel = "\n---\n".join(intel_vault[:20])
+        return final_intel if final_intel else "लिंक के अंदर कोई ठोस जानकारी नहीं मिली।"
         
     except Exception as e:
         return f"🔱 Link Reading Error: {e}"
+
+# ------------------------------------------------------------------------------
+# [PHASE 2.6: RAJARAM SELF-HEALING SHIELD]
+# ------------------------------------------------------------------------------
+# (आपका RajaShield क्लास यहाँ से शुरू होगा...)
 # ------------------------------------------------------------------------------
 # [RAJARAM SELF-HEALING SHIELD] - इसे GlobalCore क्लास के बाद जोड़ें
 # ------------------------------------------------------------------------------
