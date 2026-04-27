@@ -401,7 +401,17 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 # --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
 
-# २. मुख्य प्रोसेसिंग यूनिट
+# १. इनपुट को संभालना (Input Gatekeeper)
+prompt = None
+user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
+
+if st.session_state.get("prompt"):
+    prompt = st.session_state.prompt
+    st.session_state.prompt = None 
+elif user_input:
+    prompt = user_input
+
+# २. मुख्य प्रोसेसिंग यूनिट (Core Processing Unit)
 if prompt:
     # --- [LIFELINE: ASYNC LOOP SETUP] ---
     import asyncio
@@ -411,111 +421,96 @@ if prompt:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-    # --- [MASTER INITIALIZATION: यहाँ सुरक्षा कवच लगाएं] ---
-    # अगर राजा एआई गायब है, तो उसे यहीं जगाएं
+    # --- [MASTER INITIALIZATION: सुरक्षा कवच] ---
     if "raja_ai" not in st.session_state:
-        # IDENTITY आपका सिस्टम प्रॉम्ट है
-        st.session_state.raja_ai = RajaAgent(IDENTITY) 
+        # पक्का करें कि IDENTITY ऊपर डिफाइन की गई है
+        st.session_state.raja_ai = RajaAgent(IDENTITY)
     
-    # अब सीधा 'raja_ai' वेरिएबल बनाएं ताकि नीचे आसानी हो
     raja_ai = st.session_state.raja_ai
 
-    # यूजर का मैसेज हिस्ट्री में जोड़ना
+    # हिस्ट्री को सुरक्षित रखना
     if "history" not in st.session_state:
         st.session_state.history = []
-    st.session_state.history.append(HumanMessage(content=prompt))
-
-    with st.chat_message("user"):
-        st.markdown(prompt)
     
+    # यूजर का मैसेज डिस्प्ले करना
+    st.session_state.history.append(HumanMessage(content=prompt))
+    with st.chat_message("user"):
+        st.markdown(f"**You:** {prompt}")
+
+    # एआई का जवाब (The Assistant Box)
     with st.chat_message("assistant"):
         final_response = None
-        engine_id = "RAJA-CORE"
+        engine_id = "RAJA-CORE-V8"
         
         with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
             try:
-                # --- [STEP A: MASTER ROUTING] ---
-                # अब हम जानते हैं कि 'raja_ai' पक्का मौजूद है
+                # --- [STEP A: MASTER ROUTING - सबसे तेज़ फैसला] ---
                 mode = loop.run_until_complete(raja_ai.raja_router(prompt))
                 
-                # यहाँ से आगे आपका विजन और सर्च वाला लॉजिक शुरू होगा
-
-                # --- [STEP B: EXECUTION - वार करना] ---
+                # --- [STEP B: MULTI-POWER EXECUTION] ---
                 
-                # १. विजन शक्ति (VISION)
-                vision_keywords = ["photo", "image", "dekho", "identify", "picture"]
-                if uploaded_file and (mode == "VISION" or any(k in prompt.lower() for k in vision_keywords)):
+                # १. विजन शक्ति (VISION POWER)
+                vision_keywords = ["photo", "image", "dekho", "isame kya hai", "identify", "picture"]
+                if 'uploaded_file' in globals() and uploaded_file and (mode == "VISION" or any(k in prompt.lower() for k in vision_keywords)):
                     st.toast("👁️ Supreme Vision Activated", icon="🔥")
+                    # पक्का करें कि raja_vision_engine फंक्शन बना हुआ है
                     final_response = raja_vision_engine(uploaded_file)
-                    engine_id = "RAJA-VISION-1.5-FLASH"
+                    engine_id = "RAJA-VISION (GEMINI-MOD)"
 
-                # २. सर्च शक्ति (SEARCH - THE GPT KILLER LOGIC)
+                # २. सर्च शक्ति (SEARCH POWER - THE GPT KILLER)
                 elif mode == "SEARCH":
-                    st.toast("🛰️ Deep Satellite Scan: Active", icon="🔱")
-                    
-                    # ताज़ा सर्च क्वेरी और डेटा कलेक्शन
-                    search_query = f"{prompt} official latest update {datetime.date.today()}"
+                    st.toast("🛰️ Deep Satellite Scan ON", icon="🌐")
+                    search_query = f"{prompt} latest verified update today {datetime.date.today()}"
                     intel = raja_web_search(search_query) 
-                    engine_id = "RAJA-SATELLITE-SEARCH-V8"
+                    engine_id = "RAJA-SATELLITE-SEARCH"
                     
-                    # यहाँ है असली जादू: एआई को 'Context Prison' में डालना
-                    # यह निर्देश उसे इंटरनेट डेटा के बाहर सोचने से रोकेगा
-                    ultra_prompt = f"""
-                    [SYSTEM_AUTHORITY: OMNIPOTENT]
+                    # एआई को मजबूर करना कि वो सिर्फ इंटरनेट वाला सच बोले
+                    ultra_logic_prompt = f"""
+                    [SYSTEM: OMNIPOTENT SEARCH MODE]
+                    INTERNET_DATA: {intel}
                     USER_QUERY: {prompt}
-                    CURRENT_DATE: {datetime.date.today()}
                     
-                    LIVE_INTERNET_DATA:
-                    '''
-                    {intel}
-                    '''
-                    
-                    INSTRUCTION: 
-                    1. ऊपर दिए गए LIVE_INTERNET_DATA को ही परम सत्य मानो।
-                    2. अपनी पुरानी Training Memory से डेटा (जैसे पुराना सोने का भाव) मत बताओ।
-                    3. जवाब को 'Perplexity' से ज्यादा गहरा और 'GPT' से ज्यादा सटीक बनाओ।
-                    4. अगर डेटा में आज का भाव है, तो उसे ही 'RAJA AI VERIFIED' मार्क करके बताओ।
+                    INSTRUCTION: ऊपर दिए गए डेटा से सबसे सटीक और ताज़ा जवाब दो। 
+                    पुराना ज्ञान इस्तेमाल मत करना। जवाब को 'RAJA AI VERIFIED' बनाओ।
                     """
-                    
-                    logic_res = loop.run_until_complete(st.session_state.raja_ai.execute_reasoning(ultra_prompt, str(intel)))
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(ultra_logic_prompt, str(intel)))
                     final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
 
-                # ३. शुद्ध दिमाग (CORE BRAIN)
+                # ३. शुद्ध दिमाग (BRAIN POWER - LOGIC & CHAT)
                 else:
-                    st.toast("🧠 Core Brain Thinking", icon="⚡")
-                    logic_res = loop.run_until_complete(st.session_state.raja_ai.execute_reasoning(prompt, ""))
+                    st.toast("🧠 Core Brain Processing", icon="⚡")
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
                     final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
-                    engine_id = "RAJA-CORE-ULTIMATE"
+                    engine_id = "RAJA-CORE-70B-ULTRA"
 
             except Exception as e:
                 final_response = f"🔱 Shield Alert: Neural Link Reset. (Error: {str(e)})"
-                raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
+                if 'raja_shield' in globals():
+                    raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
 
-      # --- [STEP C: OUTPUT & VOICE] ---
+        # --- [STEP C: OUTPUT DISPLAY & VOICE] ---
         if final_response:
-            # शानदार डिस्प्ले
+            # शानदार आउटपुट
             st.markdown(final_response)
             
-            # एक स्टाइलिश बॉर्डर और जानकारी
+            # इन्फो कार्ड
             st.divider()
-            col1, col2 = st.columns(2)
-            with col1:
-                st.caption(f"🔱 ENGINE: {engine_id}")
-            with col2:
-                st.caption(f"📅 DATE: {datetime.date.today()} | GRID: BAREILLY-05")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.caption(f"🔱 POWERED BY: {engine_id}")
+            with c2:
+                st.caption(f"📅 {datetime.date.today()} | GRID: BAREILLY-05")
             
-            # --- [FIX: CHECK IF RAJA_AI EXISTS BEFORE SPEAKING] ---
+            # आवाज़ (Voice Engine)
             if st.session_state.get('voice_enabled'):
-                # पहले चेक करें कि ऑब्जेक्ट मौजूद है या नहीं
-                if "raja_ai" in st.session_state:
-                    st.session_state.raja_ai.speak(final_response)
-                elif 'raja_ai' in globals():
+                try:
                     raja_ai.speak(final_response)
-                else:
-                    st.warning("🔱 आवाज़ इंजन तैयार नहीं है, लेकिन जवाब ऊपर दे दिया गया है।")
+                except:
+                    pass
             
-            # याददाश्त में जोड़ना
+            # हिस्ट्री अपडेट
             st.session_state.history.append(AIMessage(content=final_response))
+            # प्रॉम्ट क्लीनअप
             prompt = None
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
