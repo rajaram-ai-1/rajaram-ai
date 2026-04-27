@@ -456,107 +456,61 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 # [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
 # ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - ULTIMATE OMNIPOTENT VERSION (FIXED)
-# ------------------------------------------------------------------------------
+# --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
 
-# --- [UTILITY FUNCTIONS - इन्हें लूप से बाहर रखें] ---
-import google.generativeai as genai
-from PIL import Image
-
-def raja_vision_engine(uploaded_file):
-    try:
-        if "GEMINI_API_KEY" not in st.secrets:
-            return "🔱 Error: GEMINI_API_KEY नहीं मिली भाई!"
-        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        img = Image.open(uploaded_file)
-        hacker_prompt = "तुम राजा एआई के 'Supreme Vision' मोड में हो। इस फोटो को गहराई से देखो और बारीकियां Hinglish में समझाओ।"
-        response = model.generate_content([hacker_prompt, img])
-        return response.text if response.text else "🔱 विजन इंजन ने कोई जवाब नहीं दिया।"
-    except Exception as e:
-        return f"🔱 Vision Engine Error: {str(e)}"
-
-def raja_web_search(query):
-    try:
-        from duckduckgo_search import DDGS
-        with DDGS() as ddgs:
-            results = [r['body'] for r in ddgs.text(query, max_results=5)]
-            return "\n".join(results)
-    except Exception as e:
-        return f"सर्च एरर: {str(e)}"
-
-# --- [INPUT HANDLING] ---
-user_input = st.chat_input("Ask anything to Raja Ai")
-prompt = None
-
-if st.session_state.get("prompt"):
-    prompt = st.session_state.prompt
-    st.session_state.prompt = None 
-elif user_input:
-    prompt = user_input
-
-# --- [CORE PROCESSING UNIT] ---
 if prompt:
-    # १. यूजर का मैसेज दिखाओ
-    triggered = trigger_raja_powers(prompt)
+    # १. यूजर का इनपुट हिस्ट्री में डालें
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # २. एआई का दिमाग (Assistant)
     with st.chat_message("assistant"):
-        for s in triggered:
-            st.warning(s)
-        
         final_response = None
         engine_id = "RAJA-CORE"
-
-        with st.spinner("🧠 RAJA IS PROCESSING..."):
-            # A. चेक करें: क्या फोटो के बारे में सवाल है?
-            vision_keywords = ["photo", "image", "dekho", "isame kya hai", "identify"]
-            if uploaded_file and any(k in prompt.lower() for k in vision_keywords):
-                final_response = raja_vision_engine(uploaded_file)
-                engine_id = "RAJA-SUPREME-VISION"
+        
+        with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
             
-            # B. चेक करें: क्या ताज़ा जानकारी चाहिए?
-            else:
-                intel = ""
-                if "http" in prompt:
-                    intel = raja_link_reader(prompt)
-                    engine_id = "RAJA-LINK-READER"
-                elif st.session_state.get('search_enabled'):
-                    search_keys = ["news", "today", "latest", "mausam", "weather", "हाल", "खबर", "आज"]
-                    if any(k in prompt.lower() for k in search_keys):
-                        intel = raja_web_search(prompt)
-                        engine_id = "RAJA-OMNIPOTENT-WEB"
+            # --- [STEP A: MASTER ROUTING - शक्ति का चुनाव] ---
+            # एआई खुद सोचेगा कि उसे क्या करना है
+            mode = loop.run_until_complete(raja_ai.raja_router(prompt)) if 'raja_ai' in globals() else "BRAIN"
 
-                # C. फाइनल लॉजिक (Groq Brain)
-                combined_prompt = f"RAW_DATA: {intel}\nUSER_QUESTION: {prompt}" if intel else prompt
+            # --- [STEP B: EXECUTION - वार करना] ---
+            
+            # १. अगर फोटो है और उसके बारे में सवाल है (VISION SHAKTI)
+            if uploaded_file and mode == "VISION":
+                st.toast("👁️ Supreme Vision Activated", icon="🔥")
+                final_response = raja_vision_engine(uploaded_file)
+                engine_id = "RAJA-VISION (GEMINI-FLASH-1.5)"
+
+            # २. अगर ताज़ा जानकारी चाहिए (SEARCH SHAKTI - DEEP SCAN)
+            elif mode == "SEARCH":
+                st.toast("🛰️ Deep Internet Scan Mode ON", icon="🌐")
+                # सोने का भाव या न्यूज़ के लिए खास सर्च
+                search_query = f"{prompt} latest update {datetime.date.today()}"
+                intel = raja_web_search(search_query) 
+                engine_id = "RAJA-SATELLITE-SEARCH"
                 
-                try:
-                    # Async रन करने के लिए
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(combined_prompt, str(intel)))
-                    
-                    if isinstance(logic_res, tuple):
-                        final_response, _ = logic_res
-                    else:
-                        final_response = logic_res
-                except Exception as e:
-                    final_response = f"🔱 Core Error: {str(e)}"
+                # अब ताज़ा जानकारी को दिमाग (Groq) को दो ताकि वह सच बताए
+                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, str(intel)))
+                final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
 
-        # ३. आउटपुट दिखाना
+            # ३. अगर दिमाग का काम है (CORE BRAIN SHAKTI)
+            else:
+                st.toast("🧠 Core Brain Thinking", icon="⚡")
+                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
+                engine_id = "RAJA-CORE-70B"
+
+        # --- [STEP C: OUTPUT & VOICE] ---
         if final_response:
             st.markdown(final_response)
-            st.caption(f"Engine: {engine_id} | Status: Immortal 🔱")
+            st.caption(f"🔱 POWERED BY: {engine_id} | GRID: BAREILLY-05")
             
             if st.session_state.get('voice_enabled'):
                 raja_ai.speak(final_response)
             
             st.session_state.history.append(AIMessage(content=final_response))
-            prompt = None # लूप रोकने के लिए
+            prompt = None # लूप सुरक्षा
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
