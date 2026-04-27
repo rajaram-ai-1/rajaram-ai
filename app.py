@@ -490,7 +490,7 @@ if prompt:
                 final_response = f"🔱 Shield Alert: Neural Link Reset. (Error: {str(e)})"
                 raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
 
-        # --- [STEP C: OUTPUT & VOICE] ---
+      # --- [STEP C: OUTPUT & VOICE] ---
         if final_response:
             # शानदार डिस्प्ले
             st.markdown(final_response)
@@ -503,9 +503,15 @@ if prompt:
             with col2:
                 st.caption(f"📅 DATE: {datetime.date.today()} | GRID: BAREILLY-05")
             
-            # आवाज़ इंजन
+            # --- [FIX: CHECK IF RAJA_AI EXISTS BEFORE SPEAKING] ---
             if st.session_state.get('voice_enabled'):
-                st.session_state.raja_ai.speak(final_response)
+                # पहले चेक करें कि ऑब्जेक्ट मौजूद है या नहीं
+                if "raja_ai" in st.session_state:
+                    st.session_state.raja_ai.speak(final_response)
+                elif 'raja_ai' in globals():
+                    raja_ai.speak(final_response)
+                else:
+                    st.warning("🔱 आवाज़ इंजन तैयार नहीं है, लेकिन जवाब ऊपर दे दिया गया है।")
             
             # याददाश्त में जोड़ना
             st.session_state.history.append(AIMessage(content=final_response))
