@@ -457,13 +457,25 @@ if "history" in st.session_state:
 # [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
 # ------------------------------------------------------------------------------
 # --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
+# --- [INPUT HANDLING - यह लाइनें पक्का करें] ---
+user_input = st.chat_input("Ask anything to Raja Ai")
+prompt = None
 
+# चेक करें कि बटन दबाया गया है या टाइप किया गया है
+if st.session_state.get("prompt"):
+    prompt = st.session_state.prompt
+    st.session_state.prompt = None # इस्तेमाल के बाद खाली करें
+elif user_input:
+    prompt = user_input
+
+# --- [CORE PROCESSING UNIT - अब एरर नहीं आएगा] ---
 if prompt:
     # १. यूजर का इनपुट हिस्ट्री में डालें
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
-
+    
+    # बाकी का कोड इसके नीचे...
     with st.chat_message("assistant"):
         final_response = None
         engine_id = "RAJA-CORE"
