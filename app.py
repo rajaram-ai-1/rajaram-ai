@@ -457,72 +457,88 @@ if "history" in st.session_state:
 # [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
 # ------------------------------------------------------------------------------
 # --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
-# --- [INPUT HANDLING - यह लाइनें पक्का करें] ---
+
+# १. इनपुट को संभालना (Input Handling)
 user_input = st.chat_input("Ask anything to Raja Ai")
 prompt = None
 
-# चेक करें कि बटन दबाया गया है या टाइप किया गया है
 if st.session_state.get("prompt"):
     prompt = st.session_state.prompt
-    st.session_state.prompt = None # इस्तेमाल के बाद खाली करें
+    st.session_state.prompt = None 
 elif user_input:
     prompt = user_input
 
-# --- [CORE PROCESSING UNIT - अब एरर नहीं आएगा] ---
+# २. मुख्य प्रोसेसिंग यूनिट (Core Processing)
 if prompt:
-    # १. यूजर का इनपुट हिस्ट्री में डालें
+    # --- [LIFELINE: ASYNC LOOP SETUP] ---
+    import asyncio
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    # यूजर का मैसेज स्क्रीन पर दिखाना
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # बाकी का कोड इसके नीचे...
     with st.chat_message("assistant"):
         final_response = None
         engine_id = "RAJA-CORE"
         
         with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
-            
-            # --- [STEP A: MASTER ROUTING - शक्ति का चुनाव] ---
-            # एआई खुद सोचेगा कि उसे क्या करना है
-            mode = loop.run_until_complete(raja_ai.raja_router(prompt)) if 'raja_ai' in globals() else "BRAIN"
+            try:
+                # --- [STEP A: MASTER ROUTING - फैसला] ---
+                if 'raja_ai' in globals():
+                    mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                else:
+                    mode = "BRAIN"
 
-            # --- [STEP B: EXECUTION - वार करना] ---
-            
-            # १. अगर फोटो है और उसके बारे में सवाल है (VISION SHAKTI)
-            if uploaded_file and mode == "VISION":
-                st.toast("👁️ Supreme Vision Activated", icon="🔥")
-                final_response = raja_vision_engine(uploaded_file)
-                engine_id = "RAJA-VISION (GEMINI-FLASH-1.5)"
-
-            # २. अगर ताज़ा जानकारी चाहिए (SEARCH SHAKTI - DEEP SCAN)
-            elif mode == "SEARCH":
-                st.toast("🛰️ Deep Internet Scan Mode ON", icon="🌐")
-                # सोने का भाव या न्यूज़ के लिए खास सर्च
-                search_query = f"{prompt} latest update {datetime.date.today()}"
-                intel = raja_web_search(search_query) 
-                engine_id = "RAJA-SATELLITE-SEARCH"
+                # --- [STEP B: EXECUTION - वार करना] ---
                 
-                # अब ताज़ा जानकारी को दिमाग (Groq) को दो ताकि वह सच बताए
-                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, str(intel)))
-                final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
+                # १. विजन शक्ति (Vision Power)
+                vision_keywords = ["photo", "image", "dekho", "isame kya hai", "identify"]
+                if uploaded_file and (mode == "VISION" or any(k in prompt.lower() for k in vision_keywords)):
+                    st.toast("👁️ Supreme Vision Activated", icon="🔥")
+                    final_response = raja_vision_engine(uploaded_file)
+                    engine_id = "RAJA-VISION (GEMINI-FLASH)"
 
-            # ३. अगर दिमाग का काम है (CORE BRAIN SHAKTI)
-            else:
-                st.toast("🧠 Core Brain Thinking", icon="⚡")
-                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-                final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
-                engine_id = "RAJA-CORE-70B"
+                # २. सर्च शक्ति (Search Power - Deep Scan)
+                elif mode == "SEARCH":
+                    st.toast("🛰️ Deep Internet Scan Mode ON", icon="🌐")
+                    # आज की तारीख के साथ ताज़ा सर्च
+                    search_query = f"{prompt} latest news today {datetime.date.today()}"
+                    intel = raja_web_search(search_query) 
+                    engine_id = "RAJA-SATELLITE-SEARCH"
+                    
+                    # ताज़ा डेटा को दिमाग के साथ जोड़ना
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, str(intel)))
+                    final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
+
+                # ३. शुद्ध दिमाग (Core Brain Power)
+                else:
+                    st.toast("🧠 Core Brain Thinking", icon="⚡")
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                    final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
+                    engine_id = "RAJA-CORE-70B"
+
+            except Exception as e:
+                final_response = f"🔱 Shield Alert: Logic Rerouted. (Error: {str(e)})"
+                raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
 
         # --- [STEP C: OUTPUT & VOICE] ---
         if final_response:
             st.markdown(final_response)
             st.caption(f"🔱 POWERED BY: {engine_id} | GRID: BAREILLY-05")
             
+            # आवाज़ चालू है तो बोलेगा
             if st.session_state.get('voice_enabled'):
                 raja_ai.speak(final_response)
             
             st.session_state.history.append(AIMessage(content=final_response))
-            prompt = None # लूप सुरक्षा
+            # लूप को सुरक्षित रूप से खत्म करना
+            prompt = None
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
