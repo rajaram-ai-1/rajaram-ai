@@ -198,12 +198,28 @@ raja_shield = RajaShield()
 # ------------------------------------------------------------------------------
 
 class RajaAgent:
-    def _init_(self, system_prompt):
+    def __init__(self, system_prompt):
+        """🔱 राजा Ai की याददाश्त और पहचान सेटअप"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
+    async def raja_router(self, user_input):
+        """🔱 MASTER ROUTER: यह तय करेगा कि कौन सी शक्ति इस्तेमाल करनी है"""
+        router_prompt = f"""
+        User said: "{user_input}"
+        Identify the BEST tool:
+        1. VISION: If user wants to see/describe an image.
+        2. SEARCH: If user asks for news, weather, or current facts.
+        3. BRAIN: For logic, coding, talking, or math.
+        Return ONLY one word: VISION, SEARCH, or BRAIN.
+        """
+        # तेज़ फैसले के लिए छोटे मॉडल का उपयोग
+        res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "You are a Decision Router.")
+        return res.strip().upper()
+
     async def execute_reasoning(self, user_input, web_data=""):
+        """🧠 राजा Ai का मुख्य दिमाग (Dual-Model Logic)"""
         try:
             instruction = f"{self.system_prompt}\n\n[LIVE_INTEL: {web_data}]"
             tasks = [
@@ -211,6 +227,7 @@ class RajaAgent:
                 self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], user_input, instruction)
             ]
             responses = await asyncio.gather(*tasks)
+            # सबसे सटीक और गहरा जवाब चुनना
             final_choice = max(responses, key=lambda x: len(x[0]))
             return final_choice
         except Exception as e:
@@ -218,16 +235,19 @@ class RajaAgent:
             return "🔱 SHIELD ACTIVE: I'm rerouting logic due to a neural glitch.", "RECOVERY_MODE"
 
     async def call_llm(self, model, prompt, system):
+        """⚡ GROQ INFRASTRUCTURE CALL"""
         try:
             llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
+            # पिछले 8 संदेशों की याददाश्त के साथ
             res = await llm.ainvoke([SystemMessage(content=system)] + st.session_state.history[-8:])
             return res.content, model
         except Exception as e:
             return f"Neural Error in {model}: {str(e)}", model
 
     def speak(self, text):
-        """🔱 RAJA VOICE ENGINE"""
+        """🗣️ RAJA VOICE ENGINE"""
         try:
+            # आवाज़ को भारी और शाही बनाने के लिए (300 शब्दों की लिमिट)
             tts = gTTS(text=text[:300], lang='hi')
             tts.save("response.mp3")
             with open("response.mp3", "rb") as f:
@@ -235,7 +255,6 @@ class RajaAgent:
             st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
         except Exception as e: 
             st.error(f"🔱 Shield Alert (Voice): {e}")
-
     
 
 
