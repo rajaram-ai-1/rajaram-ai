@@ -141,40 +141,38 @@ raja_shield = RajaShield()
 # ------------------------------------------------------------------------------
 # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
 # ------------------------------------------------------------------------------
-
 class RajaAgent:
     def __init__(self, system_prompt):
         """🔱 RAJA AI: NEURAL MEMORY SETUP"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
-            # सिस्टम प्रॉम्प्ट को हमेशा याददाश्त के टॉप पर रखना
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
     async def raja_router(self, user_input):
+        """🚀 LIGHT-SPEED ROUTER: बिजली की तरह फैसला लेगा"""
         try:
             p = user_input.lower()
             
-            # --- [FORCE SEARCH TRIGGERS] ---
-            # "मौसम" शब्द हिंदी अक्षरों में भी जोड़ना जरूरी है
+            # --- [FORCE SEARCH & VISION TRIGGERS] ---
             search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
-                            "मौसम", "तापमान", "temperature", "बारिश", "rain", "live"]
+                            "मौसम", "तापमान", "temperature", "बारिश", "rain", "live", "सरकारी", "योजना"]
             
             if any(word in p for word in search_words):
                 return "SEARCH"
             
-            # बाकी कोड वैसा ही रहेगा...
-
-            # अगर विज़न की बात हो रही है
-            if any(word in p for word in ["photo", "image", "dekho", "pic", "फोटो"]):
+            if any(word in p for word in ["photo", "image", "dekho", "pic", "फोटो", "देखकर बताओ"]):
                 return "VISION"
 
-            # --- [AI REASONING: बाकी सब के लिए] ---
-            router_prompt = f"User: {user_input}\nTask: Return ONLY 'VISION', 'SEARCH', or 'BRAIN' based on intent."
+            # सबसे हल्के मॉडल से तुरंत फैसला (Speed Optimization)
+            router_prompt = f"Categorize: '{user_input}'. Reply only 'VISION', 'SEARCH', or 'BRAIN'."
+            res_stream, _ = await self.call_llm(core.BRAIN_CATALOG["FLASH_VISION"], router_prompt, "Router Mode")
             
-            # सबसे हल्के मॉडल (11b) से जल्दी फैसला करवाना
-            res, _ = await self.call_llm(core.BRAIN_CATALOG["FLASH_VISION"], router_prompt, "Router Mode")
+            # चूंकि call_llm अब स्ट्रीम देता है, हम इसे तुरंत पढ़ेंगे
+            decision = ""
+            async for chunk in res_stream:
+                decision += chunk.content
             
-            decision = res.upper()
+            decision = decision.upper()
             if "VISION" in decision: return "VISION"
             if "SEARCH" in decision: return "SEARCH"
             return "BRAIN"
@@ -184,69 +182,64 @@ class RajaAgent:
             return "BRAIN"
 
     async def execute_reasoning(self, user_input, web_data=""):
-        """🧠 DUAL-CORE REASONING: दो शक्तिशाली दिमाग एक साथ सोचते हैं"""
+        """🧠 OMNIPOTENT REASONING: अब जवाब रुकेगा नहीं, बरसेगा!"""
         try:
-            # डेटा इंजेक्ट करना (अगर वेब सर्च से आया हो)
-            context_input = f"WEB_INTEL: {web_data}\n\nUSER: {user_input}" if web_data else user_input
+            # डेटा को इंजेक्ट करना
+            context_input = (f"SATELLITE_INTEL: {web_data}\n\nUSER_COMMAND: {user_input}" 
+                             if web_data else user_input)
 
-            # दो अलग-अलग मॉडल्स को एक साथ (Parallel) चलाना ताकि सबसे सटीक जवाब मिले
-            tasks = [
-                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], context_input, self.system_prompt),
-                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], context_input, self.system_prompt)
-            ]
-            
-            # दोनों का इंतज़ार करना
-            responses = await asyncio.gather(*tasks)
-            
-            # 'Quality Filter': जो मॉडल ज्यादा बड़ा और विस्तृत जवाब देगा, उसे चुनना
-            final_choice = max(responses, key=lambda x: len(x[0]))
-            return final_choice
+            # सबसे शक्तिशाली मॉडल (70B) से सीधा स्ट्रीम लेना
+            # हम Parallel नहीं कर रहे क्योंकि स्ट्रीमिंग में एक ही 'Best' मॉडल बेहतर है
+            response_stream, model = await self.call_llm(
+                core.BRAIN_CATALOG["ULTIMATE_70B"], 
+                context_input, 
+                self.system_prompt
+            )
+            return response_stream, model
             
         except Exception as e:
             raja_shield.log_error("NEURAL_COLLAPSE", str(e))
             return "🔱 Shield Active: Logic Rerouted due to spike.", "RECOVERY"
 
     async def call_llm(self, model, prompt, system):
-        """⚡ GROQ INFRASTRUCTURE: हाई-स्पीड रिस्पॉन्स"""
+        """⚡ GROQ STREAMING ENGINE: 0-सेकंड रिस्पॉन्स लॉजिक"""
         try:
-            llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=25)
+            # यहाँ streaming=True सबसे बड़ी शक्ति है
+            llm = ChatGroq(
+                groq_api_key=core.GROQ_API_KEY, 
+                model_name=model, 
+                temperature=0.6,
+                streaming=True # यह शब्द-दर-शब्द जवाब भेजेगा
+            )
             
-            # मेमोरी मैनेजमेंट: सिर्फ पिछले 8 मैसेज भेजना ताकि टोकन कम खर्च हों और स्पीड बनी रहे
-            memory_window = st.session_state.history[-8:]
+            # मेमोरी को स्लिम रखना (Last 6 messages) ताकि टोकन बोझ न बनें
+            memory_window = st.session_state.history[-6:]
             messages = [SystemMessage(content=system)] + memory_window + [HumanMessage(content=prompt)]
             
-            res = await llm.ainvoke(messages)
-            return res.content, model
+            # astream का उपयोग: यह इंतज़ार नहीं करता, सीधा आउटपुट देना शुरू करता है
+            return llm.astream(messages), model
         except Exception as e:
             return f"Error: {str(e)}", model
 
     def speak(self, text):
-        """🔱 NATURAL VOICE ENGINE (Edge-TTS)"""
-        import edge_tts
-        import asyncio
-        import base64
-        import os
+        """🔱 NATURAL VOICE ENGINE: बिना रुके आवाज़ (Madhur Neural)"""
+        import threading
+        # आवाज़ को बैकग्राउंड में चलाएं ताकि टेक्स्ट की स्पीड न रुके
+        def run_tts():
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                communicate = edge_tts.Communicate(text[:500], "hi-IN-MadhurNeural", rate="+7%")
+                loop.run_until_complete(communicate.save("response.mp3"))
+                
+                if os.path.exists("response.mp3"):
+                    with open("response.mp3", "rb") as f:
+                        b64 = base64.b64encode(f.read()).decode()
+                        st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
+            except:
+                pass
 
-        # Madhur: आवाज़ में गहराई और दम है
-        VOICE = "hi-IN-MadhurNeural" 
-        
-        async def generate():
-            communicate = edge_tts.Communicate(text[:500], VOICE, rate="+5%")
-            await communicate.save("response.mp3")
-
-        try:
-            # थ्रेडिंग और इवेंट लूप का सही कॉम्बिनेशन
-            import threading
-            thread = threading.Thread(target=lambda: asyncio.run(generate()))
-            thread.start()
-            thread.join(timeout=2) # २ सेकंड इंतज़ार
-
-            if os.path.exists("response.mp3"):
-                with open("response.mp3", "rb") as f:
-                    b64 = base64.b64encode(f.read()).decode()
-                    st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except Exception as e:
-            raja_shield.log_error("VOICE_FAILED", str(e))
+        threading.Thread(target=run_tts).start()
 
 
 
