@@ -346,12 +346,41 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 # [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
 # ------------------------------------------------------------------------------
-# एआई का जवाब (The Assistant Box)
+
+
+# १. इनपुट को संभालना
+prompt = None
+user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
+
+if st.session_state.get("prompt"):
+    prompt = st.session_state.prompt
+    st.session_state.prompt = None 
+elif user_input:
+    prompt = user_input
+
+# २. मुख्य प्रोसेसिंग यूनिट
+if prompt:
+    # --- [MASTER INITIALIZATION] ---
+    if "raja_ai" not in st.session_state:
+        st.session_state.raja_ai = RajaAgent(IDENTITY)
+    
+    raja_ai = st.session_state.raja_ai
+    
+    # यूजर का मैसेज हिस्ट्री में जोड़ना और दिखाना
+    if "history" not in st.session_state:
+        st.session_state.history = [SystemMessage(content=IDENTITY)]
+        
+    st.session_state.history.append(HumanMessage(content=prompt))
+    with st.chat_message("user"):
+        st.markdown(f"**You:** {prompt}")
+
+    # एआई का जवाब (The Assistant Box)
     with st.chat_message("assistant"):
         final_response = None
-        engine_id = "RAJA-CORE-V8"
+        current_safe_prompt = prompt # प्रॉम्ट को सुरक्षित किया
         
-        # 🔱 यहाँ 'loop' को डिफाइन करें ताकि यह पूरे ब्लॉक में काम करे
+        # 🔱 Loop Error Fix: असिस्टेंट के अंदर ही फ्रेश लूप सेटअप
+        import asyncio
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
@@ -360,33 +389,36 @@ if "history" in st.session_state:
 
         with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
             try:
-                # अब यहाँ 'loop' एरर नहीं देगा
-                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
-                
-                # बाकी कोड वैसा ही रहेगा...
+                # [STEP 1: ROUTING]
+                mode = loop.run_until_complete(raja_ai.raja_router(current_safe_prompt))
                 
                 # [STEP 2: EXECUTION PATHS]
                 if mode == "SEARCH":
                     st.toast("🛰️ Satellite Scan Active", icon="🌐")
-                    # engine.py से सर्च फंक्शन को कॉल करना
-                    intel = raja_web_search(prompt) 
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
-                    engine_id = "RAJA-SATELLITE-SEARCH"
+                    try:
+                        from engine import raja_web_search
+                        intel = raja_web_search(current_safe_prompt)
+                    except ImportError:
+                        intel = "Search engine.py file not found."
+                    
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(current_safe_prompt, intel))
                 
-                elif mode == "VISION" and uploaded_file:
+                elif mode == "VISION" and 'uploaded_file' in locals() and uploaded_file is not None:
                     st.toast("👁️ Supreme Vision Activated", icon="🔥")
-                    # आपकी विज़न वाली फाइल का फंक्शन यहाँ आएगा
-                    from vision_module import raja_vision_engine 
-                    logic_res = raja_vision_engine(uploaded_file)
-                    engine_id = "RAJA-VISION-SENSOR"
+                    try:
+                        from vision_module import raja_vision_engine
+                        logic_res = raja_vision_engine(uploaded_file)
+                    except ImportError:
+                        logic_res = "Vision module file not found."
                 
                 else:
                     st.toast("🧠 Brain Processing", icon="⚡")
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-                    engine_id = "RAJA-CORE-70B-ULTRA"
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(current_safe_prompt, ""))
 
                 # [STEP 3: FINAL OUTPUT]
-                final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
+                # अगर logic_res एक टुपल है (response, model), तो सिर्फ टेक्स्ट उठाओ
+                final_response = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
+                
                 st.markdown(final_response)
                 
                 # आवाज़ और मेमोरी अपडेट
@@ -398,7 +430,8 @@ if "history" in st.session_state:
             except Exception as e:
                 error_msg = f"🔱 Shield Alert: Neural Link Reset. (Error: {str(e)})"
                 st.error(error_msg)
-                raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
+                if 'raja_shield' in globals():
+                    raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
         
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
