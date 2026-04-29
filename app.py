@@ -351,10 +351,19 @@ if "history" in st.session_state:
         final_response = None
         engine_id = "RAJA-CORE-V8"
         
+        # 🔱 यहाँ 'loop' को डिफाइन करें ताकि यह पूरे ब्लॉक में काम करे
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
         with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
             try:
-                # [STEP 1: ROUTING] - इरादा पहचानो
+                # अब यहाँ 'loop' एरर नहीं देगा
                 mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                
+                # बाकी कोड वैसा ही रहेगा...
                 
                 # [STEP 2: EXECUTION PATHS]
                 if mode == "SEARCH":
