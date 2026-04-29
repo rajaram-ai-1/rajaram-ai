@@ -1,8 +1,4 @@
-# ==============================================================================
-# PROJECT: RAJA AI - THE OMNIPOTENT CORE (VERSION 7.0 - ULTIMATE)
-# DEVELOPER: RAJA (BAREILLY, INDIA) - THE 15-YEAR-OLD LEGEND
-# STATUS: 46 SHAKTI FULLY INTEGRATED | NO CODE DELETED
-# ==============================================================================
+
 
 import streamlit as st
 import os
@@ -115,7 +111,7 @@ class GlobalCore:
 
     def get_timestamp(self):
         return datetime.datetime.now().strftime("%H:%M:%S")
-
+core = GlobalCore() # यह एआई के दिमाग (Models) को लोड करेगा
 # ==============================================================================
 # [PHASE 2.5: THE OMNISCIENT EYE - SEARCH & VISION TOOLS]
 # ==============================================================================
