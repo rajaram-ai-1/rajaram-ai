@@ -150,7 +150,7 @@ class RajaAgent:
             # सिस्टम प्रॉम्प्ट को हमेशा याददाश्त के टॉप पर रखना
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
-  async def raja_router(self, user_input):
+    async def raja_router(self, user_input):
         try:
             p = user_input.lower()
             
