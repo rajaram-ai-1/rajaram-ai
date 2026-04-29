@@ -7,25 +7,16 @@
 import streamlit as st
 import os
 from langchain_groq import ChatGroq
-from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from gtts import gTTS
 import base64
-import requests
 import asyncio
 import time
 import datetime
 import json
 from PIL import Image
 from io import BytesIO
-import ast       # कोड को स्कैन करने के लिए (दिमाग)
-import logging   # गलतियों का रिकॉर्ड रखने के लिए (डायरी)
-import requests  # इंटरनेट से डेटा खींचने के लिए (हाथ-पैर)
 import streamlit as st
-import requests
-from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS
-# 🔱 तिजोरी से सारी शक्तियों को बुलाना
 
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
@@ -128,95 +119,6 @@ class GlobalCore:
 # ==============================================================================
 # [PHASE 2.5: THE OMNISCIENT EYE - SEARCH & VISION TOOLS]
 # ==============================================================================
-
-# इंजन चालू करें
-core = GlobalCore()
-
-def raja_web_search(query):
-    """🛰️ सैटेलाइट सर्च शक्ति: यह सीधे इंटरनेट से लाइव सच लेकर आएगी"""
-    try:
-        from duckduckgo_search import DDGS
-        import datetime
-        with DDGS() as ddgs:
-            # हम ताज़ा जानकारी के लिए क्वेरी में आज की तारीख जोड़ते हैं
-            full_query = f"{query} today {datetime.date.today()}"
-            results = [r['body'] for r in ddgs.text(full_query, max_results=6)]
-            if results:
-                return "\n---\n".join(results)
-            return "सैटेलाइट लिंक में कोई ताज़ा डेटा नहीं मिला।"
-    except Exception as e:
-        return f"🔱 Satellite Link Failure: {str(e)}"
-
-
-def raja_vision_engine(image_file):
-    """👁️ दिव्य दृष्टि: फोटो को स्कैन करके उसके अंदर का राज़ बताने वाली शक्ति"""
-    try:
-        # अगर फाइल सही से लोड हुई है
-        if image_file is not None:
-            # हम सिर्फ ये चेक कर रहे हैं कि फोटो का डेटा आ रहा है या नहीं
-            file_details = {"FileName": image_file.name, "FileType": image_file.type}
-            
-            # अभी के लिए एक पावरफुल रिस्पॉन्स (यहाँ भविष्य में Gemini API जुड़ेगी)
-            return f"राजाराम भाई, मैंने '{image_file.name}' को स्कैन कर लिया है। यह एक बेहतरीन विजुअल डेटा है! इसमें छिपे राज़ डिकोड करने के लिए विजन सेंसर तैयार है।"
-        
-        return "⚠️ कोई फोटो नहीं मिली, कृपया एक इमेज अपलोड करें।"
-        
-    except Exception as e:
-        # अगर कोई भी दिक्कत आती है तो यह एरर को पकड़ लेगा और ऐप क्रैश नहीं होगा
-        return f"👁️ विजन सेंसर में तकनीकी समस्या (Error: {str(e)})"
-
-
-
-def raja_link_reader(url):
-    """🔱 अल्ट्रा पावरफुल लिंक रीडर: खबरों का ढांचा और सच पकड़ेगा"""
-    try:
-        import requests
-        from bs4 import BeautifulSoup
-        
-        # 🛡️ शक्ति १: 'Stealth Mode' (वेबसाइट को पता नहीं चलेगा कि AI पढ़ रहा है)
-        header = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'hi-IN,hi;q=0.9,en-US;q=0.8'
-        }
-        
-        response = requests.get(url, headers=header, timeout=15)
-        response.encoding = 'utf-8' # हिंदी फॉन्ट के लिए जरूरी
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # 🧹 शक्ति २: फालतू कचरा और विज्ञापनों को जलाना
-        for garbage in soup(["script", "style", "nav", "footer", "header", "aside", "form"]):
-            garbage.decompose()
-            
-        # 🔱 शक्ति ३: 'Smart Intel Extractor'
-        intel_vault = []
-        
-        # टाइटल को प्राथमिकता देना
-        title = soup.find('h1')
-        if title:
-            intel_vault.append(f"TITLE: {title.get_text().strip()}")
-
-        # मुख्य पैराग्राफ और हेडिंग्स को उठाना
-        for tag in soup.find_all(['h2', 'h3', 'p']):
-            text = tag.get_text().strip()
-            # केवल वही जानकारी उठाना जो काम की हो (40 से 500 अक्षर)
-            if 40 < len(text) < 500:
-                if text not in intel_vault:
-                    intel_vault.append(text)
-        
-        # टॉप 20 ताज़ा जानकारी का निचोड़
-        final_intel = "\n---\n".join(intel_vault[:20])
-        return final_intel if final_intel else "लिंक के अंदर कोई ठोस जानकारी नहीं मिली।"
-        
-    except Exception as e:
-        return f"🔱 Link Reading Error: {e}"
-
-# ------------------------------------------------------------------------------
-# [PHASE 2.6: RAJARAM SELF-HEALING SHIELD]
-# ------------------------------------------------------------------------------
-# (आपका RajaShield क्लास यहाँ से शुरू होगा...)
-# ------------------------------------------------------------------------------
-# [RAJARAM SELF-HEALING SHIELD] - इसे GlobalCore क्लास के बाद जोड़ें
-# ------------------------------------------------------------------------------
 import datetime
 import logging
 
@@ -386,31 +288,6 @@ with st.sidebar:
     
     st.session_state.voice_enabled = st.toggle("Voice Protocol", value=True)
     st.session_state.search_enabled = st.toggle("Satellite Search", value=True)
-    
-    st.divider()
-    st.subheader("🔱 GOD-MODE CONTROL")
-    admin_pass = st.text_input("Admin Key", type="password")
-    
-    st.divider()
-    st.subheader("👁️ IMAGE INPUT")
-    uploaded_file = st.file_uploader("यहाँ फोटो डालें...", type=["jpg", "png", "jpeg"], key="sidebar_uploader")
-    
-    if uploaded_file:
-        st.image(uploaded_file, caption="Core Memory में लोड हो गई", use_container_width=True)
-
-    if admin_pass == "BAREILLY_KING":
-        st.info("WELCOME, BAREILLY KING 🔱")
-        evolution_cmd = st.text_input("हुक्म दो (e.g. 'add a calculator')")
-        if st.button("EVOLVE NOW"):
-            with st.spinner("Evolution in progress..."):
-                import asyncio
-                try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    result = loop.run_until_complete(raja_ai.evolve_system(evolution_cmd))
-                    st.success(result)
-                except Exception as e:
-                    st.error(f"Evolution Failed: {e}")
                 
     if st.button("PURGE ALL DATA"):
         if "history" in st.session_state:
@@ -516,82 +393,6 @@ if prompt:
         final_response = None
         engine_id = "RAJA-CORE-V8"
         
-        with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
-            try:
-                # --- [STEP A: MASTER ROUTING - सबसे तेज़ फैसला] ---
-                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
-                
-                # --- [STEP B: MULTI-POWER EXECUTION] ---
-                
-                # १. विजन शक्ति (VISION POWER)
-                vision_keywords = ["photo", "image", "dekho", "isame kya hai", "identify", "picture"]
-                if 'uploaded_file' in globals() and uploaded_file and (mode == "VISION" or any(k in prompt.lower() for k in vision_keywords)):
-                    st.toast("👁️ Supreme Vision Activated", icon="🔥")
-                    # पक्का करें कि raja_vision_engine फंक्शन बना हुआ है
-                    final_response = raja_vision_engine(uploaded_file)
-                    engine_id = "RAJA-VISION (GEMINI-MOD)"
-
-              # २. सर्च शक्ति (SEARCH POWER - THE COMMAND OVERRIDE)
-                elif mode == "SEARCH":
-                    st.toast("🛰️ Deep Satellite Scan ON", icon="🌐")
-                    search_query = f"today 24k gold rate in India {datetime.date.today()}"
-                    intel = raja_web_search(search_query) 
-                    engine_id = "RAJA-SATELLITE-SEARCH"
-                    
-                    # --- [HACKER MODE: SYSTEM OVERRIDE PROMPT] ---
-                    # यहाँ हम एआई की 'पुरानी याददाश्त' को लॉक कर रहे हैं
-                    override_prompt = f"""
-                    [SYSTEM_STATUS: OVERRIDE_ACTIVATED]
-                    [DATA_SOURCE: LIVE_SATELLITE_LINK]
-                    [INTEL]: {intel}
-                    
-                    ATTENTION RAJA AI:
-                    1. तुम्हारी पुरानी ट्रेनिंग का डेटा (52k-55k) एक्सपायर हो चुका है। उसे भूल जाओ।
-                    2. ऊपर दिए गए [INTEL] में जो आज का ताज़ा भाव है, सिर्फ वही बताओ।
-                    3. अगर इंटरनेट डेटा में भाव 75,000+ है, तो वही बताओ। झूठ मत बोलो।
-                    4. जवाब की शुरुआत "भाई, सैटेलाइट से ताज़ा भाव ये मिला है..." से करो।
-                    
-                    USER_QUERY: {prompt}
-                    """
-                    
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(override_prompt, str(intel)))
-                    final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
-                # ३. शुद्ध दिमाग (BRAIN POWER - LOGIC & CHAT)
-                else:
-                    st.toast("🧠 Core Brain Processing", icon="⚡")
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-                    final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
-                    engine_id = "RAJA-CORE-70B-ULTRA"
-
-            except Exception as e:
-                final_response = f"🔱 Shield Alert: Neural Link Reset. (Error: {str(e)})"
-                if 'raja_shield' in globals():
-                    raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
-
-        # --- [STEP C: OUTPUT DISPLAY & VOICE] ---
-        if final_response:
-            # शानदार आउटपुट
-            st.markdown(final_response)
-            
-            # इन्फो कार्ड
-            st.divider()
-            c1, c2 = st.columns(2)
-            with c1:
-                st.caption(f"🔱 POWERED BY: {engine_id}")
-            with c2:
-                st.caption(f"📅 {datetime.date.today()} | GRID: BAREILLY-05")
-            
-            # आवाज़ (Voice Engine)
-            if st.session_state.get('voice_enabled'):
-                try:
-                    raja_ai.speak(final_response)
-                except:
-                    pass
-            
-            # हिस्ट्री अपडेट
-            st.session_state.history.append(AIMessage(content=final_response))
-            # प्रॉम्ट क्लीनअप
-            prompt = None
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
