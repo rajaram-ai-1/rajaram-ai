@@ -118,21 +118,20 @@ import datetime
 import logging
 
 class RajaShield:
-    def __init__(self):  # <--- यहाँ _ (एक) नहीं, बल्कि __ (दो) अंडरस्कोर लगायें
+    def __init__(self):
         self.repair_logs = []
-        self.security_level = "MAXIMUM"
+        self.security_level = "MANUAL_DEBUG" # अब आप खुद ठीक करेंगे
     
-    def auto_fix(self, error_type, details=""):
+    def log_error(self, error_type, details=""):
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        log_entry = f"[{timestamp}] FIXED: {error_type} bypassed by Raja Shield."
-        
-        # अब यह लाइन एरर नहीं देगी क्योंकि __init__ ने इसे बना दिया है
+        # यह एरर को रिकॉर्ड करेगा ताकि आप बाद में देख सकें
+        log_entry = f"[{timestamp}] ERROR: {error_type} | Details: {details}"
         self.repair_logs.append(log_entry)
         
-        logging.warning(f"🔱 SHIELD ALERT: {log_entry} Details: {details}")
-        return True
+        # यह कंसोल (Terminal) में भी एरर दिखाएगा
+        logging.error(f"🔱 DEBUG ALERT: {log_entry}")
+        return log_entry
 
-# शील्ड का इंजन चालू करें
 raja_shield = RajaShield()
 # ------------------------------------------------------------------------------
 # [PHASE 3: 46 POWERS INTEGRATION] - NEW LOGIC ADDED
