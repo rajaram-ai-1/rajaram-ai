@@ -12,7 +12,6 @@ import datetime
 import json
 from PIL import Image
 from io import BytesIO
-import streamlit as st
 
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
@@ -259,10 +258,9 @@ IDENTITY = f"""
    हमेशा शुद्ध और सरल हिंदी में बात करना जब यूजर कहे तो इंग्लिश का उपयोग  करना ।" 
 """
 
-# एजेंट को एक्टिवेट करें
-if 'raja_ai' not in globals():
-    raja_ai = RajaAgent(IDENTITY)
-
+if 'raja_ai' not in st.session_state:
+    st.session_state.raja_ai = RajaAgent(IDENTITY)
+raja_ai = st.session_state.raja_ai
 # ------------------------------------------------------------------------------
 # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
 # ------------------------------------------------------------------------------
