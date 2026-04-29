@@ -346,48 +346,50 @@ if "history" in st.session_state:
 # ------------------------------------------------------------------------------
 # [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
 # ------------------------------------------------------------------------------
-# --- [PHASE 7: THE SUPREME OMNIPOTENT EXECUTION] ---
-
-# १. इनपुट को संभालना (Input Gatekeeper)
-prompt = None
-user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
-
-if st.session_state.get("prompt"):
-    prompt = st.session_state.prompt
-    st.session_state.prompt = None 
-elif user_input:
-    prompt = user_input
-
-# २. मुख्य प्रोसेसिंग यूनिट (Core Processing Unit)
-if prompt:
-    # --- [LIFELINE: ASYNC LOOP SETUP] ---
-    import asyncio
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    # --- [MASTER INITIALIZATION: सुरक्षा कवच] ---
-    if "raja_ai" not in st.session_state:
-        # पक्का करें कि IDENTITY ऊपर डिफाइन की गई है
-        st.session_state.raja_ai = RajaAgent(IDENTITY)
-    
-    raja_ai = st.session_state.raja_ai
-
-    # हिस्ट्री को सुरक्षित रखना
-    if "history" not in st.session_state:
-        st.session_state.history = []
-    
-    # यूजर का मैसेज डिस्प्ले करना
-    st.session_state.history.append(HumanMessage(content=prompt))
-    with st.chat_message("user"):
-        st.markdown(f"**You:** {prompt}")
-
-    # एआई का जवाब (The Assistant Box)
+# एआई का जवाब (The Assistant Box)
     with st.chat_message("assistant"):
         final_response = None
         engine_id = "RAJA-CORE-V8"
+        
+        with st.spinner("🔱 RAJA AI शक्तियों का आह्वान कर रहा है..."):
+            try:
+                # [STEP 1: ROUTING] - इरादा पहचानो
+                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                
+                # [STEP 2: EXECUTION PATHS]
+                if mode == "SEARCH":
+                    st.toast("🛰️ Satellite Scan Active", icon="🌐")
+                    # engine.py से सर्च फंक्शन को कॉल करना
+                    intel = raja_web_search(prompt) 
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
+                    engine_id = "RAJA-SATELLITE-SEARCH"
+                
+                elif mode == "VISION" and uploaded_file:
+                    st.toast("👁️ Supreme Vision Activated", icon="🔥")
+                    # आपकी विज़न वाली फाइल का फंक्शन यहाँ आएगा
+                    from vision_module import raja_vision_engine 
+                    logic_res = raja_vision_engine(uploaded_file)
+                    engine_id = "RAJA-VISION-SENSOR"
+                
+                else:
+                    st.toast("🧠 Brain Processing", icon="⚡")
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                    engine_id = "RAJA-CORE-70B-ULTRA"
+
+                # [STEP 3: FINAL OUTPUT]
+                final_response = logic_res[0] if isinstance(logic_res, tuple) else logic_res
+                st.markdown(final_response)
+                
+                # आवाज़ और मेमोरी अपडेट
+                if st.session_state.get('voice_enabled'):
+                    raja_ai.speak(final_response)
+                
+                st.session_state.history.append(AIMessage(content=final_response))
+
+            except Exception as e:
+                error_msg = f"🔱 Shield Alert: Neural Link Reset. (Error: {str(e)})"
+                st.error(error_msg)
+                raja_shield.auto_fix("SUPREME_LOGIC_ERROR", str(e))
         
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
