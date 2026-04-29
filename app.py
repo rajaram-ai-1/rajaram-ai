@@ -150,15 +150,19 @@ class RajaAgent:
             # सिस्टम प्रॉम्प्ट को हमेशा याददाश्त के टॉप पर रखना
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
-    async def raja_router(self, user_input):
-        """🔱 SUPREME ROUTER: इंटेलिजेंट इरादा पहचानना (Intent Recognition)"""
+  async def raja_router(self, user_input):
         try:
             p = user_input.lower()
             
-            # --- [HACKER OVERRIDE: KEYWORD TRIGGER] ---
-            # अगर ये शब्द मिले तो सीधा SEARCH मोड (Logic Phase 7 में हैंडल होगा)
-            if any(word in p for word in ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना"]):
+            # --- [FORCE SEARCH TRIGGERS] ---
+            # "मौसम" शब्द हिंदी अक्षरों में भी जोड़ना जरूरी है
+            search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
+                            "मौसम", "तापमान", "temperature", "बारिश", "rain", "live"]
+            
+            if any(word in p for word in search_words):
                 return "SEARCH"
+            
+            # बाकी कोड वैसा ही रहेगा...
 
             # अगर विज़न की बात हो रही है
             if any(word in p for word in ["photo", "image", "dekho", "pic", "फोटो"]):
