@@ -4,15 +4,14 @@ import streamlit as st
 import os
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from gtts import gTTS
-import base64
-import asyncio
 import time
 import datetime
 import json
 from PIL import Image
 from io import BytesIO
-
+import edge_tts
+import asyncio
+import base64
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
