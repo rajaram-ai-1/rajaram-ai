@@ -144,98 +144,105 @@ raja_shield = RajaShield()
 
 class RajaAgent:
     def __init__(self, system_prompt):
-        """🔱 राजा Ai की याददाश्त और पहचान सेटअप"""
+        """🔱 RAJA AI: NEURAL MEMORY SETUP"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
+            # सिस्टम प्रॉम्प्ट को हमेशा याददाश्त के टॉप पर रखना
             st.session_state.history = [SystemMessage(content=system_prompt)]
 
     async def raja_router(self, user_input):
-        """🔱 MASTER ROUTER: यह तय करेगा कि कौन सी शक्ति इस्तेमाल करनी है"""
+        """🔱 SUPREME ROUTER: इंटेलिजेंट इरादा पहचानना (Intent Recognition)"""
         try:
             p = user_input.lower()
             
-            # --- [FORCE OVERRIDE: हैकर की पहली शक्ति] ---
-            # अगर ये शब्द मैसेज में हैं, तो एआई से पूछना ही नहीं है, सीधा SEARCH करना है
-            search_keywords = ["सोना", "gold", "price", "bhav", "rate", "weather", "mausam", "news", "खबर", "आज का"]
-            if any(word in p for word in search_keywords):
+            # --- [HACKER OVERRIDE: KEYWORD TRIGGER] ---
+            # अगर ये शब्द मिले तो सीधा SEARCH मोड (Logic Phase 7 में हैंडल होगा)
+            if any(word in p for word in ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना"]):
                 return "SEARCH"
 
-            # अगर फोटो की बात हो रही है
-            vision_keywords = ["photo", "image", "dekho", "image", "pic", "फोटो"]
-            if any(word in p for word in vision_keywords):
+            # अगर विज़न की बात हो रही है
+            if any(word in p for word in ["photo", "image", "dekho", "pic", "फोटो"]):
                 return "VISION"
 
-            # --- [LLM DECISION: बाकी सब के लिए] ---
-            router_prompt = f"""
-            User input: "{user_input}"
-            Return ONLY one word based on intent:
-            - VISION (if it's about seeing an image)
-            - SEARCH (if it's about current real-world facts)
-            - BRAIN (for conversation, logic, or code)
-            Result:"""
+            # --- [AI REASONING: बाकी सब के लिए] ---
+            router_prompt = f"User: {user_input}\nTask: Return ONLY 'VISION', 'SEARCH', or 'BRAIN' based on intent."
             
-            res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "Decision Router")
+            # सबसे हल्के मॉडल (11b) से जल्दी फैसला करवाना
+            res, _ = await self.call_llm(core.BRAIN_CATALOG["FLASH_VISION"], router_prompt, "Router Mode")
             
-            cleaned_res = res.upper()
-            if "VISION" in cleaned_res: return "VISION"
-            if "SEARCH" in cleaned_res: return "SEARCH"
+            decision = res.upper()
+            if "VISION" in decision: return "VISION"
+            if "SEARCH" in decision: return "SEARCH"
             return "BRAIN"
             
         except Exception as e:
-            # अगर राउटर फेल हुआ, तो डिफ़ॉल्ट ब्रेन पर जाओ
-            return "BRAIN"
-            
-            res, _ = await self.call_llm("llama-3.2-11b-vision-preview", router_prompt, "Decision Router")
-            # --- [फिक्स: सिर्फ मुख्य शब्द उठाना] ---
-            cleaned_res = res.upper()
-            if "VISION" in cleaned_res: return "VISION"
-            if "SEARCH" in cleaned_res: return "SEARCH"
-            return "BRAIN"
-        except:
+            raja_shield.log_error("ROUTER_GLITCH", str(e))
             return "BRAIN"
 
     async def execute_reasoning(self, user_input, web_data=""):
-        """🧠 राजा Ai का मुख्य दिमाग (Dual-Model Logic)"""
+        """🧠 DUAL-CORE REASONING: दो शक्तिशाली दिमाग एक साथ सोचते हैं"""
         try:
-            # --- [फिक्स: वेब डेटा को प्रॉम्ट में सबसे ऊपर रखना] ---
-            if web_data:
-                full_input = f"LIVE_INTEL FROM INTERNET:\n{web_data}\n\nUSER_QUESTION: {user_input}"
-            else:
-                full_input = user_input
+            # डेटा इंजेक्ट करना (अगर वेब सर्च से आया हो)
+            context_input = f"WEB_INTEL: {web_data}\n\nUSER: {user_input}" if web_data else user_input
 
-            instruction = self.system_prompt
-            
+            # दो अलग-अलग मॉडल्स को एक साथ (Parallel) चलाना ताकि सबसे सटीक जवाब मिले
             tasks = [
-                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], full_input, instruction),
-                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], full_input, instruction)
+                self.call_llm(core.BRAIN_CATALOG["LOGIC_PRO"], context_input, self.system_prompt),
+                self.call_llm(core.BRAIN_CATALOG["ULTIMATE_70B"], context_input, self.system_prompt)
             ]
+            
+            # दोनों का इंतज़ार करना
             responses = await asyncio.gather(*tasks)
+            
+            # 'Quality Filter': जो मॉडल ज्यादा बड़ा और विस्तृत जवाब देगा, उसे चुनना
             final_choice = max(responses, key=lambda x: len(x[0]))
             return final_choice
+            
         except Exception as e:
-            raja_shield.auto_fix("NEURAL_GLITCH", str(e))
-            return "🔱 SHIELD ACTIVE: I'm rerouting logic due to a neural glitch.", "RECOVERY_MODE"
+            raja_shield.log_error("NEURAL_COLLAPSE", str(e))
+            return "🔱 Shield Active: Logic Rerouted due to spike.", "RECOVERY"
 
     async def call_llm(self, model, prompt, system):
-        """⚡ GROQ INFRASTRUCTURE CALL"""
+        """⚡ GROQ INFRASTRUCTURE: हाई-स्पीड रिस्पॉन्स"""
         try:
-            llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=30)
-            # सिर्फ पिछले 8 मैसेज भेजना ताकि मेमोरी फुल न हो
-            messages = [SystemMessage(content=system)] + st.session_state.history[-8:] + [HumanMessage(content=prompt)]
+            llm = ChatGroq(groq_api_key=core.GROQ_API_KEY, model_name=model, timeout=25)
+            
+            # मेमोरी मैनेजमेंट: सिर्फ पिछले 8 मैसेज भेजना ताकि टोकन कम खर्च हों और स्पीड बनी रहे
+            memory_window = st.session_state.history[-8:]
+            messages = [SystemMessage(content=system)] + memory_window + [HumanMessage(content=prompt)]
+            
             res = await llm.ainvoke(messages)
             return res.content, model
         except Exception as e:
-            return f"Neural Error: {str(e)}", model
+            return f"Error: {str(e)}", model
 
     def speak(self, text):
-        # आपका पुराना gTTS कोड (एकदम सही है)
+        """🔱 NATURAL VOICE ENGINE (Edge-TTS)"""
+        import edge_tts
+        import asyncio
+        import base64
+        import os
+
+        # Madhur: आवाज़ में गहराई और दम है
+        VOICE = "hi-IN-MadhurNeural" 
+        
+        async def generate():
+            communicate = edge_tts.Communicate(text[:500], VOICE, rate="+5%")
+            await communicate.save("response.mp3")
+
         try:
-            tts = gTTS(text=text[:300], lang='hi')
-            tts.save("response.mp3")
-            with open("response.mp3", "rb") as f:
-                b64 = base64.b64encode(f.read()).decode()
-            st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
-        except: pass
+            # थ्रेडिंग और इवेंट लूप का सही कॉम्बिनेशन
+            import threading
+            thread = threading.Thread(target=lambda: asyncio.run(generate()))
+            thread.start()
+            thread.join(timeout=2) # २ सेकंड इंतज़ार
+
+            if os.path.exists("response.mp3"):
+                with open("response.mp3", "rb") as f:
+                    b64 = base64.b64encode(f.read()).decode()
+                    st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
+        except Exception as e:
+            raja_shield.log_error("VOICE_FAILED", str(e))
 
 
 
