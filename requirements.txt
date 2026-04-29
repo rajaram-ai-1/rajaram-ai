@@ -4,7 +4,7 @@ langchain-groq
 langchain-community
 langchain-core
 python-dotenv
-gtts
+edge-tts
 google-generativeai>=0.8.3
 requests
 streamlit-mic-recorder
