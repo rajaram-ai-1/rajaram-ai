@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import os
 from langchain_groq import ChatGroq
@@ -162,16 +160,20 @@ class RajaAgent:
         """🚀 LIGHT-SPEED ROUTER: बिजली की तरह फैसला लेगा"""
         try:
             p = user_input.lower()
-            
-            # --- [FORCE SEARCH & VISION TRIGGERS] ---
-            search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
-                            "मौसम", "तापमान", "temperature", "बारिश", "rain", "live", "सरकारी", "योजना"]
-            
-            if any(word in p for word in search_words):
-                return "SEARCH"
-            
-            if any(word in p for word in ["photo", "image", "dekho", "pic", "फोटो", "देखकर बताओ"]):
-                return "VISION"
+             
+            # --- [FORCE SEARCH & VISION TRIGGERS - UPDATED] ---
+p = prompt.lower() # प्रॉम्प्ट को छोटे अक्षरों में बदलें ताकि मैचिंग परफेक्ट हो
+
+# १. विजन ट्रिगर (इसे सबसे ऊपर रखें ताकि फोटो को प्राथमिकता मिले)
+vision_words = ["photo", "image", "dekho", "pic", "फोटो", "देखकर बताओ", "तस्वीर", "क्या है इसमें"]
+if any(word in p for word in vision_words):
+    return "VISION"
+
+# २. सर्च ट्रिगर
+search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
+                "मौसम", "तापमान", "temperature", "बारिश", "rain", "live", "सरकारी", "योजना"]
+if any(word in p for word in search_words):
+    return "SEARCH"
 
             # सबसे हल्के मॉडल से तुरंत फैसला (Speed Optimization)
             router_prompt = f"Categorize: '{user_input}'. Reply only 'VISION', 'SEARCH', or 'BRAIN'."
