@@ -517,21 +517,26 @@ if prompt:
                     except:
                         mode = "BRAIN"
 
-                # --- [PATH B: VISION - FIXED] ---
+                # --- [PATH B: VISION - ULTRA FIXED] ---
                 elif mode == "VISION":
-                    # यहाँ check करें कि sidebar में file upload हुई है या नहीं
-                    if 'uploaded_file' in locals() or 'uploaded_file' in globals():
-                        from vision import raja_vision_engine
-                        if uploaded_file: 
-                            st.toast("👁️ Vision Active", icon="🔥")
-                            final_text = raja_vision_engine(uploaded_file, prompt)
+                    # सीधे session_state से फाइल चेक करें
+                    up_file = st.session_state.get('uploaded_file')
+                    
+                    if up_file is not None:
+                        try:
+                            from vision import raja_vision_engine
+                            st.toast("👁️ Vision Active: Scanning...", icon="🔥")
+                            
+                            # विज़न इंजन को कॉल करना
+                            final_text = raja_vision_engine(up_file, prompt)
                             st.markdown(final_text)
-                        else:
-                            final_text = "राजाराम भाई, कृपया साइडबार में फोटो अपलोड करें ताकि मैं देख सकूँ!"
-                            st.warning(final_text)
+                        except Exception as vision_err:
+                            final_text = f"Vision Engine Error: {str(vision_err)}"
+                            st.error(final_text)
                     else:
-                        final_text = "Vision Module Error: Upload variable not found."
-                        st.error(final_text)
+                        # अगर राउटर ने विज़न चुना पर फाइल नहीं मिली
+                        final_text = "राजाराम भाई, आपने साइडबार में फोटो अपलोड नहीं की है। कृपया फोटो डालें!"
+                        st.warning(final_text)
 
                 # --- [PATH C: BRAIN / REASONING] ---
                 if (mode == "BRAIN" or logic_res is not None) and not final_text:
