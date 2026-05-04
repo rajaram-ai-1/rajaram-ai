@@ -13,7 +13,16 @@ import edge_tts
 import asyncio
 import base64
 from engine import raja_web_search
-from vision import raja_vision_engine  # अपनी बनाई फाइल को इम्पोर्ट करें
+import sys
+import os
+
+# फाइल को ढूंढने की शक्ति बढ़ाना
+sys.path.append(os.path.dirname(__file__))
+
+try:
+    from vision import raja_vision_engine
+except ImportError:
+    st.error("🔱 Error: 'vision.py' फाइल आपके GitHub पर नहीं मिली। कृपया फाइल अपलोड करें!")
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
