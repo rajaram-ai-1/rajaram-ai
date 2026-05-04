@@ -439,7 +439,11 @@ if "history" in st.session_state:
 # [PHASE 7: EXECUTION LOGIC] - POWER-USER & ERROR-FREE VERSION 🔱
 # ------------------------------------------------------------------------------
 
-# १. इनपुट को संभालना (स्मार्ट तरीके से)
+# ------------------------------------------------------------------------------
+# [PHASE 7: EXECUTION LOGIC] - THE OMNIPOTENT ENGINE (FIXED & POWERFUL)
+# ------------------------------------------------------------------------------
+
+# १. इनपुट को संभालना
 prompt = None
 user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
 
@@ -451,13 +455,13 @@ elif user_input:
 
 # २. मुख्य प्रोसेसिंग यूनिट
 if prompt:
-    # मास्टर इनिशियलाइजेशन (डबल चेक)
+    # मास्टर इनिशियलाइजेशन
     if "raja_ai" not in st.session_state:
         st.session_state.raja_ai = RajaAgent(IDENTITY)
     
     raja_ai = st.session_state.raja_ai
     
-    # यूजर का मैसेज हिस्ट्री में जोड़ना
+    # यूजर का मैसेज हिस्ट्री में जोड़ना
     if "history" not in st.session_state:
         st.session_state.history = [SystemMessage(content=IDENTITY)]
         
@@ -468,7 +472,6 @@ if prompt:
     # एआई का जवाब (The Assistant Box)
     with st.chat_message("assistant"):
         import asyncio
-        # लूप सेटअप की सुरक्षा
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
@@ -479,10 +482,12 @@ if prompt:
             try:
                 # [STEP 1: ROUTING]
                 mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                logic_res = None
+                final_text = ""
 
                 # [STEP 2: EXECUTION PATHS]
-                logic_res = None
                 
+                # --- [PATH A: SEARCH] ---
                 if mode == "SEARCH":
                     st.toast("🛰️ Satellite Scan Active", icon="🌐")
                     try:
@@ -490,41 +495,41 @@ if prompt:
                         intel = raja_web_search(prompt)
                         logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
                     except:
-                        mode = "BRAIN" # सर्च फेल होने पर दिमाग इस्तेमाल करो
+                        mode = "BRAIN"
 
-            # --- [app.py का हिस्सा] ---
-elif mode == "VISION":
-    # साइडबार में जो आपने फाइल अपलोडर बनाया है, उसका वेरिएबल यहाँ इस्तेमाल करें
-    if uploaded_file: 
-        st.toast("👁️ Vision Active", icon="🔥")
-        # आपकी vision.py वाले फंक्शन को यहाँ कॉल कर रहे हैं
-        final_text = raja_vision_engine(uploaded_file, prompt)
-        st.markdown(final_text)
-    else:
-        final_text = "राजाराम भाई, कृपया साइडबार में फोटो अपलोड करें ताकि मैं देख सकूँ!"
-        st.warning(final_text)
+                # --- [PATH B: VISION - FIXED] ---
+                elif mode == "VISION":
+                    # यहाँ check करें कि sidebar में file upload हुई है या नहीं
+                    if 'uploaded_file' in locals() or 'uploaded_file' in globals():
+                        from vision import raja_vision_engine
+                        if uploaded_file: 
+                            st.toast("👁️ Vision Active", icon="🔥")
+                            final_text = raja_vision_engine(uploaded_file, prompt)
+                            st.markdown(final_text)
+                        else:
+                            final_text = "राजाराम भाई, कृपया साइडबार में फोटो अपलोड करें ताकि मैं देख सकूँ!"
+                            st.warning(final_text)
+                    else:
+                        final_text = "Vision Module Error: Upload variable not found."
+                        st.error(final_text)
 
-                # अगर सर्च/विजन से डेटा नहीं आया या मोड BRAIN है
-                if logic_res is None or mode == "BRAIN":
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                # --- [PATH C: BRAIN / REASONING] ---
+                if (mode == "BRAIN" or logic_res is not None) and not final_text:
+                    if logic_res is None:
+                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
 
-                # [STEP 3: THE STREAMING MAGIC - यहाँ था सारा झोल] 🔱
-                # logic_res[0] अब एक Generator है, उसे Pydantic एरर से बचाने के लिए:
-                
-                if hasattr(logic_res[0], '__aiter__'): # अगर यह एक Async Generator है
-                    # st.write_stream बिजली की तरह शब्द टाइप करेगा
-                    final_text = st.write_stream(logic_res[0]) 
-                else:
-                    # अगर किसी वजह से साधारण स्ट्रिंग आई हो
-                    final_text = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
-                    st.markdown(final_text)
+                    # [STEP 3: THE STREAMING MAGIC]
+                    if hasattr(logic_res[0], '__aiter__'): 
+                        final_text = st.write_stream(logic_res[0]) 
+                    else:
+                        final_text = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
+                        st.markdown(final_text)
 
-                # 🔱 सबसे ज़रूरी: याददाश्त में स्ट्रिंग सेव करें, जनरेटर नहीं
-                st.session_state.history.append(AIMessage(content=final_text))
-                
-                # आवाज़ अपडेट (जवाब के बाद)
-                if st.session_state.get('voice_enabled'):
-                    raja_ai.speak(final_text)
+                # 🔱 हिस्ट्री और आवाज़ को अपडेट करें
+                if final_text:
+                    st.session_state.history.append(AIMessage(content=final_text))
+                    if st.session_state.get('voice_enabled'):
+                        raja_ai.speak(final_text)
 
             except Exception as total_err:
                 error_msg = f"🔱 Shield Alert: Critical Neural Error. {str(total_err)}"
