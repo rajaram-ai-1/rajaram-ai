@@ -13,6 +13,7 @@ import edge_tts
 import asyncio
 import base64
 from engine import raja_web_search
+from vision import raja_vision_engine  # अपनी बनाई फाइल को इम्पोर्ट करें
 # ------------------------------------------------------------------------------
 # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
 # ------------------------------------------------------------------------------
@@ -491,14 +492,17 @@ if prompt:
                     except:
                         mode = "BRAIN" # सर्च फेल होने पर दिमाग इस्तेमाल करो
 
-                elif mode == "VISION":
-                    up_file = globals().get('uploaded_file') or locals().get('uploaded_file')
-                    if up_file:
-                        st.toast("👁️ Vision Active", icon="🔥")
-                        from vision_module import raja_vision_engine
-                        logic_res = raja_vision_engine(up_file)
-                    else:
-                        mode = "BRAIN"
+            # --- [app.py का हिस्सा] ---
+elif mode == "VISION":
+    # साइडबार में जो आपने फाइल अपलोडर बनाया है, उसका वेरिएबल यहाँ इस्तेमाल करें
+    if uploaded_file: 
+        st.toast("👁️ Vision Active", icon="🔥")
+        # आपकी vision.py वाले फंक्शन को यहाँ कॉल कर रहे हैं
+        final_text = raja_vision_engine(uploaded_file, prompt)
+        st.markdown(final_text)
+    else:
+        final_text = "राजाराम भाई, कृपया साइडबार में फोटो अपलोड करें ताकि मैं देख सकूँ!"
+        st.warning(final_text)
 
                 # अगर सर्च/विजन से डेटा नहीं आया या मोड BRAIN है
                 if logic_res is None or mode == "BRAIN":
