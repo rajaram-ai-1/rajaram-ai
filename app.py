@@ -367,7 +367,7 @@ with st.sidebar:
     # --- [शक्तिशाली विज़न कंट्रोल सेक्शन] ---
     st.markdown("### 📸 Vision Scanning")
     uploaded_file = st.file_uploader("तस्वीर अपलोड करें (JPG/PNG)", type=["jpg", "jpeg", "png"])
-    
+         st.session_state.uploaded_file = uploaded_file
     if uploaded_file:
         st.image(uploaded_file, caption="Scan Ready ✅", use_container_width=True)
         # इसे ग्लोबल एक्सेस के लिए स्टोर कर रहे हैं
