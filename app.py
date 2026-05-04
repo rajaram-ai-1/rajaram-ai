@@ -364,6 +364,17 @@ with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJA AI V7")
     
+    # --- [शक्तिशाली विज़न कंट्रोल सेक्शन] ---
+    st.markdown("### 📸 Vision Scanning")
+    uploaded_file = st.file_uploader("तस्वीर अपलोड करें (JPG/PNG)", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_file:
+        st.image(uploaded_file, caption="Scan Ready ✅", use_container_width=True)
+        # इसे ग्लोबल एक्सेस के लिए स्टोर कर रहे हैं
+        st.session_state.uploaded_file = uploaded_file
+    st.divider()
+    # ------------------------------------
+
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
         st.subheader("🔱 Shield Defense Records")
         if 'raja_shield' in globals():
@@ -380,7 +391,7 @@ with st.sidebar:
                 
     if st.button("PURGE ALL DATA"):
         if "history" in st.session_state:
-            # IDENTITY को पक्का करें कि ऊपर डिफाइन है
+            # यहाँ सुनिश्चित करें कि IDENTITY आपके कोड में ऊपर डिफाइन है
             st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
 
