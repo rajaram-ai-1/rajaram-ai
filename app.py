@@ -364,17 +364,18 @@ with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJA AI V7")
     
-    # --- [शक्तिशाली विज़न कंट्रोल सेक्शन] ---
     st.markdown("### 📸 Vision Scanning")
+    # फाइल अपलोडर
     uploaded_file = st.file_uploader("तस्वीर अपलोड करें (JPG/PNG)", type=["jpg", "jpeg", "png"])
-         st.session_state.uploaded_file = uploaded_file
-    if uploaded_file:
+    
+    # यहाँ स्पेस (Indentation) एकदम सही होना चाहिए
+    if uploaded_file is not None:
         st.image(uploaded_file, caption="Scan Ready ✅", use_container_width=True)
-        # इसे ग्लोबल एक्सेस के लिए स्टोर कर रहे हैं
+        # इस लाइन के आगे की खाली जगह (Indent) ऊपर वाली लाइन के बराबर होनी चाहिए
         st.session_state.uploaded_file = uploaded_file
+    
     st.divider()
-    # ------------------------------------
-
+    
     if st.button("🛡️ VIEW SHIELD REPAIR LOGS"):
         st.subheader("🔱 Shield Defense Records")
         if 'raja_shield' in globals():
@@ -391,7 +392,6 @@ with st.sidebar:
                 
     if st.button("PURGE ALL DATA"):
         if "history" in st.session_state:
-            # यहाँ सुनिश्चित करें कि IDENTITY आपके कोड में ऊपर डिफाइन है
             st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
 
