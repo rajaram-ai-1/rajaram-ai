@@ -159,22 +159,26 @@ class RajaAgent:
     async def raja_router(self, user_input):
         """🚀 LIGHT-SPEED ROUTER: बिजली की तरह फैसला लेगा"""
         try:
+            # १. इनपुट को छोटे अक्षरों में बदलें (Normalize)
             p = user_input.lower()
              
-            # --- [FORCE SEARCH & VISION TRIGGERS - UPDATED] ---
-p = prompt.lower() # प्रॉम्प्ट को छोटे अक्षरों में बदलें ताकि मैचिंग परफेक्ट हो
+            # २. विजन ट्रिगर (फोटो के लिए सबसे पहले चेक करें)
+            vision_words = ["photo", "image", "dekho", "pic", "फोटो", "देखकर बताओ", "तस्वीर", "क्या है इसमें", "देख"]
+            if any(word in p for word in vision_words):
+                return "VISION"
 
-# १. विजन ट्रिगर (इसे सबसे ऊपर रखें ताकि फोटो को प्राथमिकता मिले)
-vision_words = ["photo", "image", "dekho", "pic", "फोटो", "देखकर बताओ", "तस्वीर", "क्या है इसमें"]
-if any(word in p for word in vision_words):
-    return "VISION"
+            # ३. सर्च ट्रिगर (इंटरनेट सर्च के लिए)
+            search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
+                            "मौसम", "तापमान", "temperature", "बारिश", "rain", "live", "सरकारी", "योजना"]
+            if any(word in p for word in search_words):
+                return "SEARCH"
 
-# २. सर्च ट्रिगर
-search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
-                "मौसम", "तापमान", "temperature", "बारिश", "rain", "live", "सरकारी", "योजना"]
-if any(word in p for word in search_words):
-    return "SEARCH"
+            # अगर कुछ मैच न हो तो सामान्य दिमाग (BRAIN) इस्तेमाल करें
+            return "BRAIN"
 
+        except Exception as e:
+            # सुरक्षा के लिए: अगर एरर आए तो BRAIN मोड चालू रखें
+            return "BRAIN"
             # सबसे हल्के मॉडल से तुरंत फैसला (Speed Optimization)
             router_prompt = f"Categorize: '{user_input}'. Reply only 'VISION', 'SEARCH', or 'BRAIN'."
             res_stream, _ = await self.call_llm(core.BRAIN_CATALOG["FLASH_VISION"], router_prompt, "Router Mode")
