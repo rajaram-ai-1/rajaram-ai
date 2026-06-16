@@ -1,4 +1,4 @@
-Import logging
+import logging
 import time
 from typing import List, Dict, Optional
 from googlesearch import search
@@ -59,25 +59,24 @@ class RajaLiveSearchEngine:
             return None
 
 # ==========================================
-# 2. सिस्टम एग्जीक्यूशन ब्लॉक (Testing Area)
+# 2. ब्रिज फंक्शन (यह app.py को सर्च इंजन से जोड़ेगा)
 # ==========================================
-if __name__ == "__main__":
-    # राजा AI का सर्च मॉड्यूल एक्टिवेट करें
-    raja_search = RajaLiveSearchEngine(max_results=3, delay=1.0)
+def raja_web_search(query: str) -> str:
+    """
+    app.py और सर्च इंजन के बीच का पुल। 
+    यह लिस्ट डेटा को एक खूबसूरत स्ट्रिंग पैकेट में बदलता है।
+    """
+    search_engine = RajaLiveSearchEngine(max_results=3, delay=1.0)
+    raw_packets = search_engine.fetch_live_data(query)
     
-    # आप यहाँ कोई भी क्वेरी डाल सकते हैं
-    target_query = "आज की सबसे बड़ी टेक्नोलॉजी न्यूज़"
+    if not raw_packets:
+        return "सर्च इंजन से कोई लाइव डेटा नहीं मिला या लिंक डाउन है।"
+        
+    intel_string = "--- SATELLITE LIVE DATA INTERCEPTED ---\n"
+    for packet in raw_packets:
+        intel_string += f"शीर्षक: {packet['title']}\n"
+        intel_string += f"जानकारी: {packet['snippet']}\n"
+        intel_string += f"स्रोत लिंक: {packet['source_url']}\n\n"
+    intel_string += "----------------------------------------"
     
-    # डेटा फेच करें
-    live_results = raja_search.fetch_live_data(target_query)
-    
-    # रिज़ल्ट्स को टर्मिनल पर साफ-सुथरे तरीके से प्रिंट करें
-    if live_results:
-        print("\n" + "="*60)
-        print("👑 RAJA AI - OMNIPOTENT LIVE DATA STREAM 👑")
-        print("="*60)
-        for item in live_results:
-            print(f"[{item['rank']}] {item['title']}")
-            print(f"    > जानकारी : {item['snippet']}")
-            print(f"    > लिंक    : {item['source_url']}\n")
-        print("="*60)
+    return intel_string
