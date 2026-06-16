@@ -464,23 +464,19 @@ if "history" in st.session_state:
         role = "user" if isinstance(msg, HumanMessage) else "assistant"
         with st.chat_message(role):
             st.markdown(msg.content)
-# ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - ANTI-LOOP VERSION 🔱
-# ------------------------------------------------------------------------------
 
-
-# ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - MODULAR & STABLE VERSION 🔱
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-# [PHASE 7: EXECUTION LOGIC] - POWER-USER & ERROR-FREE VERSION 🔱
-# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # [PHASE 7: EXECUTION LOGIC] - THE OMNIPOTENT ENGINE (FIXED & POWERFUL)
 # ------------------------------------------------------------------------------
 
-# --- १. इनपुट कूरियर और न्यूरॉन गेटवे ---
+import asyncio
+import time
+import logging
+import streamlit as st
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+
+# --- न्यूरल गेटवे और कूरियर सिंक ---
 prompt = st.session_state.get("prompt") or user_input
 if st.session_state.get("prompt"):
     st.session_state.prompt = None 
@@ -552,22 +548,20 @@ if prompt:
                         # बिजली की गति से एसिंक जनरेटर को यूआई स्क्रीन पर सिंक और रेंडर करने वाला ब्लॉक
                         container_placeholder = st.empty()
                         
-                       async def _render_async_pipeline(async_generator) -> str:
-    accumulated_buffer = ""
-    
-    # यहाँ 'from' की जगह 'for ... in' का इस्तेमाल होगा
-    async for chunk in async_generator:
-        
-        # लांगचैन का कंटेंट हो या नॉर्मल स्ट्रिंग, दोनों को सुरक्षित तरीके से हैंडल करेगा
-        chunk_content = getattr(chunk, 'content', str(chunk))
-        accumulated_buffer += chunk_content
-        
-        # कर्सर (▌) के साथ लाइव टाइपिंग इफ़ेक्ट
-        container_placeholder.markdown(accumulated_buffer + "▌")
-        
-    # लूप खत्म होने के बाद कर्सर (▌) हटाकर फाइनल आउटपुट सेट करना
-    container_placeholder.markdown(accumulated_buffer)
-    return accumulated_buffer
+                        async def _render_async_pipeline(async_generator) -> str:
+                            accumulated_buffer = ""
+                            async for chunk in async_generator:
+                                # लांगचैन का कंटेंट हो या नॉर्मल स्ट्रिंग, दोनों को सुरक्षित तरीके से हैंडल करेगा
+                                chunk_content = getattr(chunk, 'content', str(chunk))
+                                accumulated_buffer += chunk_content
+                                
+                                # कर्सर (▌) के साथ लाइव टाइपिंग इफ़ेक्ट
+                                container_placeholder.markdown(accumulated_buffer + "▌")
+                                
+                            # लूप खत्म होने के बाद कर्सर (▌) हटाकर फाइनल आउटपुट सेट करना
+                            container_placeholder.markdown(accumulated_buffer)
+                            return accumulated_buffer
+                            
                         final_text = loop.run_until_complete(_render_async_pipeline(stream_target))
                     else:
                         final_text = str(stream_target)
@@ -589,7 +583,8 @@ if prompt:
                 st.error(error_signature)
                 if 'raja_shield' in globals():
                     raja_shield.log_error("CORE_PIPELINE_MUTATION", str(core_collapse_error))
-        
+
+
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
 # ------------------------------------------------------------------------------
