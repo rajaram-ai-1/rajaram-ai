@@ -11,10 +11,10 @@ streamlit-mic-recorder
 flask
 flask-cors
 beautifulsoup4
-duckduckgo-search
 asyncio
 easyocr
 opencv-python-headless
 Pillow
 numpy
 googlesearch-python
+tavily-python
