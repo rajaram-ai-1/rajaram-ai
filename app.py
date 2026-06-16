@@ -147,52 +147,46 @@ raja_shield = RajaShield()
 # ------------------------------------------------------------------------------
 # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
 # ------------------------------------------------------------------------------
+
 class RajaAgent:
     def __init__(self, system_prompt):
         """🔱 RAJA AI: NEURAL MEMORY SETUP"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
+            
+        # एडवांस ऑप्टिमाइज़ेशन: बिजली की रफ़्तार से मैचिंग के लिए Regex का उपयोग
+        self.vision_regex = re.compile(r'(photo|image|dekho|pic|फोटो|देखकर बताओ|तस्वीर|क्या है इसमें|देख)', re.IGNORECASE)
+        self.search_regex = re.compile(r'(price|weather|news|खबर|आज का|rate|gold|सोना|मौसम|तापमान|temperature|बारिश|rain|live|सरकारी|योजना|भाव)', re.IGNORECASE)
 
     async def raja_router(self, user_input):
         """🚀 LIGHT-SPEED ROUTER: बिजली की तरह फैसला लेगा"""
         try:
-            # १. इनपुट को छोटे अक्षरों में बदलें (Normalize)
-            p = user_input.lower()
-             
-            # २. विजन ट्रिगर (फोटो के लिए सबसे पहले चेक करें)
-            vision_words = ["photo", "image", "dekho", "pic", "फोटो", "देखकर बताओ", "तस्वीर", "क्या है इसमें", "देख"]
-            if any(word in p for word in vision_words):
+            # १. सबसे पहले Regex से नैनो-सेकंड में चेक करें (फास्टेस्ट मोड)
+            if self.vision_regex.search(user_input):
                 return "VISION"
-
-            # ३. सर्च ट्रिगर (इंटरनेट सर्च के लिए)
-            search_words = ["price", "weather", "news", "खबर", "आज का", "rate", "gold", "सोना", 
-                            "मौसम", "तापमान", "temperature", "बारिश", "rain", "live", "सरकारी", "योजना"]
-            if any(word in p for word in search_words):
+            if self.search_regex.search(user_input):
                 return "SEARCH"
 
-            # अगर कुछ मैच न हो तो सामान्य दिमाग (BRAIN) इस्तेमाल करें
-            return "BRAIN"
-
-        except Exception as e:
-            # सुरक्षा के लिए: अगर एरर आए तो BRAIN मोड चालू रखें
-            return "BRAIN"
-            # सबसे हल्के मॉडल से तुरंत फैसला (Speed Optimization)
-            router_prompt = f"Categorize: '{user_input}'. Reply only 'VISION', 'SEARCH', or 'BRAIN'."
+            # २. अगर कीवर्ड मैच न हों, तो AI मॉडल (FLASH_VISION) से बैकअप डिसीजन लें
+            router_prompt = f"Categorize the input: '{user_input}'. Reply ONLY with one word: 'VISION', 'SEARCH', or 'BRAIN'."
             res_stream, _ = await self.call_llm(core.BRAIN_CATALOG["FLASH_VISION"], router_prompt, "Router Mode")
             
-            # चूंकि call_llm अब स्ट्रीम देता है, हम इसे तुरंत पढ़ेंगे
             decision = ""
             async for chunk in res_stream:
                 decision += chunk.content
             
-            decision = decision.upper()
+            decision = decision.upper().strip()
             if "VISION" in decision: return "VISION"
             if "SEARCH" in decision: return "SEARCH"
             return "BRAIN"
-            
+
         except Exception as e:
-            raja_shield.log_error("ROUTER_GLITCH", str(e))
+            # अगर पूरा सिस्टम भी फेल हो जाए, तो सुरक्षित रूप से BRAIN पर फॉलबैक करें
+            try:
+                raja_shield.log_error("ROUTER_GLITCH", str(e))
+            except:
+                pass
             return "BRAIN"
 
     async def execute_reasoning(self, user_input, web_data=""):
@@ -203,7 +197,6 @@ class RajaAgent:
                              if web_data else user_input)
 
             # सबसे शक्तिशाली मॉडल (70B) से सीधा स्ट्रीम लेना
-            # हम Parallel नहीं कर रहे क्योंकि स्ट्रीमिंग में एक ही 'Best' मॉडल बेहतर है
             response_stream, model = await self.call_llm(
                 core.BRAIN_CATALOG["ULTIMATE_70B"], 
                 context_input, 
@@ -212,48 +205,68 @@ class RajaAgent:
             return response_stream, model
             
         except Exception as e:
-            raja_shield.log_error("NEURAL_COLLAPSE", str(e))
-            return "🔱 Shield Active: Logic Rerouted due to spike.", "RECOVERY"
+            try:
+                raja_shield.log_error("NEURAL_COLLAPSE", str(e))
+            except:
+                pass
+            
+            # 🛡️ क्रैश-प्रूफिंग सीक्रेट: एक नकली एसिंक स्ट्रीम बनाएं ताकि app.py का लूप न टूटे
+            async def safe_fallback_stream():
+                class DummyChunk:
+                    def __init__(self, content):
+                        self.content = content
+                yield DummyChunk("🔱 Shield Active: Logic Rerouted due to spike. सर्वर पर लोड अधिक है।")
+            
+            return safe_fallback_stream(), "RECOVERY"
 
     async def call_llm(self, model, prompt, system):
         """⚡ GROQ STREAMING ENGINE: 0-सेकंड रिस्पॉन्स लॉजिक"""
         try:
-            # यहाँ streaming=True सबसे बड़ी शक्ति है
             llm = ChatGroq(
                 groq_api_key=core.GROQ_API_KEY, 
                 model_name=model, 
                 temperature=0.6,
-                streaming=True # यह शब्द-दर-शब्द जवाब भेजेगा
+                streaming=True
             )
             
             # मेमोरी को स्लिम रखना (Last 6 messages) ताकि टोकन बोझ न बनें
             memory_window = st.session_state.history[-6:]
             messages = [SystemMessage(content=system)] + memory_window + [HumanMessage(content=prompt)]
             
-            # astream का उपयोग: यह इंतज़ार नहीं करता, सीधा आउटपुट देना शुरू करता है
             return llm.astream(messages), model
         except Exception as e:
-            return f"Error: {str(e)}", model
+            # एरर को ऊपर वाले फंक्शन (execute_reasoning) में भेजें ताकि वो सुरक्षित हैंडल कर सके
+            raise e
 
     def speak(self, text):
-        """🔱 NATURAL VOICE ENGINE: बिना रुके आवाज़ (Madhur Neural)"""
-        import threading
-        # आवाज़ को बैकग्राउंड में चलाएं ताकि टेक्स्ट की स्पीड न रुके
+        """🔱 NATURAL VOICE ENGINE: मल्टी-यूज़र सेफ ऑडियो (Madhur Neural)"""
+        # बफर ओवरफ्लो रोकने के लिए टेक्स्ट लिमिट
+        safe_text = text[:600] 
+        
         def run_tts():
             try:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                communicate = edge_tts.Communicate(text[:500], "hi-IN-MadhurNeural", rate="+7%")
-                loop.run_until_complete(communicate.save("response.mp3"))
+                communicate = edge_tts.Communicate(safe_text, "hi-IN-MadhurNeural", rate="+7%")
                 
-                if os.path.exists("response.mp3"):
-                    with open("response.mp3", "rb") as f:
+                # 🛠️ प्रो-लेवल फिक्स: "response.mp3" लिखने से मल्टी-यूज़र एनवायरनमेंट में क्रैश होता था
+                # अब हर बार एक यूनिक टेम्परेरी फाइल बनेगी जो प्ले होने के बाद खुद डिलीट हो जाएगी
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+                    temp_path = temp_file.name
+                
+                loop.run_until_complete(communicate.save(temp_path))
+                
+                if os.path.exists(temp_path):
+                    with open(temp_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
-                        st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
+                    st.markdown(f'<audio autoplay src="data:audio/mp3;base64,{b64}">', unsafe_allow_html=True)
+                    
+                    # फाइल का काम खत्म, तुरंत मेमोरी से हटाएँ
+                    os.remove(temp_path)
             except:
                 pass
 
-        threading.Thread(target=run_tts).start()
+        threading.Thread(target=run_tts, daemon=True).start()
 
 
 
