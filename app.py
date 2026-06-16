@@ -478,6 +478,7 @@ import streamlit as st
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 # --- न्यूरल गेटवे और कूरियर सिंक ---
+user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
 prompt = st.session_state.get("prompt") or user_input
 if st.session_state.get("prompt"):
     st.session_state.prompt = None 
