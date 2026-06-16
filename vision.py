@@ -13,7 +13,7 @@ def raja_vision_engine(uploaded_file, prompt=""):
         genai.configure(api_key=api_key)
         
         # सबसे आधुनिक विज़न मॉडल (Flash 1.5)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel("gemini-1.5-pro")
         
         # इमेज को प्रोसेस करना
         img = Image.open(uploaded_file)
