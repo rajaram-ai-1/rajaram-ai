@@ -105,7 +105,7 @@ class GlobalCore:
             "THE_TITAN": "llama-3.1-405b-reasoning",
             "ULTIMATE_70B": "llama-3.3-70b-versatile",
             "LOGIC_PRO": "llama-3.3-70b-versatile",
-            "EYE_OF_RA": "gemini-1.5-flash", 
+            "EYE_OF_RA": "gemini-1.5-pro", 
             "FLASH_VISION": "llama-3.2-11b-vision-preview",
             "CODE_WIZARD": "llama-3.3-70b-versatile", 
             "CYBER_EXPERT": "llama-3.3-70b-versatile", 
