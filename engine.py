@@ -6,8 +6,9 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [RAJA-AI-CORE] : %
 
 class RajaLiveSearchEngine:
     def __init__(self):
-        # यहाँ अपनी असली Tavily API Key डालें
-        self.client = TavilyClient(api_key="YOUR_TAVILY_API_KEY")
+       import streamlit as st
+# कोड के अंदर डायरेक्ट की लिखने की बजाय ऐसे कॉल करें:
+self.client = TavilyClient(api_key=st.secrets["TAVILY_API_KEY"])
         logging.info("Tavily Live Search Engine एक्टिवेटेड।")
 
     def fetch_live_data(self, query: str) -> str:
