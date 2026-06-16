@@ -552,7 +552,7 @@ if prompt:
                         # बिजली की गति से एसिंक जनरेटर को यूआई स्क्रीन पर सिंक और रेंडर करने वाला ब्लॉक
                         container_placeholder = st.empty()
                         
-                      async def _render_async_pipeline(async_generator) -> str:
+                       async def _render_async_pipeline(async_generator) -> str:
     accumulated_buffer = ""
     
     # यहाँ 'from' की जगह 'for ... in' का इस्तेमाल होगा
@@ -568,7 +568,6 @@ if prompt:
     # लूप खत्म होने के बाद कर्सर (▌) हटाकर फाइनल आउटपुट सेट करना
     container_placeholder.markdown(accumulated_buffer)
     return accumulated_buffer
-                            
                         final_text = loop.run_until_complete(_render_async_pipeline(stream_target))
                     else:
                         final_text = str(stream_target)
