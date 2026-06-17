@@ -461,20 +461,16 @@ if "history" in st.session_state:
 # [PHASE 7: EXECUTION LOGIC] - THE OMNIPOTENT ENGINE (FIXED & POWERFUL)
 # ------------------------------------------------------------------------------
 
-import asyncio
-import time
-import logging
-import streamlit as st
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+# ------------------------------------------------------------------------------
+# [PHASE 7: EXECUTION LOGIC] - THE OMNIPOTENT ENGINE (FULLY CONNECTED)
+# ------------------------------------------------------------------------------
 
-# --- न्यूरल गेटवे और कूरियर सिंक ---
 user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
 prompt = st.session_state.get("prompt") or user_input
 if st.session_state.get("prompt"):
     st.session_state.prompt = None 
 
 if prompt:
-    # राजा एआई मास्टर कोर इनिशियलाइजेशन
     if "raja_ai" not in st.session_state:
         st.session_state.raja_ai = RajaAgent(IDENTITY)
     if "history" not in st.session_state:
@@ -482,20 +478,15 @@ if prompt:
         
     raja_ai = st.session_state.raja_ai
     
-    # स्टेट अपेंडिंग और थ्रेड-सेफ यूजर यूआई रेंडर
     st.session_state.history.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(f"**You:** {prompt}")
 
-    # --- २. मुख्य एआई कर्नल निष्पादन पाइपलाइन (MAIN ASSISTANT KERNEL) ---
     with st.chat_message("assistant"):
-        # टेलीमेट्री मैट्रिक्स काउंटर शुरू (समय मापने के लिए)
         telemetry_start = time.perf_counter()
         
-        # थ्रेड-सेफ इवेंट लूप ऑप्टिमाइज़र हेल्पर
         def _get_kernel_loop() -> asyncio.AbstractEventLoop:
-            try:
-                return asyncio.get_running_loop()
+            try: return asyncio.get_running_loop()
             except RuntimeError:
                 new_loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(new_loop)
@@ -505,52 +496,48 @@ if prompt:
         
         with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
             try:
-                # [चरण १: प्रेडिक्टिव इंटेलिजेंट राउटिंग]
+                # [चरण १: प्रेडिक्टिव राउटिंग]
                 mode = loop.run_until_complete(raja_ai.raja_router(prompt))
                 final_text, logic_res = "", None
 
-                # [चरण २: एडवांस स्ट्रक्चरल पैटर्न मैचिंग - PRO LEVEL MATCH-CASE]
+                # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
                 match mode:
                     case "SEARCH" if st.session_state.get('search_enabled', True):
                         st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
-                        from engine import raja_web_search
+                        # इंटरनेट सर्च का डेटा लाओ
                         intel = raja_web_search(prompt)
+                        # उस डेटा को एआई के थिंकिंग इंजन में इंजेक्ट करो
                         logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
                         
                     case "VISION":
                         uploaded_file = st.session_state.get('uploaded_file')
                         if uploaded_file is not None:
-                            from vision import raja_vision_engine
                             st.toast("👁️ Cybernetic Vision Core Active", icon="🔥")
+                            # विज़न इंजन से फोटो का विश्लेषण करवाओ
                             final_text = raja_vision_engine(uploaded_file, prompt)
                             st.markdown(final_text)
                         else:
-                            final_text = "राजाराम भाई, आपने साइडबार में फोटो अपलोड नहीं की है। कृपया फोटो डालें!"
-                            st.warning(final_text)
+                            # अगर फोटो नहीं है, तो सीधे दिमाग का इस्तेमाल करने के लिए ब्रेन मोड पर डाइवर्ट करो
+                            st.toast("⚠️ No Image Found! Rerouting to Brain Mode...", icon="🧠")
+                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
                             
-                    case _: # वाइल्डकार्ड एंट्री: अगर कुछ मैच न हो या 'BRAIN' मोड हो
+                    case _: # BRAIN MODE (सामान्य बातचीत)
+                        st.toast("🧠 Internal Brain Core Engaged", icon="🔱")
                         logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
 
-                # [चरण ३: यूनिवर्सल एसिंक स्ट्रीम रेजोल्यूशन (Universal Async Stream Resolver)]
+                # [चरण ३: यूनिवर्सल एसिंक स्ट्रीम रेजोल्यूशन]
                 if logic_res and not final_text:
-                    # टुपल या लिस्ट में से सीधे कोर स्ट्रीम ऑब्जेक्ट को निकालना
                     stream_target = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
                     
                     if hasattr(stream_target, '__aiter__'):
-                        # बिजली की गति से एसिंक जनरेटर को यूआई स्क्रीन पर सिंक और रेंडर करने वाला ब्लॉक
                         container_placeholder = st.empty()
                         
                         async def _render_async_pipeline(async_generator) -> str:
                             accumulated_buffer = ""
                             async for chunk in async_generator:
-                                # लांगचैन का कंटेंट हो या नॉर्मल स्ट्रिंग, दोनों को सुरक्षित तरीके से हैंडल करेगा
                                 chunk_content = getattr(chunk, 'content', str(chunk))
                                 accumulated_buffer += chunk_content
-                                
-                                # कर्सर (▌) के साथ लाइव टाइपिंग इफ़ेक्ट
                                 container_placeholder.markdown(accumulated_buffer + "▌")
-                                
-                            # लूप खत्म होने के बाद कर्सर (▌) हटाकर फाइनल आउटपुट सेट करना
                             container_placeholder.markdown(accumulated_buffer)
                             return accumulated_buffer
                             
@@ -559,13 +546,11 @@ if prompt:
                         final_text = str(stream_target)
                         st.markdown(final_text)
 
-                # [चरण ४: टेलीमेट्री और पोस्ट-प्रोसेसिंग कर्नल]
+                # [चरण ४: टेलीमेट्री और वॉइस आउटपुट]
                 if final_text:
                     st.session_state.history.append(AIMessage(content=final_text))
-                    
-                    # सिस्टम टेलीमेट्री लॉगिंग (सीनियर इंजीनियर्स इसे देखकर दीवाने हो जाएंगे)
                     execution_ms = (time.perf_counter() - telemetry_start) * 1000
-                    logging.info(f"[RAJA-CORE-TELEMETRY] Pipeline executed successfully in {execution_ms:.2f}ms | Router-Mode: {mode}")
+                    logging.info(f"[RAJA-CORE-TELEMETRY] Executed in {execution_ms:.2f}ms | Mode: {mode}")
                     
                     if st.session_state.get('voice_enabled'):
                         raja_ai.speak(final_text)
@@ -575,7 +560,6 @@ if prompt:
                 st.error(error_signature)
                 if 'raja_shield' in globals():
                     raja_shield.log_error("CORE_PIPELINE_MUTATION", str(core_collapse_error))
-
 
 # ------------------------------------------------------------------------------
 # [PHASE 8: FOOTER] - NO CHANGES
