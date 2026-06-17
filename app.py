@@ -500,11 +500,9 @@ if prompt:
         
         with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
             try:
-                # [चरण १: प्रेडिक्टिव राउटिंग]
-                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
-                final_text, logic_res = "", None
-
-                 case "SEARCH" if st.session_state.get('search_enabled', True):
+               # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
+                match mode:
+                    case "SEARCH" if st.session_state.get('search_enabled', True):
                         # 🧠 न्यूरल वेदर कीवर्ड चेकर (Hyper-Optimized)
                         weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी", "rain", "climate"]
                         
@@ -527,15 +525,15 @@ if prompt:
                                         groq_api_key=core.GROQ_API_KEY, 
                                         model_name="llama3-8b-8192", 
                                         temperature=0.0,
-                                        max_tokens=15 # स्पीड के लिए टोकंस लिमिट किए
+                                        max_tokens=15
                                     )
                                     extract_prompt = f"Extract ONLY the single city name from this text. No punctuation, no extra words. If no city is found, output 'Bareilly'. Text: '{prompt}'"
                                     response = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
                                     target_city = "".join(c for c in response if c.isalnum() or c.isspace()).strip()
                                 except Exception:
-                                    target_city = "Bareilly" # मजबूत बैकअप
+                                    target_city = "Bareilly"
                             
-                            # फाइनल सिक्योरिटी चेक
+                            # फाइनल Security Check
                             if not target_city or len(target_city) > 20:
                                 target_city = "Bareilly"
                                 
@@ -546,7 +544,7 @@ if prompt:
                                 from engine import raja_weather_engine
                                 weather_intel = raja_weather_engine(target_city)
                                 
-                                # 🔐 [STRICT CONTEXT BINDING] एआई को झूठ बोलने से रोकने का अचूक ब्रह्मास्त्र
+                                # 🔐 [STRICT CONTEXT BINDING]
                                 hacked_weather_prompt = f"""
                                 [SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
                                 यूज़र का मूल सवाल: "{prompt}"
@@ -565,13 +563,13 @@ if prompt:
                                 logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
                                 
                             except Exception as weather_core_error:
-                                # 🔄 डायनेमिक फ़ॉलबैक: अगर वेदर इंजन फेल हुआ, तो सिस्टम क्रैश नहीं होगा, तुरंत वेब सर्च पर जाएगा!
+                                # 🔄 डायनेमिक फ़ॉलबैक
                                 st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
                                 from engine import raja_web_search
                                 intel = raja_web_search(prompt)
                                 logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
                         else:
-                            # 🌐 बाकी सभी सामान्य इंटरनेट सर्च के लिए पुराना सॉलिड Tavily इंजन
+                            # 🌐 सामान्य इंटरनेट सर्च के लिए पुराना सॉलिड Tavily इंजन
                             st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
                             from engine import raja_web_search
                             intel = raja_web_search(prompt)
