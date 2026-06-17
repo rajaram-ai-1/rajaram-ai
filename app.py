@@ -465,6 +465,10 @@ if "history" in st.session_state:
 # [PHASE 7: EXECUTION LOGIC] - THE OMNIPOTENT ENGINE (FULLY CONNECTED)
 # ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
+# [PHASE 7: EXECUTION LOGIC] - 🔱 सुधरा हुआ महाशक्तिशाली कर्नल इंजन 🔱
+# ------------------------------------------------------------------------------
+
 user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
 prompt = st.session_state.get("prompt") or user_input
 if st.session_state.get("prompt"):
@@ -503,25 +507,54 @@ if prompt:
                 # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
                 match mode:
                     case "SEARCH" if st.session_state.get('search_enabled', True):
-                        st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
-                        # इंटरनेट सर्च का डेटा लाओ
-                        intel = raja_web_search(prompt)
-                        # उस डेटा को एआई के थिंकिंग इंजन में इंजेक्ट करो
-                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
+                        # 🧠 न्यूरल वेदर कीवर्ड चेकर
+                        weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी"]
+                        
+                        if any(w in prompt.lower() for w in weather_keywords):
+                            st.toast("🌤️ वेदर सॅटेलाइट एक्टिवेटेड: शहर ट्रैक किया जा रहा है...", icon="🛰️")
+                            
+                            # प्रॉम्ट में से शहर का नाम ढूंढने के लिए नैनो-सेकंड एलएलएम कॉल
+                            from langchain_core.messages import HumanMessage
+                            extractor_llm = ChatGroq(
+                                groq_api_key=core.GROQ_API_KEY, 
+                                model_name="llama3-8b-8192", 
+                                temperature=0.0
+                            )
+                            extract_prompt = f"इस वाक्य में से केवल शहर का नाम निकालो। कोई और फालतू शब्द मत लिखना। अगर शहर का नाम न मिले तो केवल 'Bareilly' लिखना। वाक्य: '{prompt}'"
+                            
+                            try:
+                                target_city = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
+                                # फालतू डॉट्स या कोट्स हटाना
+                                target_city = target_city.replace("'", "").replace('"', "").replace(".", "")
+                            except:
+                                target_city = "Bareilly"
+                                
+                            st.toast(f"📍 टारगेट लोकेशन लॉक्ड: {target_city}", icon="🎯")
+                            
+                            # ⛈️ सीधे हमारे नए ओपनवेदर इंजन से लाइव डेटा खींचना
+                            from engine import raja_weather_engine
+                            weather_intel = raja_weather_engine(target_city)
+                            
+                            # इस ताज़ा सैटेलाइट डेटा को थिंकिंग इंजन में इंजेक्ट करना
+                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, weather_intel))
+                        else:
+                            # बाकी सामान्य इंटरनेट सर्च के लिए Tavily इंजन ही चलेगा
+                            st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
+                            from engine import raja_web_search
+                            intel = raja_web_search(prompt)
+                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
                         
                     case "VISION":
                         uploaded_file = st.session_state.get('uploaded_file')
                         if uploaded_file is not None:
                             st.toast("👁️ Cybernetic Vision Core Active", icon="🔥")
-                            # विज़न इंजन से फोटो का विश्लेषण करवाओ
                             final_text = raja_vision_engine(uploaded_file, prompt)
                             st.markdown(final_text)
                         else:
-                            # अगर फोटो नहीं है, तो सीधे दिमाग का इस्तेमाल करने के लिए ब्रेन मोड पर डाइवर्ट करो
                             st.toast("⚠️ No Image Found! Rerouting to Brain Mode...", icon="🧠")
                             logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
                             
-                    case _: # BRAIN MODE (सामान्य बातचीत)
+                    case _: # BRAIN MODE
                         st.toast("🧠 Internal Brain Core Engaged", icon="🔱")
                         logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
 
