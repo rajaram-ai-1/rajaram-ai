@@ -504,41 +504,74 @@ if prompt:
                 mode = loop.run_until_complete(raja_ai.raja_router(prompt))
                 final_text, logic_res = "", None
 
-                # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
-                match mode:
-                    case "SEARCH" if st.session_state.get('search_enabled', True):
-                        # 🧠 न्यूरल वेदर कीवर्ड चेकर
-                        weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी"]
+                 case "SEARCH" if st.session_state.get('search_enabled', True):
+                        # 🧠 न्यूरल वेदर कीवर्ड चेकर (Hyper-Optimized)
+                        weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी", "rain", "climate"]
                         
                         if any(w in prompt.lower() for w in weather_keywords):
-                            st.toast("🌤️ वेदर सॅटेलाइट एक्टिवेटेड: शहर ट्रैक किया जा रहा है...", icon="🛰️")
+                            st.toast("🛰️ Weather Matrix Triggered: Initiating Sat-Link...", icon="🌤️")
                             
-                            # प्रॉम्ट में से शहर का नाम ढूंढने के लिए नैनो-सेकंड एलएलएम कॉल
-                            from langchain_core.messages import HumanMessage
-                            extractor_llm = ChatGroq(
-                                groq_api_key=core.GROQ_API_KEY, 
-                                model_name="llama3-8b-8192", 
-                                temperature=0.0
-                            )
-                            extract_prompt = f"इस वाक्य में से केवल शहर का नाम निकालो। कोई और फालतू शब्द मत लिखना। अगर शहर का नाम न मिले तो केवल 'Bareilly' लिखना। वाक्य: '{prompt}'"
+                            # 🛑 लेयर १: ज़ीरो-लेटेंसी लोकल पार्सर (बिना LLM के तुरंत शहर पकड़ना)
+                            target_city = None
+                            common_cities = ["bareilly", "बरेली", "delhi", "दिल्ली", "mumbai", "मुंबई", "lucknow", "लखनऊ"]
+                            for city in common_cities:
+                                if city in prompt.lower():
+                                    target_city = "Bareilly" if city in ["bareilly", "बरेली"] else city.title()
+                                    break
                             
-                            try:
-                                target_city = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
-                                # फालतू डॉट्स या कोट्स हटाना
-                                target_city = target_city.replace("'", "").replace('"', "").replace(".", "")
-                            except:
+                            # लेयर २: अगर लोकल पार्सर से नहीं मिला, तब ही केवल फ़ास्ट नैनो-LLM कॉल करेंगे
+                            if not target_city:
+                                try:
+                                    from langchain_core.messages import HumanMessage
+                                    extractor_llm = ChatGroq(
+                                        groq_api_key=core.GROQ_API_KEY, 
+                                        model_name="llama3-8b-8192", 
+                                        temperature=0.0,
+                                        max_tokens=15 # स्पीड के लिए टोकंस लिमिट किए
+                                    )
+                                    extract_prompt = f"Extract ONLY the single city name from this text. No punctuation, no extra words. If no city is found, output 'Bareilly'. Text: '{prompt}'"
+                                    response = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
+                                    target_city = "".join(c for c in response if c.isalnum() or c.isspace()).strip()
+                                except Exception:
+                                    target_city = "Bareilly" # मजबूत बैकअप
+                            
+                            # फाइनल सिक्योरिटी चेक
+                            if not target_city or len(target_city) > 20:
                                 target_city = "Bareilly"
                                 
-                            st.toast(f"📍 टारगेट लोकेशन लॉक्ड: {target_city}", icon="🎯")
+                            st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
                             
-                            # ⛈️ सीधे हमारे नए ओपनवेदर इंजन से लाइव डेटा खींचना
-                            from engine import raja_weather_engine
-                            weather_intel = raja_weather_engine(target_city)
-                            
-                            # इस ताज़ा सैटेलाइट डेटा को थिंकिंग इंजन में इंजेक्ट करना
-                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, weather_intel))
+                            # लेयर ३: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट इंजेक्शन
+                            try:
+                                from engine import raja_weather_engine
+                                weather_intel = raja_weather_engine(target_city)
+                                
+                                # 🔐 [STRICT CONTEXT BINDING] एआई को झूठ बोलने से रोकने का अचूक ब्रह्मास्त्र
+                                hacked_weather_prompt = f"""
+                                [SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
+                                यूज़र का मूल सवाल: "{prompt}"
+                                
+                                नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
+                                -----------------------------
+                                {weather_intel}
+                                -----------------------------
+                                
+                                कोर कमांड्स (तुम्हें इसे सख्ती से मानना है):
+                                1. केवल और केवल ऊपर दिए गए डेटा के वास्तविक आंकड़ों (तापमान, नमी, हवा) का उपयोग करके ही जवाब तैयार करो।
+                                2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान या मौसम की स्थिति बिल्कुल मत जोड़ो।
+                                3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।
+                                """
+                                
+                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
+                                
+                            except Exception as weather_core_error:
+                                # 🔄 डायनेमिक फ़ॉलबैक: अगर वेदर इंजन फेल हुआ, तो सिस्टम क्रैश नहीं होगा, तुरंत वेब सर्च पर जाएगा!
+                                st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
+                                from engine import raja_web_search
+                                intel = raja_web_search(prompt)
+                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
                         else:
-                            # बाकी सामान्य इंटरनेट सर्च के लिए Tavily इंजन ही चलेगा
+                            # 🌐 बाकी सभी सामान्य इंटरनेट सर्च के लिए पुराना सॉलिड Tavily इंजन
                             st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
                             from engine import raja_web_search
                             intel = raja_web_search(prompt)
