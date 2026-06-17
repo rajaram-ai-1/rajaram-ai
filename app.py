@@ -549,9 +549,7 @@ if prompt:
                     case _: # BRAIN MODE
                         logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
             except Exception as e:
-                st.error(f"🔱 Core Error: {str(e)}")
-                                   
-                            
+                st.error(f"🔱 Core Error: {str(e)}") 
                             # लेयर २: अगर लोकल पार्सर से नहीं मिला, तब ही केवल फ़ास्ट नैनो-LLM कॉल करेंगे
                             if not target_city:
                                 try:
