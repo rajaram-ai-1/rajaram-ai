@@ -498,9 +498,17 @@ if prompt:
 
         loop = _get_kernel_loop()
         
-        with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
+    
+                with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
+            # 🛡️ सेफ्टी लेयर: 'mode' को पहले से ही डिफाइन करो ताकि क्रैश न हो
+            mode = "BRAIN" 
             try:
-               # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
+                # [चरण १: प्रेडिक्टिव राउटिंग]
+                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                final_text, logic_res = "", None
+                
+                # ... बाकी का कोड यहाँ से वैसे ही रहेगा जैसा हमने अभी सेट किया था ...
+                # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
                 match mode:
                     case "SEARCH" if st.session_state.get('search_enabled', True):
                         # 🧠 न्यूरल वेदर कीवर्ड चेकर (Hyper-Optimized)
