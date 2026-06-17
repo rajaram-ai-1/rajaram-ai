@@ -498,31 +498,58 @@ if prompt:
 
         loop = _get_kernel_loop()
         
-    
-                with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
-            # 🛡️ सेफ्टी लेयर: 'mode' को पहले से ही डिफाइन करो ताकि क्रैश न हो
+    with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
+            # 🛡️ सेफ्टी लेयर: 'mode' को यहाँ डिफाइन करो
             mode = "BRAIN" 
             try:
                 # [चरण १: प्रेडिक्टिव राउटिंग]
                 mode = loop.run_until_complete(raja_ai.raja_router(prompt))
                 final_text, logic_res = "", None
                 
-                # ... बाकी का कोड यहाँ से वैसे ही रहेगा जैसा हमने अभी सेट किया था ...
                 # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
                 match mode:
                     case "SEARCH" if st.session_state.get('search_enabled', True):
-                        # 🧠 न्यूरल वेदर कीवर्ड चेकर (Hyper-Optimized)
                         weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी", "rain", "climate"]
                         
                         if any(w in prompt.lower() for w in weather_keywords):
                             st.toast("🛰️ Weather Matrix Triggered: Initiating Sat-Link...", icon="🌤️")
                             
-                            # 🛑 लेयर १: ज़ीरो-लेटेंसी लोकल पार्सर (बिना LLM के तुरंत शहर पकड़ना)
-                            target_city = None
+                            # 🛑 लेयर १: लोकल पार्सर (Bareilly default)
+                            target_city = "Bareilly"
                             common_cities = ["bareilly", "बरेली", "delhi", "दिल्ली", "mumbai", "मुंबई", "lucknow", "लखनऊ"]
                             for city in common_cities:
                                 if city in prompt.lower():
                                     target_city = "Bareilly" if city in ["bareilly", "बरेली"] else city.title()
+                                    break
+                            
+                            st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
+                            
+                            # लेयर २: एपीआई निष्पादन
+                            try:
+                                from engine import raja_weather_engine
+                                weather_intel = raja_weather_engine(target_city)
+                                # एंटी-हैलुसिनेशन प्रॉम्ट
+                                hacked_weather_prompt = f"System Override: Use strictly this data: {weather_intel}. User asked: '{prompt}'."
+                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
+                            except Exception:
+                                from engine import raja_web_search
+                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, raja_web_search(prompt)))
+                        else:
+                            from engine import raja_web_search
+                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, raja_web_search(prompt)))
+
+                    case "VISION":
+                        uploaded_file = st.session_state.get('uploaded_file')
+                        if uploaded_file:
+                            final_text = raja_vision_engine(uploaded_file, prompt)
+                            st.markdown(final_text)
+                        else:
+                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                            
+                    case _: # BRAIN MODE
+                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+            except Exception as e:
+                st.error(f"🔱 Core Error: {str(e)}")
                                     break
                             
                             # लेयर २: अगर लोकल पार्सर से नहीं मिला, तब ही केवल फ़ास्ट नैनो-LLM कॉल करेंगे
