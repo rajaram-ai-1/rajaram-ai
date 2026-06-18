@@ -438,11 +438,11 @@ def trigger_raja_powers(prompt):
     ("🔮 भविष्य", "predict")
     ]
     
-    cols = st.columns(5)
-    for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
-    if col.button(label, key=f"gen_sev_{k}_{i}"):
-        st.session_state.prompt = f"ACTIVATE {k.upper()}"
-        st.rerun()
+  cols = st.columns(5)
+for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
+    if col.button(label, key=f"gen_sev_{k}_{i}"):  # 🔱 यह लाइन अब 4 स्पेस आगे खिसक गई है
+        st.session_state.prompt = f"ACTIVATE {k.upper()}"  # 🔱 यह 8 स्पेस आगे है
+        st.rerun()  # 🔱 यह भी 8 स्पेस आगे है
     
     # --- चैट डिस्प्ले ---
     if "history" in st.session_state:
