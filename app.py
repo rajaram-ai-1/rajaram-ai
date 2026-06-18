@@ -127,10 +127,10 @@ class GlobalCore:
     import datetime
     import logging
     
-  class RajaShield:
-     def __init__(self):
-         self.repair_logs = []
-         self.security_level = "MANUAL_DEBUG" # अब आप खुद ठीक करेंगे
+class RajaShield:
+    def __init__(self):
+        self.repair_logs = []
+        self.security_level = "MANUAL_DEBUG" # अब आप खुद ठीक करेंगे
     
     def log_error(self, error_type, details=""):
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
