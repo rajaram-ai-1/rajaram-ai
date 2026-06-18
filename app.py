@@ -445,7 +445,7 @@ for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
         st.rerun()  # 🔱 यह भी 8 स्पेस आगे है
     
     # --- चैट डिस्प्ले ---
-    if "history" in st.session_state:
+if "history" in st.session_state:
     for msg in st.session_state.history[1:]:
         from langchain_core.messages import HumanMessage
         role = "user" if isinstance(msg, HumanMessage) else "assistant"
