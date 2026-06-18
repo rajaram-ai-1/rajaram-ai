@@ -568,92 +568,91 @@ if not target_city or len(target_city) > 20:
     
 st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
                             
-      # लेयर ३: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट इंजेक्शन
-                            try:
-                                from engine import raja_weather_engine
-                                weather_intel = raja_weather_engine(target_city)
-                                
-                                # 🔐 [STRICT CONTEXT BINDING]
-                                hacked_weather_prompt = f"""
-                                [SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
-                                यूज़र का मूल सवाल: "{prompt}"
-                                
-                                नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
-                                -----------------------------
-                                {weather_intel}
-                                -----------------------------
-                                
-                                कोर कमांड्स (तुम्हें इसे सख्ती से मानना है):
-                                1. केवल और केवल ऊपर दिए गए डेटा के वास्तविक आंकड़ों (तापमान, नमी, हवा) का उपयोग करके ही जवाब तैयार करो।
-                                2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान या मौसम की स्थिति बिल्कुल मत जोड़ो।
-                                3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।
-                                """
-                                
-                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
-                                
-                            except Exception as weather_core_error:
-                                # 🔄 डायनेमिक फ़ॉलबैक
-                                st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
-                                from engine import raja_web_search
-                                intel = raja_web_search(prompt)
-                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
-                        else:
-                            # 🌐 सामान्य इंटरनेट सर्च के लिए पुराना सॉलिड Tavily इंजन
-                            st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
+   # लेयर ३: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट इंजेक्शन
+                        try:
+                            from engine import raja_weather_engine
+                            weather_intel = raja_weather_engine(target_city)
+                            
+                            # 🔐 [STRICT CONTEXT BINDING]
+                            hacked_weather_prompt = f"""
+[SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
+यूज़र का मूल सवाल: "{prompt}"
+
+नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
+-----------------------------
+{weather_intel}
+-----------------------------
+
+कोर कमांड्स (तुम्हें इसे सख्ती से मानना है):
+1. केवल और केवल ऊपर दिए गए डेटा के वास्तविक आंकड़ों (तापमान, नमी, हवा) का उपयोग करके ही जवाब तैयार करो।
+2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान या मौसम की स्थिति बिल्कुल मत जोड़ो।
+3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।
+"""
+                            
+                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
+                            
+                        except Exception as weather_core_error:
+                            # 🔄 डायनेमिक फ़ॉलबैक
+                            st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
                             from engine import raja_web_search
                             intel = raja_web_search(prompt)
                             logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
-                        
-                    case "VISION":
-                        uploaded_file = st.session_state.get('uploaded_file')
-                        if uploaded_file is not None:
-                            st.toast("👁️ Cybernetic Vision Core Active", icon="🔥")
-                            final_text = raja_vision_engine(uploaded_file, prompt)
-                            st.markdown(final_text)
-                        else:
-                            st.toast("⚠️ No Image Found! Rerouting to Brain Mode...", icon="🧠")
-                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-                            
-                    case _: # BRAIN MODE
-                        st.toast("🧠 Internal Brain Core Engaged", icon="🔱")
-                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-    
-                # [चरण ३: यूनिवर्सल एसिंक स्ट्रीम रेजोल्यूशन]
-                if logic_res and not final_text:
-                    stream_target = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
-                    
-                    if hasattr(stream_target, '__aiter__'):
-                        container_placeholder = st.empty()
-                        
-                        async def _render_async_pipeline(async_generator) -> str:
-                            accumulated_buffer = ""
-                            async for chunk in async_generator:
-                                chunk_content = getattr(chunk, 'content', str(chunk))
-                                accumulated_buffer += chunk_content
-                                container_placeholder.markdown(accumulated_buffer + "▌")
-                            container_placeholder.markdown(accumulated_buffer)
-                            return accumulated_buffer
-                            
-                        final_text = loop.run_until_complete(_render_async_pipeline(stream_target))
                     else:
-                        final_text = str(stream_target)
+                        # 🌐 सामान्य इंटरनेट सर्च के लिए पुराना सॉलिड Tavily इंजन
+                        st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
+                        from engine import raja_web_search
+                        intel = raja_web_search(prompt)
+                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
+                        
+                case "VISION":
+                    uploaded_file = st.session_state.get('uploaded_file')
+                    if uploaded_file is not None:
+                        st.toast("👁️ Cybernetic Vision Core Active", icon="🔥")
+                        final_text = raja_vision_engine(uploaded_file, prompt)
                         st.markdown(final_text)
-    
-                # [चरण ४: टेलीमेट्री और वॉइस आउटपुट]
-                if final_text:
-                    st.session_state.history.append(AIMessage(content=final_text))
-                    execution_ms = (time.perf_counter() - telemetry_start) * 1000
-                    logging.info(f"[RAJA-CORE-TELEMETRY] Executed in {execution_ms:.2f}ms | Mode: {mode}")
+                    else:
+                        st.toast("⚠️ No Image Found! Rerouting to Brain Mode...", icon="🧠")
+                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                        
+                case _: # BRAIN MODE
+                    st.toast("🧠 Internal Brain Core Engaged", icon="🔱")
+                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+        
+            # [चरण ३: यूनिवर्सल एसिंक स्ट्रीम रेजोल्यूशन]
+            if logic_res and not final_text:
+                stream_target = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
+                
+                if hasattr(stream_target, '__aiter__'):
+                    container_placeholder = st.empty()
                     
-                    if st.session_state.get('voice_enabled'):
-                        raja_ai.speak(final_text)
-    
-            except Exception as core_collapse_error:
-                error_signature = f"🔱 Shield Alert: Critical Core Collapse. Signature: {str(core_collapse_error)}"
-                st.error(error_signature)
-                if 'raja_shield' in globals():
-                    raja_shield.log_error("CORE_PIPELINE_MUTATION", str(core_collapse_error))
-    
+                    async def _render_async_pipeline(async_generator) -> str:
+                        accumulated_buffer = ""
+                        async for chunk in async_generator:
+                            chunk_content = getattr(chunk, 'content', str(chunk))
+                            accumulated_buffer += chunk_content
+                            container_placeholder.markdown(accumulated_buffer + "▌")
+                        container_placeholder.markdown(accumulated_buffer)
+                        return accumulated_buffer
+                        
+                    final_text = loop.run_until_complete(_render_async_pipeline(stream_target))
+                else:
+                    final_text = str(stream_target)
+                    st.markdown(final_text)
+        
+            # [चरण ४: टेलीमेट्री और वॉइस आउटपुट]
+            if final_text:
+                st.session_state.history.append(AIMessage(content=final_text))
+                execution_ms = (time.perf_counter() - telemetry_start) * 1000
+                logging.info(f"[RAJA-CORE-TELEMETRY] Executed in {execution_ms:.2f}ms | Mode: {mode}")
+                
+                if st.session_state.get('voice_enabled'):
+                    raja_ai.speak(final_text)
+        
+        except Exception as core_collapse_error:
+            error_signature = f"🔱 Shield Alert: Critical Core Collapse. Signature: {str(core_collapse_error)}"
+            st.error(error_signature)
+            if 'raja_shield' in globals():
+                raja_shield.log_error("CORE_PIPELINE_MUTATION", str(core_collapse_error))
     # ------------------------------------------------------------------------------
     # [PHASE 8: FOOTER] - NO CHANGES
     # ------------------------------------------------------------------------------
