@@ -16,12 +16,12 @@ import re
 import threading  # 🔱 वॉइस प्रोटोकॉल के थ्रेड एरर को खत्म करने के लिए
 import logging    # 📊 कोर कर्नल टेलीमेट्री ट्रैकिंग के लिए
 import tempfile
-    # फाइल को ढूंढने की शक्ति बढ़ाना
-    sys.path.append(os.path.dirname(__file__))
-    
-    try:
+# फाइल को ढूंढने की शक्ति बढ़ाना
+sys.path.append(os.path.dirname(__file__))
+
+try:
     from vision import raja_vision_engine
-    except ImportError:
+except ImportError:
     st.error("🔱 Error: 'vision.py' फाइल आपके GitHub पर नहीं मिली। कृपया फाइल अपलोड करें!")
     # ------------------------------------------------------------------------------
     # [PHASE 1: SYSTEM HARDENING & UI ARCHITECTURE]
