@@ -470,7 +470,7 @@ if "history" in st.session_state:
     if st.session_state.get("prompt"):
        st.session_state.prompt = None 
     
-    if prompt:
+if prompt:
     if "raja_ai" not in st.session_state:
         st.session_state.raja_ai = RajaAgent(IDENTITY)
     if "history" not in st.session_state:
