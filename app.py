@@ -365,8 +365,7 @@ raja_ai = st.session_state.raja_ai
     # ------------------------------------------------------------------------------
     # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
     # ------------------------------------------------------------------------------
-    
-    with st.sidebar:
+  with st.sidebar:
     st.image("https://img.icons8.com/nolan/128/trident.png", width=100)
     st.title("🔱 RAJA AI V7")
     
