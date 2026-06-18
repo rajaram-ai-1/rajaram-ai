@@ -400,14 +400,13 @@ with st.sidebar:
             st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
     
-    # --- मुख्य स्क्रीन का शीर्षक ---
-    st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJA AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
-    
-    try:
+  # --- मुख्य स्क्रीन का शीर्षक ---
+st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJA AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
+
+try:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
-    except:
+except:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal</p>", unsafe_allow_html=True)
-    
     # --- शक्तियों का लॉजिक फंक्शन ---
     def trigger_raja_powers(prompt):
     p = prompt.lower()
