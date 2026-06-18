@@ -562,11 +562,11 @@ if prompt:
         except Exception:
             target_city = "Bareilly"
                             
-                            # फाइनल Security Check
-                            if not target_city or len(target_city) > 20:
-                                target_city = "Bareilly"
-                                
-                            st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
+    # फाइनल Security Check
+if not target_city or len(target_city) > 20:
+    target_city = "Bareilly"
+    
+st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
                             
                             # लेयर ३: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट इंजेक्शन
                             try:
