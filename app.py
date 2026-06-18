@@ -468,7 +468,7 @@ if "history" in st.session_state:
     user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
     prompt = st.session_state.get("prompt") or user_input
     if st.session_state.get("prompt"):
-    st.session_state.prompt = None 
+       st.session_state.prompt = None 
     
     if prompt:
     if "raja_ai" not in st.session_state:
