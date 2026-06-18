@@ -127,7 +127,7 @@ class GlobalCore:
     import datetime
     import logging
     
-    class RajaShield:
+  class RajaShield:
     def __init__(self):
         self.repair_logs = []
         self.security_level = "MANUAL_DEBUG" # अब आप खुद ठीक करेंगे
