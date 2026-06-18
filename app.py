@@ -151,9 +151,8 @@ class RajaShield:
     # ------------------------------------------------------------------------------
     # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
     # ------------------------------------------------------------------------------
-    
-  class RajaAgent:
-     def __init__(self, system_prompt):
+class RajaAgent:
+    def __init__(self, system_prompt):
         """🔱 RAJA AI: NEURAL MEMORY SETUP"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
