@@ -407,10 +407,10 @@ try:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
 except:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal</p>", unsafe_allow_html=True)
-    # --- शक्तियों का लॉजिक फंक्शन ---
-    def trigger_raja_powers(prompt):
-    p = prompt.lower()
-    active_shaktis = []
+  # --- शक्तियों का लॉजिक फंक्शन ---
+def trigger_raja_powers(prompt):
+    p = prompt.lower()       # 🔱 यह लाइन अब 4 स्पेस आगे है
+    active_shaktis = []      # 🔱 यह लाइन भी 4專ेस आगे है
     
     powers_map = {
         "jal_jeevan": "💧 जल जीवन मिशन: पानी की हर बूंद कीमती है।",
