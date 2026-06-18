@@ -546,21 +546,21 @@ if prompt:
                         logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
             except Exception as e:
                 st.error(f"🔱 Core Error: {str(e)}") 
-                            # लेयर २: अगर लोकल पार्सर से नहीं मिला, तब ही केवल फ़ास्ट नैनो-LLM कॉल करेंगे
-                            if not target_city:
-                                try:
-                                    from langchain_core.messages import HumanMessage
-                                    extractor_llm = ChatGroq(
-                                        groq_api_key=core.GROQ_API_KEY, 
-                                        model_name="llama3-8b-8192", 
-                                        temperature=0.0,
-                                        max_tokens=15
-                                    )
-                                    extract_prompt = f"Extract ONLY the single city name from this text. No punctuation, no extra words. If no city is found, output 'Bareilly'. Text: '{prompt}'"
-                                    response = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
-                                    target_city = "".join(c for c in response if c.isalnum() or c.isspace()).strip()
-                                except Exception:
-                                    target_city = "Bareilly"
+    # लेयर २: अगर लोकल पार्सर से नहीं मिला, तब ही केवल फ़ास्ट नैनो-LLM कॉल करेंगे
+    if not target_city:
+        try:
+            from langchain_core.messages import HumanMessage
+            extractor_llm = ChatGroq(
+                groq_api_key=core.GROQ_API_KEY, 
+                model_name="llama3-8b-8192", 
+                temperature=0.0,
+                max_tokens=15
+            )
+            extract_prompt = f"Extract ONLY the single city name from this text. No punctuation, no extra words. If no city is found, output 'Bareilly'. Text: '{prompt}'"
+            response = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
+            target_city = "".join(c for c in response if c.isalnum() or c.isspace()).strip()
+        except Exception:
+            target_city = "Bareilly"
                             
                             # फाइनल Security Check
                             if not target_city or len(target_city) > 20:
