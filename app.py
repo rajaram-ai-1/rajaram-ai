@@ -152,13 +152,12 @@ class RajaShield:
     # [PHASE 4: AGENTIC PROTOCOLS] - GHOST VAULT INTEGRATED 🔱
     # ------------------------------------------------------------------------------
     
-   class RajaAgent:
-      def __init__(self, system_prompt):
+  class RajaAgent:
+     def __init__(self, system_prompt):
         """🔱 RAJA AI: NEURAL MEMORY SETUP"""
         self.system_prompt = system_prompt
         if "history" not in st.session_state:
             st.session_state.history = [SystemMessage(content=system_prompt)]
-            
         # एडवांस ऑप्टिमाइज़ेशन: Regex पैटर्न्स
         self.vision_regex = re.compile(r'(photo|image|dekho|pic|फोटो|देखकर बताओ|तस्वीर|क्या है इसमें|देख|इमेज)', re.IGNORECASE)
         self.search_regex = re.compile(r'(price|weather|news|खबर|आज का|rate|gold|सोना|मौसम|तापमान|temperature|बारिश|rain|live|सरकारी|योजना|भाव|खोजो|इंटरनेट)', re.IGNORECASE)
