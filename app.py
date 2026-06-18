@@ -357,11 +357,11 @@ class RajaAgent:
     Deadline Countdown (अंतिम तिथि): एआई लाल रंग के अलर्ट के साथ बताए कि "इस फॉर्म की आखिरी तारीख सिर्फ 2 दिन बची है, जल्दी करो!"
     """
     
-    # ३. AI एजेंट को शुरू करना (FULL_IDENTITY का उपयोग करें)
-    if 'raja_ai' not in st.session_state:
-    st.session_state.raja_ai = RajaAgent(IDENTITY)
-    
-    raja_ai = st.session_state.raja_ai
+   # ३. AI एजेंट को शुरू करना (FULL_IDENTITY का उपयोग करें)
+if 'raja_ai' not in st.session_state:
+    st.session_state.raja_ai = RajaAgent(IDENTITY)  # 🔱 यह लाइन अब 4 स्पेस आगे है
+
+raja_ai = st.session_state.raja_ai
     # ------------------------------------------------------------------------------
     # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
     # ------------------------------------------------------------------------------
