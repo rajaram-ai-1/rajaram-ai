@@ -94,12 +94,12 @@ except ImportError:
     # [PHASE 2: NEURAL NETWORK INITIALIZATION] - ALL YOUR BRAINS PROTECTED
     # ------------------------------------------------------------------------------
     
-    # [PHASE 2: NEURAL NETWORK INITIALIZATION]
-    class GlobalCore:
-    def __init__(self):  # <--- ध्यान दें: यहाँ दो बार (__) अंडरस्कोर है
+ # [PHASE 2: NEURAL NETWORK INITIALIZATION]
+class GlobalCore:
+    def __init__(self):  # <--- यहाँ 4 स्पेस का गैप होना चाहिए
         self.GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
         # Gemini key के लिए भी variable बना लें
-        self.GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY") 
+        self.GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY")
         
         # 🔱 ब्रावो! डिक्शनरी एक ही बार रहेगी
         self.BRAIN_CATALOG = {
