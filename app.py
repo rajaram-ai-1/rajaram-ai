@@ -569,12 +569,11 @@ if not target_city or len(target_city) > 20:
 st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
                             
    # लेयर ३: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट इंजेक्शन
-                        try:
-                            from engine import raja_weather_engine
-                            weather_intel = raja_weather_engine(target_city)
-                            
-                            # 🔐 [STRICT CONTEXT BINDING]
-                            hacked_weather_prompt = f"""
+try:
+    from engine import raja_weather_engine
+    weather_intel = raja_weather_engine(target_city)
+     # 🔐 [STRICT CONTEXT BINDING]
+    hacked_weather_prompt = f"""
 [SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
 यूज़र का मूल सवाल: "{prompt}"
 
