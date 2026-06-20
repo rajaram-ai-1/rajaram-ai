@@ -577,7 +577,7 @@ try:
 [SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
 यूज़र का मूल सवाल: "{prompt}"""
 
-नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
+#नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
 -----------------------------
 {weather_intel}
 -----------------------------
