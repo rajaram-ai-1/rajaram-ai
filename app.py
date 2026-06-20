@@ -575,7 +575,7 @@ try:
      # 🔐 [STRICT CONTEXT BINDING]
     hacked_weather_prompt = f"""
 [SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
-यूज़र का मूल सवाल: "{prompt}"
+यूज़र का मूल सवाल: "{prompt}"""
 
 नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
 -----------------------------
