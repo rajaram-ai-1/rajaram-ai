@@ -433,17 +433,18 @@ with st.sidebar:
             st.session_state.history = [SystemMessage(content=IDENTITY)]
         st.rerun()
     
-  # --- मुख्य स्क्रीन का शीर्षक ---
+# --- मुख्य स्क्रीन का शीर्षक ---
 st.markdown("<h1 style='text-align: center; color: #FFD700;'>🔱 RAJA AI: OMNIPOTENT CORE 🔱</h1>", unsafe_allow_html=True)
 
 try:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal | Time: {core.get_timestamp()}</p>", unsafe_allow_html=True)
 except:
     st.write(f"<p style='text-align: center; color: #00FF9C;'>Grid: Bareilly | Status: Immortal</p>", unsafe_allow_html=True)
-  # --- शक्तियों का लॉजिक फंक्शन ---
+
+# --- शक्तियों का लॉजिक फंक्शन ---
 def trigger_raja_powers(prompt):
-    p = prompt.lower()       # 🔱 यह लाइन अब 4 स्पेस आगे है
-    active_shaktis = []      # 🔱 यह लाइन भी 4專ेस आगे है
+    p = prompt.lower()
+    active_shaktis = []
     
     powers_map = {
         "jal_jeevan": "💧 जल जीवन मिशन: पानी की हर बूंद कीमती है।",
@@ -456,39 +457,41 @@ def trigger_raja_powers(prompt):
     for key, val in powers_map.items():
         if key in p:
             active_shaktis.append(val)
-            
     return active_shaktis
-    
-    # --- जन सेवा केंद्र (बटन इंटरफेस) ---
-    st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
-    
-    # बटन की लिस्ट
-    custom_powers = [
+
+# --- जन सेवा केंद्र (बटन इंटरफेस) ---
+st.markdown('<h3 style="text-align: center; color: #2E7D32;">🌱 RAJA AI: ज्ञान और सेवा केंद्र 🌱</h3>', unsafe_allow_html=True)
+
+# बटन की लिस्ट
+custom_powers = [
     ("💧 जल जीवन", "jal_jeevan"), 
-    ("❤️ दिल की बात", "dil_ki_at"), 
+    ("❤️ दिल की बात", "dil_ki_baat"), 
     ("🌾 कृषि ज्ञान", "kheti"), 
     ("📚 न्यू स्किल्स", "skills"), 
     ("🔮 भविष्य", "predict")
-    ]
-    
-# 🔱 [PHASE 3: SUPREME AGENT INITIALIZATION]
+]
 
-# 1. IDENTITY की सुरक्षा सुनिश्चित करें (अगर डिफाइन नहीं है तो उसे सुप्रीम पहचान दें)
+# 🔱 यह कोड बटन को स्क्रीन पर लाने के लिए अनिवार्य है:
+cols = st.columns(5) # 5 कॉलम बनाए
+for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
+    if col.button(label, key=f"btn_{i}"):
+        st.session_state.prompt = f"ACTIVATE {k.upper()}"
+        st.rerun()
+
+# 🔱 [PHASE 3: SUPREME AGENT INITIALIZATION]
 if 'IDENTITY' not in globals():
     IDENTITY = "You are Raja AI, a supreme, royal, and intelligent assistant built for Rajaram."
 
-# 2. एजेंट को सुरक्षित तरीके से लोड करें
 if 'raja_ai' not in st.session_state:
     try:
-        # यहाँ हम RajaAgent को उसकी फुल आइडेंटिटी के साथ शुरू कर रहे हैं
         st.session_state.raja_ai = RajaAgent(IDENTITY)
         st.toast("🔱 Raja AI Neural Agent: Online & Supreme", icon="🔥")
     except Exception as e:
-        # अगर लोड होने में कोई भी दिक्कत आई, तो शील्ड उसे पकड़ लेगी
         st.error(f"❌ AGENT FAILED: {str(e)}")
         if 'raja_shield' in globals():
             raja_shield.log_error("AGENT_INIT_FAILURE", str(e))
 
+raja_ai = st.session_state.raja_ai
 # 3. एजेंट को ग्लोबल 'raja_ai' वेरिएबल में बाइंड करें
 raja_ai = st.session_state.raja_ai
     # --- चैट डिस्प्ले ---
