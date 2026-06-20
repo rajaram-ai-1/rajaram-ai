@@ -464,196 +464,166 @@ if "history" in st.session_state:
     # ------------------------------------------------------------------------------
     # [PHASE 7: EXECUTION LOGIC] - 🔱 सुधरा हुआ महाशक्तिशाली कर्नल इंजन 🔱
     # ------------------------------------------------------------------------------
-    
-    user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
+ user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
     prompt = st.session_state.get("prompt") or user_input
+    
     if st.session_state.get("prompt"):
-       st.session_state.prompt = None 
+        st.session_state.prompt = None 
     
-if prompt:
-    if "raja_ai" not in st.session_state:
-        st.session_state.raja_ai = RajaAgent(IDENTITY)
-    if "history" not in st.session_state:
-        st.session_state.history = [SystemMessage(content=IDENTITY)]
+    if prompt:
+        if "raja_ai" not in st.session_state:
+            st.session_state.raja_ai = RajaAgent(IDENTITY)
+        if "history" not in st.session_state:
+            st.session_state.history = [SystemMessage(content=IDENTITY)]
+            
+        raja_ai = st.session_state.raja_ai
         
-    raja_ai = st.session_state.raja_ai
-    
-    st.session_state.history.append(HumanMessage(content=prompt))
-    with st.chat_message("user"):
-        st.markdown(f"**You:** {prompt}")
-    
-    with st.chat_message("assistant"):
-        telemetry_start = time.perf_counter()
+        st.session_state.history.append(HumanMessage(content=prompt))
+        with st.chat_message("user"):
+            st.markdown(f"**You:** {prompt}")
         
-        def _get_kernel_loop() -> asyncio.AbstractEventLoop:
-            try: return asyncio.get_running_loop()
-            except RuntimeError:
-                new_loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(new_loop)
-                return new_loop
-    
-        loop = _get_kernel_loop()
-        
-    with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
-            # 🛡️ सेफ्टी लेयर: 'mode' को यहाँ डिफाइन करो
-            mode = "BRAIN" 
-            try:
-                # [चरण १: प्रेडिक्टिव राउटिंग]
-                mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+        with st.chat_message("assistant"):
+            telemetry_start = time.perf_counter()
+            
+            def _get_kernel_loop() -> asyncio.AbstractEventLoop:
+                try: return asyncio.get_running_loop()
+                except RuntimeError:
+                    new_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(new_loop)
+                    return new_loop
+            
+            loop = _get_kernel_loop()
+            
+            with st.spinner("🔱 RAJA AI कोर इंजन एक्टिवेटेड... क्वांटम थ्रेड्स अलाइन हो रहे हैं..."):
                 final_text, logic_res = "", None
+                mode = "BRAIN" 
                 
-                # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
-                match mode:
-                    case "SEARCH" if st.session_state.get('search_enabled', True):
-                        weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी", "rain", "climate"]
-                        
-                        if any(w in prompt.lower() for w in weather_keywords):
-                            st.toast("🛰️ Weather Matrix Triggered: Initiating Sat-Link...", icon="🌤️")
+                try:
+                    # [चरण १: प्रेडिक्टिव राउटिंग]
+                    mode = loop.run_until_complete(raja_ai.raja_router(prompt))
+                    
+                    # [चरण २: एडवांस स्ट्रक्चरल निष्पादन]
+                    match mode:
+                        case "SEARCH" if st.session_state.get('search_enabled', True):
+                            weather_keywords = ["मौसम", "तापमान", "weather", "temperature", "बारिश", "ठंड", "गर्मी", "नमी", "rain", "climate"]
                             
-                            # 🛑 लेयर १: लोकल पार्सर (Bareilly default)
-                            target_city = "Bareilly"
-                            common_cities = ["bareilly", "बरेली", "delhi", "दिल्ली", "mumbai", "मुंबई", "lucknow", "लखनऊ"]
-                            for city in common_cities:
-                                if city in prompt.lower():
-                                    target_city = "Bareilly" if city in ["bareilly", "बरेली"] else city.title()
-                                    break
-                            
-                            st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
-                            
-                            # लेयर २: एपीआई निष्पादन
-                            try:
-                                from engine import raja_weather_engine
-                                weather_intel = raja_weather_engine(target_city)
-                                # एंटी-हैलुसिनेशन प्रॉम्ट
-                                hacked_weather_prompt = f"System Override: Use strictly this data: {weather_intel}. User asked: '{prompt}'."
-                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
-                            except Exception:
+                            if any(w in prompt.lower() for w in weather_keywords):
+                                st.toast("🛰️ Weather Matrix Triggered: Initiating Sat-Link...", icon="🌤️")
+                                
+                                # 🛑 लेयर 1: लोकल पार्सर (Bareilly default)
+                                target_city = None
+                                common_cities = ["bareilly", "बरेली", "delhi", "दिल्ली", "mumbai", "मुंबई", "lucknow", "लखनऊ"]
+                                for city in common_cities:
+                                    if city in prompt.lower():
+                                        target_city = "Bareilly" if city in ["bareilly", "बरेली"] else city.title()
+                                        break
+                                
+                                # 🛑 लेयर 2: अगर लोकल पार्सर से नहीं मिला, तब Groq नैनो-LLM कॉल करेंगे
+                                if not target_city:
+                                    try:
+                                        from langchain_core.messages import HumanMessage
+                                        # ध्यान दें: ChatGroq और core.GROQ_API_KEY ऊपर इम्पोर्ट होने चाहिए
+                                        extractor_llm = ChatGroq(
+                                            groq_api_key=core.GROQ_API_KEY, 
+                                            model_name="llama3-8b-8192", 
+                                            temperature=0.0,
+                                            max_tokens=15
+                                        )
+                                        extract_prompt = f"Extract ONLY the single city name from this text. No punctuation, no extra words. If no city is found, output 'Bareilly'. Text: '{prompt}'"
+                                        response = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
+                                        target_city = "".join(c for c in response if c.isalnum() or c.isspace()).strip()
+                                    except Exception:
+                                        target_city = "Bareilly"
+                                
+                                # फाइनल Security Check
+                                if not target_city or len(target_city) > 20:
+                                    target_city = "Bareilly"
+                                    
+                                st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
+                                
+                                # 🛑 लेयर 3: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट 
+                                try:
+                                    from engine import raja_weather_engine
+                                    weather_intel = raja_weather_engine(target_city)
+                                    
+                                    # प्रॉम्प्ट पूरी तरह से सुरक्षित कर दिया गया है (कोई एरर नहीं आएगी)
+                                    hacked_weather_prompt = (
+                                        "[SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]\n"
+                                        f"यूज़र का मूल सवाल: '{prompt}'\n\n"
+                                        "कोर कमांड्स (तुम्हें इसे सख्ती से मानना है):\n"
+                                        "1. केवल और केवल नीचे दिए गए डेटा के वास्तविक आंकड़ों का उपयोग करके जवाब तैयार करो।\n"
+                                        "2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान बिल्कुल मत जोड़ो।\n"
+                                        "3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।\n\n"
+                                        "#नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया 100% सटीक डेटा है:\n"
+                                        "-----------------------------\n"
+                                        f"{weather_intel}\n"
+                                        "-----------------------------"
+                                    )
+                                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
+                                except Exception as weather_core_error:
+                                    st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
+                                    from engine import raja_web_search
+                                    intel = raja_web_search(prompt)
+                                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
+                            else:
+                                st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
                                 from engine import raja_web_search
-                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, raja_web_search(prompt)))
-                        else:
-                            from engine import raja_web_search
-                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, raja_web_search(prompt)))
-    
-                    case "VISION":
-                        uploaded_file = st.session_state.get('uploaded_file')
-                        if uploaded_file:
-                            final_text = raja_vision_engine(uploaded_file, prompt)
-                            st.markdown(final_text)
-                        else:
+                                intel = raja_web_search(prompt)
+                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
+                                
+                        case "VISION":
+                            uploaded_file = st.session_state.get('uploaded_file')
+                            if uploaded_file is not None:
+                                st.toast("👁️ Cybernetic Vision Core Active", icon="🔥")
+                                final_text = raja_vision_engine(uploaded_file, prompt)
+                                st.markdown(final_text)
+                            else:
+                                st.toast("⚠️ No Image Found! Rerouting to Brain Mode...", icon="🧠")
+                                logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
+                                
+                        case _: # BRAIN MODE
+                            st.toast("🧠 Internal Brain Core Engaged", icon="🔱")
                             logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
                             
-                    case _: # BRAIN MODE
-                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-            except Exception as e:
-                st.error(f"🔱 Core Error: {str(e)}") 
-    # लेयर २: अगर लोकल पार्सर से नहीं मिला, तब ही केवल फ़ास्ट नैनो-LLM कॉल करेंगे
-    if not target_city:
-        try:
-            from langchain_core.messages import HumanMessage
-            extractor_llm = ChatGroq(
-                groq_api_key=core.GROQ_API_KEY, 
-                model_name="llama3-8b-8192", 
-                temperature=0.0,
-                max_tokens=15
-            )
-            extract_prompt = f"Extract ONLY the single city name from this text. No punctuation, no extra words. If no city is found, output 'Bareilly'. Text: '{prompt}'"
-            response = extractor_llm.invoke([HumanMessage(content=extract_prompt)]).content.strip()
-            target_city = "".join(c for c in response if c.isalnum() or c.isspace()).strip()
-        except Exception:
-            target_city = "Bareilly"
-                            
-    # फाइनल Security Check
-if not target_city or len(target_city) > 20:
-    target_city = "Bareilly"
-    
-st.toast(f"🎯 Target Location Locked: {target_city.upper()}", icon="⚡")
-                            
-   # लेयर ३: एपीआई निष्पादन और एंटी-हैलुसिनेशन प्रॉम्ट इंजेक्शन
-try:
-    from engine import raja_weather_engine
-    weather_intel = raja_weather_engine(target_city)
-     # 🔐 [STRICT CONTEXT BINDING]
-    hacked_weather_prompt = f"""
-[SYSTEM OVERRIDE: ANTI-HALLUCINATION ACTIVE]
-यूज़र का मूल सवाल: "{prompt}"""
-
-#नीचे सीधे लाइव सैटेलाइट (OpenWeather API) से आया हुआ 100% सटीक डेटा है:
-#-----------------------------
-{weather_intel}
-#-----------------------------
-# प्रॉम्प्ट को ब्रैकेट और कोट्स में सुरक्षित कर दिया गया है
-        hacked_weather_prompt = (
-            "कोर कमांड्स (तुम्हें इसे सख्ती से मानना है):\n"
-            "1. केवल और केवल ऊपर दिए गए डेटा के वास्तविक आंकड़ों (तापमान, नमी, हवा) का उपयोग करके ही जवाब तैयार करो।\n"
-            "2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान या मौसम की स्थिति बिल्कुल मत जोड़ो।\n"
-            "3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।"
-        )
-
-        try:
-            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
-        except Exception as weather_core_error:
-            print(f"Raja AI Weather Core Error: {weather_core_error}")
-                            # 🔄 डायनेमिक फ़ॉलबैक
-                            st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
-                            from engine import raja_web_search
-                            intel = raja_web_search(prompt)
-                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
-                    else:
-                        # 🌐 सामान्य इंटरनेट सर्च के लिए पुराना सॉलिड Tavily इंजन
-                        st.toast("🛰️ Satellite Link Injected: Fetching Real-Time Intel...", icon="🌐")
-                        from engine import raja_web_search
-                        intel = raja_web_search(prompt)
-                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, intel))
-                        
-                case "VISION":
-                    uploaded_file = st.session_state.get('uploaded_file')
-                    if uploaded_file is not None:
-                        st.toast("👁️ Cybernetic Vision Core Active", icon="🔥")
-                        final_text = raja_vision_engine(uploaded_file, prompt)
-                        st.markdown(final_text)
-                    else:
-                        st.toast("⚠️ No Image Found! Rerouting to Brain Mode...", icon="🧠")
-                        logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-                        
-                case _: # BRAIN MODE
-                    st.toast("🧠 Internal Brain Core Engaged", icon="🔱")
-                    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(prompt, ""))
-        
-            # [चरण ३: यूनिवर्सल एसिंक स्ट्रीम रेजोल्यूशन]
-            if logic_res and not final_text:
-                stream_target = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
-                
-                if hasattr(stream_target, '__aiter__'):
-                    container_placeholder = st.empty()
+                except Exception as e:
+                    st.error(f"🔱 Core Routing Error: {str(e)}") 
                     
-                    async def _render_async_pipeline(async_generator) -> str:
-                        accumulated_buffer = ""
-                        async for chunk in async_generator:
-                            chunk_content = getattr(chunk, 'content', str(chunk))
-                            accumulated_buffer += chunk_content
-                            container_placeholder.markdown(accumulated_buffer + "▌")
-                        container_placeholder.markdown(accumulated_buffer)
-                        return accumulated_buffer
+            # [चरण ३: यूनिवर्सल एसिंक स्ट्रीम रेजोल्यूशन]
+            try:
+                if logic_res and not final_text:
+                    stream_target = logic_res[0] if isinstance(logic_res, (tuple, list)) else logic_res
+                    
+                    if hasattr(stream_target, '__aiter__'):
+                        container_placeholder = st.empty()
                         
-                    final_text = loop.run_until_complete(_render_async_pipeline(stream_target))
-                else:
-                    final_text = str(stream_target)
-                    st.markdown(final_text)
-        
-            # [चरण ४: टेलीमेट्री और वॉइस आउटपुट]
-            if final_text:
-                st.session_state.history.append(AIMessage(content=final_text))
-                execution_ms = (time.perf_counter() - telemetry_start) * 1000
-                logging.info(f"[RAJA-CORE-TELEMETRY] Executed in {execution_ms:.2f}ms | Mode: {mode}")
+                        async def _render_async_pipeline(async_generator) -> str:
+                            accumulated_buffer = ""
+                            async for chunk in async_generator:
+                                chunk_content = getattr(chunk, 'content', str(chunk))
+                                accumulated_buffer += chunk_content
+                                container_placeholder.markdown(accumulated_buffer + "▌")
+                            container_placeholder.markdown(accumulated_buffer)
+                            return accumulated_buffer
+                            
+                        final_text = loop.run_until_complete(_render_async_pipeline(stream_target))
+                    else:
+                        final_text = str(stream_target)
+                        st.markdown(final_text)
                 
-                if st.session_state.get('voice_enabled'):
-                    raja_ai.speak(final_text)
-        
-        except Exception as core_collapse_error:
-            error_signature = f"🔱 Shield Alert: Critical Core Collapse. Signature: {str(core_collapse_error)}"
-            st.error(error_signature)
-            if 'raja_shield' in globals():
-                raja_shield.log_error("CORE_PIPELINE_MUTATION", str(core_collapse_error))
+                # [चरण ४: टेलीमेट्री और वॉइस आउटपुट]
+                if final_text:
+                    st.session_state.history.append(AIMessage(content=final_text))
+                    execution_ms = (time.perf_counter() - telemetry_start) * 1000
+                    logging.info(f"[RAJA-CORE-TELEMETRY] Executed in {execution_ms:.2f}ms | Mode: {mode}")
+                    
+                    if st.session_state.get('voice_enabled'):
+                        raja_ai.speak(final_text)
+                        
+            except Exception as core_collapse_error:
+                error_signature = f"🔱 Shield Alert: Critical Core Collapse. Signature: {str(core_collapse_error)}"
+                st.error(error_signature)
+                if 'raja_shield' in globals():
+                    raja_shield.log_error("CORE_PIPELINE_MUTATION", str(core_collapse_error))
     # ------------------------------------------------------------------------------
     # [PHASE 8: FOOTER] - NO CHANGES
     # ------------------------------------------------------------------------------
