@@ -464,7 +464,7 @@ if "history" in st.session_state:
     # ------------------------------------------------------------------------------
     # [PHASE 7: EXECUTION LOGIC] - 🔱 सुधरा हुआ महाशक्तिशाली कर्नल इंजन 🔱
     # ------------------------------------------------------------------------------
- user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
+    user_input = st.chat_input("🔱 Ask Raja Ai: Built for Supremacy")
     prompt = st.session_state.get("prompt") or user_input
     
     if st.session_state.get("prompt"):
