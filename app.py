@@ -471,11 +471,25 @@ def trigger_raja_powers(prompt):
     ("🔮 भविष्य", "predict")
     ]
     
+# 🔱 [PHASE 4: CUSTOM POWER ACTIVATION SYSTEM]
+# 1. बटन के लेबल और उनके कीवर्ड्स (Power keys) को यहाँ डिफाइन करें
+custom_powers = [
+    ("Titan Logic", "THE_TITAN"),
+    ("70B Brain", "ULTIMATE_70B"),
+    ("Vision Eye", "FLASH_VISION"),
+    ("Code Wizard", "CODE_WIZARD"),
+    ("Math Genius", "MATH_GENIUS")
+]
+
+# 2. कॉलम बनाएँ
 cols = st.columns(5)
+
+# 3. अब लूप चलाएँ (ध्यान दें: अलाइनमेंट बिल्कुल सही होना चाहिए)
 for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
-    if col.button(label, key=f"gen_sev_{k}_{i}"):  # 🔱 यह लाइन अब 4 स्पेस आगे खिसक गई है
-        st.session_state.prompt = f"ACTIVATE {k.upper()}"  # 🔱 यह 8 स्पेस आगे है
-        st.rerun()  # 🔱 यह भी 8 स्पेस आगे है
+    # बटन का की (key) यूनिक होना चाहिए ताकि कोई टकराव न हो
+    if col.button(label, key=f"btn_pwr_{i}"):
+        st.session_state.prompt = f"ACTIVATE {k}"
+        st.rerun()
     
     # --- चैट डिस्प्ले ---
 if "history" in st.session_state:
