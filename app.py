@@ -377,10 +377,23 @@ class RajaAgent:
     Deadline Countdown (अंतिम तिथि): एआई लाल रंग के अलर्ट के साथ बताए कि "इस फॉर्म की आखिरी तारीख सिर्फ 2 दिन बची है, जल्दी करो!"
     """
     
-   # ३. AI एजेंट को शुरू करना (FULL_IDENTITY का उपयोग करें)
-if 'raja_ai' not in st.session_state:
-    st.session_state.raja_ai = RajaAgent(IDENTITY)  # 🔱 यह लाइन अब 4 स्पेस आगे है
+ # 🔱 [PHASE 3: IDENTITY & AGENT BINDING]
+# सबसे पहले IDENTITY को परिभाषित करें (इसे अपनी ज़रूरत के अनुसार सेट करें)
+if 'IDENTITY' not in locals():
+    IDENTITY = "You are Raja AI, a supreme, royal, and intelligent assistant built for Rajaram."
 
+# अब एजेंट को सुरक्षित तरीके से इनिशियलाइज़ करें
+if "raja_ai" not in st.session_state:
+    try:
+        # यहाँ हम RajaAgent को बुला रहे हैं
+        st.session_state.raja_ai = RajaAgent(IDENTITY)
+        st.toast("🔱 Raja AI Neural Agent Loaded", icon="🔥")
+    except NameError:
+        st.error("❌ ERROR: RajaAgent क्लास नहीं मिली। कृपया चेक करें कि 'engine' इम्पोर्ट हुआ है या नहीं।")
+    except Exception as e:
+        st.error(f"❌ AGENT INITIALIZATION FAILED: {str(e)}")
+
+# अब सुरक्षित रूप से एक्सेस करें
 raja_ai = st.session_state.raja_ai
     # ------------------------------------------------------------------------------
     # [PHASE 6: UI - SIDEBAR & MAIN INTERFACE]
