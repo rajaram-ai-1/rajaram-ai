@@ -93,15 +93,19 @@ except ImportError:
     # ------------------------------------------------------------------------------
     # [PHASE 2: NEURAL NETWORK INITIALIZATION] - ALL YOUR BRAINS PROTECTED
     # ------------------------------------------------------------------------------
-    
- # [PHASE 2: NEURAL NETWORK INITIALIZATION]
+
+# [PHASE 2: NEURAL NETWORK INITIALIZATION]
 class GlobalCore:
-    def __init__(self):  # <--- यहाँ 4 स्पेस का गैप होना चाहिए
+    """
+    🔱 RAJA AI: SUPREME GLOBAL CORE 
+    यह मास्टर क्लास AI के सभी दिमागों (Neural Networks) और API Keys को सुरक्षित रूप से हैंडल करती है।
+    """
+    def __init__(self):
+        # 🔐 Security Layer 1: API Keys Fetching
         self.GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
-        # Gemini key के लिए भी variable बना लें
         self.GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY")
         
-        # 🔱 ब्रावो! डिक्शनरी एक ही बार रहेगी
+        # 🧠 The Supreme Brain Catalog (Models Locked)
         self.BRAIN_CATALOG = {
             "THE_TITAN": "llama-3.1-405b-reasoning",
             "ULTIMATE_70B": "llama-3.3-70b-versatile",
@@ -112,15 +116,23 @@ class GlobalCore:
             "CYBER_EXPERT": "llama-3.3-70b-versatile", 
             "MATH_GENIUS": "qwen-2.5-72b-instruct"
         } 
-    
+        
+        # ⚡ System Status Telemetry (सिस्टम बूट होते ही चेक करेगा)
+        self._initialize_core_status()
+
+    def _initialize_core_status(self):
+        """कोर सिस्टम के सुरक्षित रूप से ऑन होने की जांच करता है"""
         if self.GROQ_API_KEY:
-            st.toast("🔱 Raja Ai is Active", icon="🟢")
+            st.toast("🔱 Raja Ai Core Initialized: All Systems Go", icon="🟢")
         else:
-            st.error("❌ GROQ_API_KEY नहीं मिली!")
-    
+            st.error("❌ CRITICAL ERROR: GROQ_API_KEY Missing! Core collapse imminent.")
+
     def get_timestamp(self):
+        """🕒 क्वांटम टाइमस्टैम्प सिस्टम"""
         return datetime.datetime.now().strftime("%H:%M:%S")
-    core = GlobalCore() # यह एआई के दिमाग (Models) को लोड करेगा
+
+# 🚀 मास्टर एग्जीक्यूशन: ध्यान दें! यह लाइन क्लास के बिल्कुल बाहर (बिना किसी स्पेस के) होनी चाहिए
+core = GlobalCore() # यह एआई के दिमाग (Models) को ग्लोबल लेवल पर लोड करेगा
     # ==============================================================================
     # [PHASE 2.5: THE OMNISCIENT EYE - SEARCH & VISION TOOLS]
     # ==============================================================================
