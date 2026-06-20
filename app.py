@@ -581,15 +581,20 @@ try:
 -----------------------------
 {weather_intel}
 -----------------------------
-
+"""
 कोर कमांड्स (तुम्हें इसे सख्ती से मानना है):
 1. केवल और केवल ऊपर दिए गए डेटा के वास्तविक आंकड़ों (तापमान, नमी, हवा) का उपयोग करके ही जवाब तैयार करो।
 2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान या मौसम की स्थिति बिल्कुल मत जोड़ो।
 3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।
 """
-logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
-                            
-                        except Exception as weather_core_error:
+
+# यहाँ से try ब्लॉक शुरू होगा
+try:
+    logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
+    
+except Exception as weather_core_error:
+    # अगर सिस्टम में कोई एरर आती है, तो 'Raja AI' यहाँ उसे संभाल लेगा
+    print(f"Weather Core Error: {weather_core_error}")
                             # 🔄 डायनेमिक फ़ॉलबैक
                             st.toast("⚠️ Sat-Link Failed. Rerouting to Global Intel Link...", icon="🔄")
                             from engine import raja_web_search
