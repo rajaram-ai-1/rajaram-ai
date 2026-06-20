@@ -471,26 +471,26 @@ def trigger_raja_powers(prompt):
     ("🔮 भविष्य", "predict")
     ]
     
-# 🔱 [PHASE 4: CUSTOM POWER ACTIVATION SYSTEM]
-# 1. बटन के लेबल और उनके कीवर्ड्स (Power keys) को यहाँ डिफाइन करें
-custom_powers = [
-    ("Titan Logic", "THE_TITAN"),
-    ("70B Brain", "ULTIMATE_70B"),
-    ("Vision Eye", "FLASH_VISION"),
-    ("Code Wizard", "CODE_WIZARD"),
-    ("Math Genius", "MATH_GENIUS")
-]
+# 🔱 [PHASE 3: SUPREME AGENT INITIALIZATION]
 
-# 2. कॉलम बनाएँ
-cols = st.columns(5)
+# 1. IDENTITY की सुरक्षा सुनिश्चित करें (अगर डिफाइन नहीं है तो उसे सुप्रीम पहचान दें)
+if 'IDENTITY' not in globals():
+    IDENTITY = "You are Raja AI, a supreme, royal, and intelligent assistant built for Rajaram."
 
-# 3. अब लूप चलाएँ (ध्यान दें: अलाइनमेंट बिल्कुल सही होना चाहिए)
-for i, (col, (label, k)) in enumerate(zip(cols, custom_powers)):
-    # बटन का की (key) यूनिक होना चाहिए ताकि कोई टकराव न हो
-    if col.button(label, key=f"btn_pwr_{i}"):
-        st.session_state.prompt = f"ACTIVATE {k}"
-        st.rerun()
-    
+# 2. एजेंट को सुरक्षित तरीके से लोड करें
+if 'raja_ai' not in st.session_state:
+    try:
+        # यहाँ हम RajaAgent को उसकी फुल आइडेंटिटी के साथ शुरू कर रहे हैं
+        st.session_state.raja_ai = RajaAgent(IDENTITY)
+        st.toast("🔱 Raja AI Neural Agent: Online & Supreme", icon="🔥")
+    except Exception as e:
+        # अगर लोड होने में कोई भी दिक्कत आई, तो शील्ड उसे पकड़ लेगी
+        st.error(f"❌ AGENT FAILED: {str(e)}")
+        if 'raja_shield' in globals():
+            raja_shield.log_error("AGENT_INIT_FAILURE", str(e))
+
+# 3. एजेंट को ग्लोबल 'raja_ai' वेरिएबल में बाइंड करें
+raja_ai = st.session_state.raja_ai
     # --- चैट डिस्प्ले ---
 if "history" in st.session_state:
     for msg in st.session_state.history[1:]:
