@@ -587,7 +587,7 @@ try:
 2. अपनी पुरानी मेमोरी से कोई भी काल्पनिक तापमान या मौसम की स्थिति बिल्कुल मत जोड़ो।
 3. जवाब का लहजा 'Raja AI' का शाही, रौबदार और सुप्रीम होना चाहिए।
 """
-                            logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
+logic_res = loop.run_until_complete(raja_ai.execute_reasoning(hacked_weather_prompt, weather_intel))
                             
                         except Exception as weather_core_error:
                             # 🔄 डायनेमिक फ़ॉलबैक
